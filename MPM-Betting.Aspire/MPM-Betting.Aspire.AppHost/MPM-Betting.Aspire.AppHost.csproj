@@ -1,20 +1,25 @@
+<!-- This is a .csproj file for a .NET project. It defines the properties and references for the project. -->
+
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <!-- The OutputType is set to Exe, indicating that this is an executable project. -->
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <IsAspireHost>true</IsAspireHost>
+        <TargetFramework>net9.0</TargetFramework> <!-- The TargetFramework is set to net9.0, indicating the version of .NET to use. -->
+        <ImplicitUsings>enable</ImplicitUsings> <!-- Enables implicit usings, which automatically imports commonly used namespaces. -->
+        <Nullable>enable</Nullable> <!-- Enables nullable reference types, which provide better warnings for potential null reference exceptions. -->
+        <IsAspireHost>true</IsAspireHost> <!-- This indicates that the project is an Aspire host. -->
     </PropertyGroup>
 
+    <!-- PackageReference: This element is used to reference external packages for the project. -->
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting" Version="9.0.0-preview.2.24162.2" />
+        <PackageReference Include="Aspire.Hosting" Version="9.0.0-preview.2.24162.2" /> <!-- A reference to the Aspire.Hosting package with a specific version. -->
     </ItemGroup>
 
+    <!-- ProjectReference: This element is used to reference other projects in the solution. -->
     <ItemGroup>
-      <ProjectReference Include="..\..\MPM-Betting.Api\MPM-Betting.Api.csproj" />
-      <ProjectReference Include="..\..\MPM-Betting.Blazor\MPM-Betting.Blazor.csproj" />
+      <ProjectReference Include="..\..\MPM-Betting.Api\MPM-Betting.Api.csproj" /> <!-- A reference to the MPM-Betting.Api project. -->
+      <ProjectReference Include="..\..\MPM-Betting.Blazor\MPM-Betting.Blazor.csproj" /> <!-- A reference to the MPM-Betting.Blazor project. -->
     </ItemGroup>
 
 </Project>
