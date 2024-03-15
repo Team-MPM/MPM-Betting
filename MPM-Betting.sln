@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Aspire.AppHost"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Aspire.ServiceDefaults", "MPM-Betting.Aspire\MPM-Betting.Aspire.ServiceDefaults\MPM-Betting.Aspire.ServiceDefaults.csproj", "{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.DataModel", "MPM-Betting.DataModel\MPM-Betting.DataModel.csproj", "{0332508D-368E-4E37-AA05-EF9745F1618A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0332508D-368E-4E37-AA05-EF9745F1618A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0332508D-368E-4E37-AA05-EF9745F1618A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0332508D-368E-4E37-AA05-EF9745F1618A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0332508D-368E-4E37-AA05-EF9745F1618A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
