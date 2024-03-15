@@ -1,8 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Aspire.AppHost", "MPM-Betting.Aspire\MPM-Betting.Aspire.AppHost\MPM-Betting.Aspire.AppHost.csproj", "{D9D02921-A8CF-485E-8F5E-3A1606C11B77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Aspire.ServiceDefaults", "MPM-Betting.Aspire\MPM-Betting.Aspire.ServiceDefaults\MPM-Betting.Aspire.ServiceDefaults.csproj", "{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9D02921-A8CF-485E-8F5E-3A1606C11B77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9D02921-A8CF-485E-8F5E-3A1606C11B77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9D02921-A8CF-485E-8F5E-3A1606C11B77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9D02921-A8CF-485E-8F5E-3A1606C11B77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DED63443-6AAA-404D-9E47-CC5A6DA89F0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
