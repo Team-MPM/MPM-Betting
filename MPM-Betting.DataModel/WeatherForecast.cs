@@ -1,4 +1,4 @@
-﻿namespace DotNetWeb.DataModel;
+﻿namespace MPM_Betting.DataModel;
 
 public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {

@@ -12,4 +12,8 @@
         <PackageReference Include="Aspire.Hosting" Version="9.0.0-preview.2.24162.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\MPM-Betting.Api\MPM-Betting.Api.csproj" />
+    </ItemGroup>
+
 </Project>

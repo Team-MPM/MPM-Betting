@@ -1,0 +1,6 @@
+@MPM_Betting.Api_HostAddress = http://localhost:5241
+
+GET {{MPM_Betting.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
