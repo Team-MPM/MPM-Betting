@@ -14,6 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\MPM-Betting.Api\MPM-Betting.Api.csproj" />
+      <ProjectReference Include="..\..\MPM-Betting.Blazor\MPM-Betting.Blazor.csproj" />
     </ItemGroup>
 
 </Project>

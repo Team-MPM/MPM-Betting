@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.DataModel", "MP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Api", "MPM-Betting.Api\MPM-Betting.Api.csproj", "{43046453-3D9B-401D-9978-4A995AA0CD4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Blazor", "MPM-Betting.Blazor\MPM-Betting.Blazor.csproj", "{91C5EB9E-E355-4BE7-BAD7-E971C245F9F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{43046453-3D9B-401D-9978-4A995AA0CD4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43046453-3D9B-401D-9978-4A995AA0CD4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43046453-3D9B-401D-9978-4A995AA0CD4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91C5EB9E-E355-4BE7-BAD7-E971C245F9F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91C5EB9E-E355-4BE7-BAD7-E971C245F9F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91C5EB9E-E355-4BE7-BAD7-E971C245F9F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91C5EB9E-E355-4BE7-BAD7-E971C245F9F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>MPM-Betting.Blazor</RootNamespace>
+        <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MPM-Betting.Aspire\MPM-Betting.Aspire.ServiceDefaults\MPM-Betting.Aspire.ServiceDefaults.csproj" />
+      <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
+    </ItemGroup>
+
+</Project>
