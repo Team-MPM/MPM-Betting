@@ -13,4 +13,8 @@
       <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0-preview.2.24162.2" />
+    </ItemGroup>
+
 </Project>

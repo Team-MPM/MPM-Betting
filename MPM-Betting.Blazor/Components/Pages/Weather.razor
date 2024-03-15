@@ -1,6 +1,8 @@
 ﻿@page "/weather"
 @using MPM_Betting.DataModel
+@using Microsoft.AspNetCore.OutputCaching
 @attribute [StreamRendering]
+@attribute [OutputCache(Duration = 5)]
 
 @inject WeatherApiClient WeatherApi
 

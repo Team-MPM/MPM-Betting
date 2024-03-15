@@ -5,6 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.AddRedisOutputCache("redis");
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -13,6 +15,8 @@ builder.Services.AddHttpClient<WeatherApiClient>(client => client.BaseAddress = 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+app.UseOutputCache();
 
 if (!app.Environment.IsDevelopment())
 {
