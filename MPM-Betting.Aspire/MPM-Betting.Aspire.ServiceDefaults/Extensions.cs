@@ -11,30 +11,35 @@ namespace Microsoft.Extensions.Hosting;
 
 public static class Extensions
 {
+    /// <summary>
+    /// Adds default services to the application builder, such as OpenTelemetry, Health Checks, Service Discovery, and HTTP client configuration.
+    /// </summary>
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
-        builder.ConfigureOpenTelemetry();
+        builder.ConfigureOpenTelemetry(); // Configure OpenTelemetry for logging, metrics, and tracing
 
-        builder.AddDefaultHealthChecks();
+        builder.AddDefaultHealthChecks(); // Add default Health Checks, including a liveness check
 
-        builder.Services.AddServiceDiscovery();
+        builder.Services.AddServiceDiscovery(); // Register services for Service Discovery
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
-            // Turn on resilience by default
+            // Enable resilience and service discovery by default for HTTP clients
             http.AddStandardResilienceHandler();
-
-            // Turn on service discovery by default
             http.UseServiceDiscovery();
         });
 
         return builder;
     }
 
+    /// <summary>
+    /// Configures OpenTelemetry for logging, metrics, and tracing in the application builder.
+    /// </summary>
     public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
     {
         builder.Logging.AddOpenTelemetry(logging =>
         {
+            // Configure OpenTelemetry logging options
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
         });
@@ -42,6 +47,7 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
+                // Add various instrumentation for OpenTelemetry metrics
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddProcessInstrumentation()
@@ -49,9 +55,10 @@ public static class Extensions
             })
             .WithTracing(tracing =>
             {
+                // Configure OpenTelemetry tracing options
                 if (builder.Environment.IsDevelopment())
                 {
-                    // We want to view all traces in development
+                    // Enable all traces in development
                     tracing.SetSampler(new AlwaysOnSampler());
                 }
 
@@ -60,17 +67,21 @@ public static class Extensions
                     .AddHttpClientInstrumentation();
             });
 
-        builder.AddOpenTelemetryExporters();
+        builder.AddOpenTelemetryExporters(); // Configure OpenTelemetry exporters
 
         return builder;
     }
 
+    /// <summary>
+    /// Adds OpenTelemetry exporters to the application builder based on the provided configuration.
+    /// </summary>
     private static IHostApplicationBuilder AddOpenTelemetryExporters(this IHostApplicationBuilder builder)
     {
         var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
         if (useOtlpExporter)
         {
+            // Configure OpenTelemetry exporters for logging, metrics, and tracing using the OTLP protocol
             builder.Services.Configure<OpenTelemetryLoggerOptions>(logging => logging.AddOtlpExporter());
             builder.Services.ConfigureOpenTelemetryMeterProvider(metrics => metrics.AddOtlpExporter());
             builder.Services.ConfigureOpenTelemetryTracerProvider(tracing => tracing.AddOtlpExporter());
@@ -87,6 +98,9 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds default Health Checks to the application builder, including a liveness check.
+    /// </summary>
     public static IHostApplicationBuilder AddDefaultHealthChecks(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHealthChecks()
@@ -96,6 +110,9 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Maps default endpoints for the application, such as Health Checks and Prometheus (if enabled).
+    /// </summary>
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         // Uncomment the following line to enable the Prometheus endpoint (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)

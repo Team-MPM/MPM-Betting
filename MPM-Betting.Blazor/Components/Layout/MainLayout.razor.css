@@ -1,97 +1,67 @@
+/* The page container with a relative position and flex layout. */
 .page {
     position: relative;
     display: flex;
     flex-direction: column;
 }
 
+/* The main content area with flex-grow property set to 1. */
 main {
     flex: 1;
 }
 
+/* The sidebar with a linear gradient background. */
 .sidebar {
     background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
 }
 
+/* The top row with a light gray background and a border at the bottom. */
 .top-row {
     background-color: #f7f7f7;
     border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
+    justify-content: flex-end; /* Align items to the right */
     height: 3.5rem;
     display: flex;
-    align-items: center;
+    align-items: center; /* Vertically center the items */
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
+/* Styling for anchor tags and btn-link elements within the top-row */
+.top-row ::deep a, .top-row ::deep .btn-link {
+    white-space: nowrap; /* Prevents text wrapping */
+    margin-left: 1.5rem; /* Adds horizontal spacing between elements */
+    text-decoration: none; /* Removes underline from links */
+}
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+/* Hover styles for anchor tags and btn-link elements within the top-row */
+.top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+    text-decoration: underline; /* Adds underline on hover */
+}
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+/* First child anchor tag styling within the top-row */
+.top-row ::deep a:first-child {
+    overflow: hidden; /* Prevents text overflow */
+    text-overflow: ellipsis; /* Displays ellipsis when text overflows */
+}
 
+/* Media query for screens smaller than 640.98px */
 @media (max-width: 640.98px) {
     .top-row {
-        justify-content: space-between;
+        justify-content: space-between; /* Distributes items evenly in a row */
     }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
+        margin-left: 0; /* Removes horizontal spacing between elements */
     }
 }
 
+/* Media query for screens larger than or equal to 641px */
 @media (min-width: 641px) {
     .page {
-        flex-direction: row;
+        flex-direction: row; /* Changes the flex direction to horizontal */
     }
 
     .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
+        width: 250px; /* Sets the width of the sidebar */
+        height: 100vh; /* Makes the sidebar the height of the viewport */
+        position: sticky; /* Keeps the sidebar in place when scrolling */
         top: 0;
-    }
-
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
-
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
-}
-
-#blazor-error-ui {
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
-    position: fixed;
-    width: 100%;
-    z-index: 1000;
-}
-
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }

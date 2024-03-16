@@ -1,4 +1,20 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
+// This code defines a <Router> component that is used to render different
+// pages in a Blazor application based on the current route.
+//
+// The Router component is configured with an AppAssembly, which is
+// set to the assembly containing the Program class. This tells the
+// router which assemblies to scan for routes.
+//
+// The Router component contains a <Found> element, which is used to
+// render the component that matches the current route. The RouteView
+// component is used to render the matched component, and it is
+// configured with the current route data (routeData) and a default
+// layout type (MainLayout).
+//
+// The <FocusOnNavigate> component is used to set the focus on an element
+// within the rendered component. In this case, it is set to the first
+// <h1> element within the rendered component.
+<Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
         <FocusOnNavigate RouteData="routeData" Selector="h1"/>
