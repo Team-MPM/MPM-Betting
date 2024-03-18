@@ -1,5 +1,4 @@
-@page "/Error"
-@* This line sets the page title to "Error". *@
+﻿@page "/Error"
 @using System.Diagnostics
 
 <PageTitle>Error</PageTitle>
@@ -7,7 +6,6 @@
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
 
-@* This if-block checks if the 'ShowRequestId' variable is true. If it is, it displays a paragraph with a strong tag and a code tag containing the 'RequestId' value. *@
 @if (ShowRequestId)
 {
     <p>
@@ -27,13 +25,11 @@
 </p>
 
 @code{
-    *@ The following CascadingParameter is used to get the current HttpContext. *@*@
     [CascadingParameter] private HttpContext? HttpContext { get; set; }
 
     private string? RequestId { get; set; }
     private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-    *@ The 'OnInitialized' method is called after the component has been initialized. Here, it sets the 'RequestId' variable to the current Activity Id or the HttpContext TraceIdentifier if it's not null. *@*@
     protected override void OnInitialized() =>
         RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
 
