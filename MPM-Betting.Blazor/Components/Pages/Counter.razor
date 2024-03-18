@@ -1,20 +1,20 @@
-@page "/counter"  @* Defines the URL for this component's page. In this case, the page is accessible at "/counter". *@
-@rendermode InteractiveServer  @* Determines the rendering mode for this component. Here, it's set to InteractiveServer. *@
+﻿@page "/counter"
+@rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>  @* Sets the title of the page. *@
+<PageTitle>Counter</PageTitle>
 
-<h1>Counter</h1>  @* Displays a header with the text "Counter". *@
+<h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>  @* Displays a paragraph with the current count value. *@
+<p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>  @* Displays a button with the text "Click me". When clicked, it triggers the IncrementCount method. *@
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-@code {  @* Defines the code for this component. *@
-    private int currentCount = 0;  @* Declares a private integer variable named "currentCount" and initializes it to 0. *@
+@code {
+    private int currentCount = 0;
 
-    private void IncrementCount()  @* Declares a private method named "IncrementCount" that increments the "currentCount" variable. *@
+    private void IncrementCount()
     {
-        currentCount++;  @* Increments the "currentCount" variable by 1. *@
+        currentCount++;
     }
 
 }
