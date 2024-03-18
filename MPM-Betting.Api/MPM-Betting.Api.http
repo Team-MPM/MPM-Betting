@@ -1,2 +1,6 @@
-' Set the API host address for MPM_Betting to localhost on port 5241
-@MPM_Betting.Api_HostAddress = "http://localhost:5
+@MPM_Betting.Api_HostAddress = http://localhost:5241
+
+GET {{MPM_Betting.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
