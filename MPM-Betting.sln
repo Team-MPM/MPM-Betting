@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Blazor", "MPM-B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.UnitTests", "MPM-Betting.UnitTests\MPM-Betting.UnitTests.csproj", "{EDEFF6B9-81D6-48F9-BA55-2B41B5FC840D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Blazor.Components", "MPM-Betting.Blazor.Components\MPM-Betting.Blazor.Components.csproj", "{670CE4C7-1A4A-4942-83EE-EF75B040DE39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{EDEFF6B9-81D6-48F9-BA55-2B41B5FC840D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDEFF6B9-81D6-48F9-BA55-2B41B5FC840D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDEFF6B9-81D6-48F9-BA55-2B41B5FC840D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{670CE4C7-1A4A-4942-83EE-EF75B040DE39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{670CE4C7-1A4A-4942-83EE-EF75B040DE39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{670CE4C7-1A4A-4942-83EE-EF75B040DE39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{670CE4C7-1A4A-4942-83EE-EF75B040DE39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
