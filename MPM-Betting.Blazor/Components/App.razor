@@ -1,35 +1,20 @@
-<!-- The doctype declaration helps with browser compatibility by telling the browser which version of HTML the page is written in. -->
-<!DOCTYPE html>
-
-<!-- The 'html' element is the root element of an HTML page. The 'lang' attribute sets the language of the page. -->
+﻿<!DOCTYPE html>
 <html lang="en">
 
-<!-- The 'head' element contains meta-information about the document, such as its character encoding, viewport, and linked files. -->
 <head>
-    <!-- The 'meta' tag with 'charset' attribute specifies the character encoding for the HTML document. -->
-    <meta charset="utf-8" />
-
-    <!-- The 'viewport' meta tag gives the browser instructions on how to control the page's dimensions and scaling. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- The 'base' tag specifies the base URL for all relative URLs in a document. -->
-    <base href="/" />
-
-    <!-- The 'link' tag is used to link external CSS files. Here, it links to the Bootstrap, app.css, and the component's specific stylesheet. -->
-    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="MPM-Betting.Blazor.styles.css" />
-
-    <!-- The 'link' tag with 'rel' set to 'icon' is used to specify a favicon for the web page. -->
-    <link rel="icon" type="image/png" href="favicon.png" />
-
-    <!-- The 'HeadOutlet' component is a placeholder for components that need to inject content into the head element. -->
-    <HeadOutlet />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base href="/"/>
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css"/>
+    <link rel="stylesheet" href="app.css"/>
+    <link rel="stylesheet" href="MPM-Betting.Blazor.styles.css"/>
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    <HeadOutlet/>
 </head>
 
-<!-- The 'body' element contains the content of the document, such as text, images, hyperlinks, tables, lists, etc. -->
 <body>
-    <!-- The 'Routes' component is a Blazor component that renders the router and its associated routes. -->
-    <Routes />
+<Routes/>
+<script src="_framework/blazor.web.js"></script>
+</body>
 
-    <!-- The 'script' tag imports the Blazor Web
+</html>
