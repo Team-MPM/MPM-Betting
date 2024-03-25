@@ -64,4 +64,8 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0-preview.2.24128.5"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\MPM-Betting.PlatformServices\MPM-Betting.PlatformServices.csproj" />
+    </ItemGroup>
+
 </Project>
