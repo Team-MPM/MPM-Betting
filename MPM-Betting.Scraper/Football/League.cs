@@ -1,5 +1,8 @@
-﻿namespace MPM_Betting.Scraper.Football;
+﻿namespace MPM_Betting.DataModel.Football;
 
+/// <summary>
+/// Enum List of all supported football leagues with corresponding values to FotMob page id's
+/// </summary>
 public enum League
 {
     PremierLeague = 47,
@@ -7,7 +10,6 @@ public enum League
     ChampionsLeague = 42,
     BundesligaAustria = 38,
     LaLiga = 87,
-    EuropaLeague = 73,
     SerieA = 55,
     Ligue1 = 53,
 }

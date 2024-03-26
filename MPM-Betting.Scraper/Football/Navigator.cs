@@ -2,14 +2,16 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 
+using MPM_Betting.DataModel.Football;
+
 namespace MPM_Betting.Scraper.Football;
 
-public class FootballNavigator
+public class Navigator
 {
     private const string FotmobBaseUrl = "https://www.fotmob.com/en-GB";
     private readonly WebDriver m_Driver;
     
-    public FootballNavigator()
+    public Navigator()
     {
         m_Driver = new ChromeDriver();
         m_Driver.Navigate().GoToUrl(FotmobBaseUrl);
