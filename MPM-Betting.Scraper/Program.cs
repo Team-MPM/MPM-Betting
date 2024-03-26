@@ -1,8 +1,10 @@
 ﻿
+using MPM_Betting.Scraper.Football;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
-WebDriver driver = new ChromeDriver();
-driver.Navigate().GoToUrl("https://www.google.at");
-var element = driver.FindElement(By.TagName("h1"));
-Console.WriteLine(element.Text);
+var navigator = new FootballNavigator();
+navigator.GetLeagueData();
+
+
