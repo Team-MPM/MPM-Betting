@@ -1,8 +1,12 @@
+using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+builder.Services.AddDbContext<MpmDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MPM-Betting")));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

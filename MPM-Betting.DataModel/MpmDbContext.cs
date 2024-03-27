@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel.Betting;
-using MPM_Betting.DataModel.Football;
 using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.DataModel;

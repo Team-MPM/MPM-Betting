@@ -12,6 +12,7 @@
       <ProjectReference Include="..\MPM-Betting.Aspire\MPM-Betting.Aspire.ServiceDefaults\MPM-Betting.Aspire.ServiceDefaults.csproj" />
       <ProjectReference Include="..\MPM-Betting.Blazor.Components\MPM-Betting.Blazor.Components.csproj" />
       <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Services\MPM-Betting.Services.csproj" />
     </ItemGroup>
 
     <ItemGroup>
