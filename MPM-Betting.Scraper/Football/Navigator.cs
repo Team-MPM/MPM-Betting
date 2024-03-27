@@ -45,7 +45,7 @@ public class Navigator
             if (CheckForTableLoad()) continue;
             
             var element = m_Driver.FindElement(By.XPath("//article[@class='TableContainer']"));
-            Console.WriteLine(element.Text);
+            Console.WriteLine(element.Text); // TODO
         }
     }
 
