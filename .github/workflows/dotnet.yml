@@ -22,6 +22,8 @@ jobs:
         dotnet-version: 9.0.100-preview.2.24157.14
     - name: Restore dependencies
       run: dotnet restore
+    - name: Restore dependencies
+      run: dotnet workload restore
     - name: Build
       run: dotnet build --no-restore
     - name: Test
