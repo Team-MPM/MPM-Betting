@@ -1,6 +1,9 @@
+using MPM_Betting.Aspire.AppHost;
 using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
+
+var functions = builder.AddAzureFunction<Projects.MPM_Betting_Functions>("functions");
 
 var redis = builder.AddRedis("redis");
 

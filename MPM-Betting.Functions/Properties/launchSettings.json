@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "MPM_Betting.Functions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7161",
+      "launchBrowser": false
+    }
+  }
+}
