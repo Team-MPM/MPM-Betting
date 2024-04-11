@@ -1,0 +1,47 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master", "dev" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.100-preview.2.24157.14
+    - name: Restore Workloads
+      run: dotnet workload restore
+    - name: Restore Dependencies
+      run: |
+        dotnet restore ./MPM-Betting.Api/MPM-Betting.Api.csproj
+        dotnet restore ./MPM-Betting.Blazor/MPM-Betting.Blazor.csproj
+        dotnet restore ./MPM-Betting.Blazor.Components/MPM-Betting.Blazor.Components.csproj
+        dotnet restore ./MPM-Betting.DataModel/MPM-Betting.DataModel.csproj
+        dotnet restore ./MPM-Betting.Functions/MPM-Betting.Functions.csproj
+        dotnet restore ./MPM-Betting.Scraper/MPM-Betting.Scraper.csproj
+        dotnet restore ./MPM-Betting.Services/MPM-Betting.Services.csproj
+        dotnet restore ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+        dotnet restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.AppHost/MPM-Betting.Aspire.AppHost.csproj
+        dotnet restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.ServiceDefaults/MPM-Betting.Aspire.ServiceDefaults.csproj
+    - name: Build
+      run: |
+        dotnet build --no-restore ./MPM-Betting.Api/MPM-Betting.Api.csproj
+        dotnet build --no-restore ./MPM-Betting.Blazor/MPM-Betting.Blazor.csproj
+        dotnet build --no-restore ./MPM-Betting.Blazor.Components/MPM-Betting.Blazor.Components.csproj
+        dotnet build --no-restore ./MPM-Betting.DataModel/MPM-Betting.DataModel.csproj
+        dotnet build --no-restore ./MPM-Betting.Functions/MPM-Betting.Functions.csproj
+        dotnet build --no-restore ./MPM-Betting.Scraper/MPM-Betting.Scraper.csproj
+        dotnet build --no-restore ./MPM-Betting.Services/MPM-Betting.Services.csproj
+        dotnet build --no-restore ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+        dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.AppHost/MPM-Betting.Aspire.AppHost.csproj
+        dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.ServiceDefaults/MPM-Betting.Aspire.ServiceDefaults.csproj
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
