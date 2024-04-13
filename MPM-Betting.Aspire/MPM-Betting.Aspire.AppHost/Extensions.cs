@@ -26,15 +26,14 @@ public static class Extensions
             debugPort.ToString()
         };
 
-        return builder.AddResource(new ExecutableResource(name, $"func host start --port {port.ToString()} --nodeDebugPort {debugPort.ToString()}", projectDirectory))
+        return builder.AddExecutable(name, "func", projectDirectory, args)
             .WithOtlpExporter();
     }
     
     public static  IResourceBuilder<ExecutableResource> AddProjectWithDotnetWatch<TServiceMetadata>(this IDistributedApplicationBuilder builder, string name) where TServiceMetadata : IProjectMetadata, new()
     {
         var serviceMetadata = new TServiceMetadata();
-        var project = new ExecutableResource(name, "dotnet watch --non-interactive", Path.GetDirectoryName(serviceMetadata.ProjectPath)!);
-        var executableBuilder = builder.AddResource(project);
+        var executableBuilder = builder.AddExecutable(name, "dotnet", Path.GetDirectoryName(serviceMetadata.ProjectPath)!, "watch --non-interactive");
         executableBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true");
         executableBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true");
         executableBuilder.WithOtlpExporter();
