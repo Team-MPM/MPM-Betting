@@ -1,4 +1,7 @@
-﻿namespace MPM_Betting.Aspire.AppHost;
+﻿using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
+
+namespace MPM_Betting.Aspire.AppHost;
 
 public static class Extensions
 {
@@ -23,24 +26,21 @@ public static class Extensions
             debugPort.ToString()
         };
 
-        return builder.AddResource(new ExecutableResource(name, "func", projectDirectory, args))
+        return builder.AddResource(new ExecutableResource(name, $"func host start --port {port.ToString()} --nodeDebugPort {debugPort.ToString()}", projectDirectory))
             .WithOtlpExporter();
     }
     
     public static  IResourceBuilder<ExecutableResource> AddProjectWithDotnetWatch<TServiceMetadata>(this IDistributedApplicationBuilder builder, string name) where TServiceMetadata : IProjectMetadata, new()
     {
         var serviceMetadata = new TServiceMetadata();
-        var project = new ExecutableResource(name, "dotnet", Path.GetDirectoryName(serviceMetadata.ProjectPath)!, ["watch", "--non-interactive"]);
+        var project = new ExecutableResource(name, "dotnet watch --non-interactive", Path.GetDirectoryName(serviceMetadata.ProjectPath)!);
         var executableBuilder = builder.AddResource(project);
         executableBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true");
         executableBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true");
         executableBuilder.WithOtlpExporter();
         executableBuilder.WithEnvironment((context) =>
         {
-            // like i know it says deprecated but i cant find any docs on how to do this properly...
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (context.PublisherName == "manifest")
-#pragma warning restore CS0618 // Type or member is obsolete
+            if (context.ExecutionContext.IsPublishMode)
             {
                 return;
             }

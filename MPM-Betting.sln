@@ -14,10 +14,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.UnitTests", "MP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Blazor.Components", "MPM-Betting.Blazor.Components\MPM-Betting.Blazor.Components.csproj", "{670CE4C7-1A4A-4942-83EE-EF75B040DE39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.MauiHybrid", "MPM-Betting.MauiHybrid\MPM-Betting.MauiHybrid.csproj", "{1245EA55-5DC2-435B-9F1C-1F6D8374709C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.PlatformServices", "MPM-Betting.PlatformServices\MPM-Betting.PlatformServices.csproj", "{D0738BC2-E379-41C4-BEFA-05ACBA08BBD8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Services", "MPM-Betting.Services\MPM-Betting.Services.csproj", "{065B9F53-71ED-4AC6-BB19-D26775C8A75D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Scraper", "MPM-Betting.Scraper\MPM-Betting.Scraper.csproj", "{C0CF3C3C-D1FC-4C36-937A-8BAD17A7BDC8}"
@@ -58,14 +54,6 @@ Global
 		{670CE4C7-1A4A-4942-83EE-EF75B040DE39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{670CE4C7-1A4A-4942-83EE-EF75B040DE39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{670CE4C7-1A4A-4942-83EE-EF75B040DE39}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1245EA55-5DC2-435B-9F1C-1F6D8374709C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1245EA55-5DC2-435B-9F1C-1F6D8374709C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1245EA55-5DC2-435B-9F1C-1F6D8374709C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1245EA55-5DC2-435B-9F1C-1F6D8374709C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0738BC2-E379-41C4-BEFA-05ACBA08BBD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0738BC2-E379-41C4-BEFA-05ACBA08BBD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0738BC2-E379-41C4-BEFA-05ACBA08BBD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0738BC2-E379-41C4-BEFA-05ACBA08BBD8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{065B9F53-71ED-4AC6-BB19-D26775C8A75D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{065B9F53-71ED-4AC6-BB19-D26775C8A75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{065B9F53-71ED-4AC6-BB19-D26775C8A75D}.Release|Any CPU.ActiveCfg = Release|Any CPU

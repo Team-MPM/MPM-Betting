@@ -1,0 +1,39 @@
+{
+  "resources": {
+    "azurite": {
+      "type": "container.v0",
+      "image": "mcr.microsoft.com/azure-storage/azurite:latest",
+      "bindings": {
+        "blob": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "containerPort": 10000
+        },
+        "queue": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "containerPort": 10001
+        },
+        "table": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "containerPort": 10001
+        }
+      }
+    },
+    "functions": {
+      "type": "executable.v0",
+      "workingDirectory": "../../../MPM-Betting.Functions",
+      "command": "func",
+      "args": [
+        "host",
+        "start",
+        "--port",
+        "7122",
+        "--nodeDebugPort",
+        "7123"
+      ],
+      "env": {

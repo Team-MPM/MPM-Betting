@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.100-preview.2.24157.14
+        dotnet-version: 9.0.100-preview.3.24204.13
     - name: Restore Workloads
       run: dotnet workload restore
     - name: Restore Dependencies
