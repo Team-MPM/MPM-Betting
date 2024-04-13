@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
 
 namespace MPM_Betting.Services.Data;
@@ -9,14 +10,19 @@ public static class FootballApi
     
     public static WebApplication MapFootballEndpoints(this WebApplication app)
     {
-        app.MapGet("/football/leagues", async () =>
+        app.MapGet("/football/leagues", async (IMemoryCache cache) =>
             {
+                const string cacheKey = "footballLeagues";
+                if (cache.TryGetValue(cacheKey, out List<LeagueEntry>? allLeagues)) 
+                    return allLeagues;
+
+                allLeagues ??= [];
+                
                 var client = new HttpClient();
                 var response = await client.GetAsync("https://www.fotmob.com/api/allLeagues");
 
                 var json = await response.Content.ReadAsStringAsync();
                 var jObject = JObject.Parse(json);
-                var allLeagues = new List<LeagueEntry>();
                 
                 var international = (JArray)jObject["international"]!;
                 var internationalLeagues = international[0]["leagues"]!;
@@ -42,9 +48,14 @@ public static class FootballApi
                     }
                 }
                 
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromDays(1));
+
+                cache.Set(cacheKey, allLeagues, cacheEntryOptions);
+                
                 return allLeagues;
             })
-        .WithName("GetFootballLeagues")
+        .WithName("GetAllFootballLeagues")
         .WithOpenApi();
         
         return app;
