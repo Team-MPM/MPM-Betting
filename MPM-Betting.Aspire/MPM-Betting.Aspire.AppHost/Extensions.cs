@@ -33,7 +33,7 @@ public static class Extensions
     public static  IResourceBuilder<ExecutableResource> AddProjectWithDotnetWatch<TServiceMetadata>(this IDistributedApplicationBuilder builder, string name) where TServiceMetadata : IProjectMetadata, new()
     {
         var serviceMetadata = new TServiceMetadata();
-        var executableBuilder = builder.AddExecutable(name, "dotnet", Path.GetDirectoryName(serviceMetadata.ProjectPath)!, "watch --non-interactive");
+        var executableBuilder = builder.AddExecutable(name, "dotnet", Path.GetDirectoryName(serviceMetadata.ProjectPath)!, ["watch", "--non-interactive"]);
         executableBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true");
         executableBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true");
         executableBuilder.WithOtlpExporter();

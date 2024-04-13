@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
+using MPM_Betting.Services.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapFootballEndpoints();
 
 var summaries = new[]
 {
