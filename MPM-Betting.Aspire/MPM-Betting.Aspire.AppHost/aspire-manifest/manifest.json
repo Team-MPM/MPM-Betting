@@ -20,20 +20,12 @@
           "scheme": "tcp",
           "protocol": "tcp",
           "transport": "tcp",
-          "containerPort": 10001
+          "containerPort": 10002
         }
       }
     },
     "functions": {
       "type": "executable.v0",
       "workingDirectory": "../../../MPM-Betting.Functions",
-      "command": "func",
-      "args": [
-        "host",
-        "start",
-        "--port",
-        "7122",
-        "--nodeDebugPort",
-        "7123"
-      ],
+      "command": "func host start --port 7122 --nodeDebugPort 7123",
       "env": {
