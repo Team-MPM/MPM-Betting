@@ -3,19 +3,23 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var azurite = builder.AddContainer("azurite", "mcr.microsoft.com/azure-storage/azurite")
-    .WithEndpoint(containerPort: 10000, name: "blob", hostPort: 11000)
-    .WithEndpoint(containerPort: 10001, name: "queue", hostPort: 11001)
-    .WithEndpoint(containerPort: 10002, name: "table", hostPort: 11002);
+if (!builder.ExecutionContext.IsPublishMode)
+{
+    var azurite = builder.AddContainer("azurite", "mcr.microsoft.com/azure-storage/azurite")
+        .WithEndpoint(containerPort: 10000, name: "blob", hostPort: 11000)
+        .WithEndpoint(containerPort: 10001, name: "queue", hostPort: 11001)
+        .WithEndpoint(containerPort: 10002, name: "table", hostPort: 11002);
 
-var queueConnStrCallback = () =>  $"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint={azurite.GetEndpoint("queue").Url.Replace("tcp", "http")}/devstoreaccount1;";
+    var queueConnStrCallback = () =>  $"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint={azurite.GetEndpoint("queue").Url.Replace("tcp", "http")}/devstoreaccount1;";
 
-//    .WithReference(queue)
-//    .WithEnvironment("QueueConnectionString", queueConnStrCallback)
+    //    .WithReference(queue)
+    //    .WithEnvironment("QueueConnectionString", queueConnStrCallback)
 
-var functions = builder.AddAzureFunction<MPM_Betting_Functions>("functions")
-    .WithReference(azurite.GetEndpoint("queue"))
-    .WithEnvironment("QueueConnectionString", queueConnStrCallback);
+    var functions = builder.AddAzureFunction<MPM_Betting_Functions>("functions")
+        .WithReference(azurite.GetEndpoint("queue"))
+        .WithEnvironment("QueueConnectionString", queueConnStrCallback);
+}
+
 
 var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana")

@@ -1,31 +1,154 @@
 {
   "resources": {
-    "azurite": {
+    "grafana": {
       "type": "container.v0",
-      "image": "mcr.microsoft.com/azure-storage/azurite:latest",
+      "image": "grafana/grafana:latest",
+      "bindMounts": [
+        {
+          "source": "../../grafana/config",
+          "target": "/etc/grafana",
+          "readOnly": false
+        },
+        {
+          "source": "../../grafana/dashboards",
+          "target": "/var/lib/grafana/dashboards",
+          "readOnly": false
+        }
+      ],
       "bindings": {
-        "blob": {
-          "scheme": "tcp",
+        "grafana-http": {
+          "scheme": "http",
           "protocol": "tcp",
-          "transport": "tcp",
-          "containerPort": 10000
-        },
-        "queue": {
-          "scheme": "tcp",
-          "protocol": "tcp",
-          "transport": "tcp",
-          "containerPort": 10001
-        },
-        "table": {
-          "scheme": "tcp",
-          "protocol": "tcp",
-          "transport": "tcp",
-          "containerPort": 10002
+          "transport": "http",
+          "containerPort": 3000
         }
       }
     },
-    "functions": {
-      "type": "executable.v0",
-      "workingDirectory": "../../../MPM-Betting.Functions",
-      "command": "func host start --port 7122 --nodeDebugPort 7123",
+    "prometheus": {
+      "type": "container.v0",
+      "image": "prom/prometheus:latest",
+      "bindMounts": [
+        {
+          "source": "../../prometheus",
+          "target": "/etc/prometheus",
+          "readOnly": false
+        }
+      ],
+      "bindings": {
+        "prometheus-http": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "containerPort": 9090
+        }
+      }
+    },
+    "redis": {
+      "type": "container.v0",
+      "connectionString": "{redis.bindings.tcp.host}:{redis.bindings.tcp.port}",
+      "image": "redis:7.2.4",
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "containerPort": 6379
+        }
+      }
+    },
+    "sql": {
+      "type": "container.v0",
+      "connectionString": "Server={sql.bindings.tcp.host},{sql.bindings.tcp.port};User ID=sa;Password={sql-password.value};TrustServerCertificate=true",
+      "image": "mcr.microsoft.com/mssql/server:2022-latest",
+      "volumes": [
+        {
+          "name": "MPM-Betting.Aspire.AppHost-sql-data",
+          "target": "/var/opt/mssql",
+          "readOnly": false
+        }
+      ],
       "env": {
+        "ACCEPT_EULA": "Y",
+        "MSSQL_SA_PASSWORD": "{sql-password.value}"
+      },
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "containerPort": 1433
+        }
+      }
+    },
+    "MPM-Betting": {
+      "type": "value.v0",
+      "connectionString": "{sql.connectionString};Database=MPM-Betting"
+    },
+    "api": {
+      "type": "project.v0",
+      "path": "../../../MPM-Betting.Api/MPM-Betting.Api.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}",
+        "ConnectionStrings__redis": "{redis.connectionString}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "blazor": {
+      "type": "project.v0",
+      "path": "../../../MPM-Betting.Blazor/MPM-Betting.Blazor.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "services__api__http__0": "{api.bindings.http.url}",
+        "services__api__https__0": "{api.bindings.https.url}",
+        "ConnectionStrings__redis": "{redis.connectionString}",
+        "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "sql-password": {
+      "type": "parameter.v0",
+      "value": "{sql-password.inputs.value}",
+      "inputs": {
+        "value": {
+          "type": "string",
+          "secret": true,
+          "default": {
+            "generate": {
+              "minLength": 22,
+              "minLower": 1,
+              "minUpper": 1,
+              "minNumeric": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
