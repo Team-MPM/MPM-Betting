@@ -1,40 +1,37 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace MPM_Betting.Services.Data;
 
 public partial class Utils
 {
-    public static T GetViaCache<T>(IMemoryCache cache,  TimeSpan expiration, string cacheKey, Func<T> generator)
+    public static T GetViaCache<T>(IDistributedCache cache, TimeSpan expiration, string cacheKey, Func<T> generator)
     {
-        if (cache.TryGetValue(cacheKey, out T? cachedValue))
+        var cachedValueBytes = cache.Get(cacheKey);
+        if (cachedValueBytes != null)
         {
-            return cachedValue!;
+            return JsonSerializer.Deserialize<T>(cachedValueBytes) ?? throw new InvalidOperationException();
         }
 
         var value = generator.Invoke();
-        
-        var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(expiration);
+        var serializedValue = JsonSerializer.SerializeToUtf8Bytes(value);
+        cache.Set(cacheKey, serializedValue, new DistributedCacheEntryOptions { SlidingExpiration = expiration });
 
-        cache.Set(cacheKey, value, cacheEntryOptions);
-        
         return value;
     }
-    
-    public static async Task<T> GetViaCache<T>(IMemoryCache cache, TimeSpan expiration, string cacheKey, Func<Task<T>> generator)
+
+    public static async Task<T> GetViaCache<T>(IDistributedCache cache, TimeSpan expiration, string cacheKey, Func<Task<T>> generator)
     {
-        if (cache.TryGetValue(cacheKey, out T? cachedValue))
+        var cachedValueBytes = cache.Get(cacheKey);
+        if (cachedValueBytes != null)
         {
-            return cachedValue!;
+            return JsonSerializer.Deserialize<T>(cachedValueBytes) ?? throw new InvalidOperationException();
         }
 
         var value = await generator.Invoke();
-        
-        var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(expiration);
+        var serializedValue = JsonSerializer.SerializeToUtf8Bytes(value);
+        cache.Set(cacheKey, serializedValue, new DistributedCacheEntryOptions { SlidingExpiration = expiration });
 
-        cache.Set(cacheKey, value, cacheEntryOptions);
-        
         return value;
     }
 }

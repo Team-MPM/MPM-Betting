@@ -30,7 +30,9 @@ var prometheus = builder.AddContainer("prometheus", "prom/prometheus")
     .WithBindMount(GetFullPath("../prometheus"), "/etc/prometheus")
     .WithEndpoint(containerPort: 9090, hostPort: 9090);
 
-var redis = builder.AddRedis("redis");
+var redis = builder.AddRedis("redis")
+    .WithPersistence()
+    .WithDataVolume();
 
 var sql = builder.AddSqlServer("sql")
     .WithDataVolume()

@@ -12,8 +12,6 @@
         <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0-preview.3.24210.17" />
         <PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0-preview.3.24210.17" />
         <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.0.0-preview.3.24210.17" />
-        <PackageReference Include="Aspire.StackExchange.Redis" Version="9.0.0-preview.3.24210.17" />
-        <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0-preview.3.24210.17" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
         <PackageReference Include="KubernetesClient" Version="13.0.26" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-preview.3.24172.9" />

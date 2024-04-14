@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddMpmDbContext();
+builder.AddRedisDistributedCache("redis");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
