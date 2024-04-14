@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
@@ -8,8 +9,8 @@ namespace MPM_Betting.Services.Data;
 public static class FootballApi
 {
     record LeagueEntry(string Name, string Country, int Id);
-    record TeamEntry(int Id, string Name, LeagueEntry League);
-    record PlayerEntry(string Name, string Position, int Id, TeamEntry Team);
+    record TeamEntry(int Id, string Name);
+    record PlayerEntry(string Name, string Position, int Id);
     
     public static WebApplication MapFootballEndpoints(this WebApplication app)
     {
@@ -18,11 +19,42 @@ public static class FootballApi
             .WithName("GetAllFootballLeagues")
             .WithOpenApi();
         
-        app.MapGet("/football/teams", async (IDistributedCache cache) => await GetAllFootballTeams(cache))
+        app.MapGet("/football/teams", async (IDistributedCache cache, [FromQuery] int? league) => league is null ? await GetAllFootballTeams(cache) : await GetTeamsFromLeague(cache, league.Value))
             .WithName("GetAllFootballTeams")
             .WithOpenApi();
         
         return app;
+    }
+    
+    private static async Task<List<TeamEntry>> GetTeamsFromLeague(IDistributedCache cache, int leagueId)
+    {
+        var allTeams = new List<TeamEntry>();
+        try
+        {
+            var client = new HttpClient();
+            var url = $"https://www.fotmob.com/api/leagues?id={leagueId}";
+            var response = await Utils.GetViaCache(cache, TimeSpan.FromMinutes(1), url,
+                async () => await client.GetAsync(url));
+            var json = await response.Content.ReadAsStringAsync();
+            var jObject = JObject.Parse(json);
+
+            var table = ((JArray)jObject["table"]!)[0]["data"]!["table"];
+            table ??= ((JArray)jObject["table"]!)[0]["data"]!["tables"]![0]!["table"]!;
+            var all = (JArray)table["all"]!;
+
+            foreach (var team in all)
+            {
+                var name = team["name"]!.Value<string>()!;
+                var id = team["id"]!.Value<int>();
+                allTeams.Add(new TeamEntry(id, name));
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Failed to load football league {leagueId}");
+        }
+
+        return allTeams;
     }
     
     private static async Task<List<TeamEntry>> GetAllFootballTeams(IDistributedCache cache)
@@ -39,30 +71,7 @@ public static class FootballApi
                     return;
                 }
 
-                try
-                {
-                    var client = new HttpClient();
-                    var url = $"https://www.fotmob.com/api/leagues?id={leagueEntry.Id}";
-                    var response = await Utils.GetViaCache(cache, TimeSpan.FromMinutes(1), url,
-                        async () => await client.GetAsync(url));
-                    var json = await response.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(json);
-
-                    var table = ((JArray)jObject["table"]!)[0]["data"]!["table"];
-                    table ??= ((JArray)jObject["table"]!)[0]["data"]!["tables"]![0]!["table"]!;
-                    var all = (JArray)table["all"]!;
-
-                    foreach (var team in all)
-                    {
-                        var name = team["name"]!.Value<string>()!;
-                        var id = team["id"]!.Value<int>();
-                        allTeams.Add(new TeamEntry(id, name, leagueEntry));
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Failed to load {leagueEntry.Name}");
-                }
+                allTeams.AddRange(await GetTeamsFromLeague(cache, leagueEntry.Id));
             });
             
             await Task.WhenAll(tasks);
