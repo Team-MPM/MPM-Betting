@@ -38,7 +38,7 @@ public static class FootballApi
     
     private static async Task<LeagueTable> GetLeagueTable(IDistributedCache cache, int leagueId, string? season)
     {
-        return await Utils.GetViaCache(cache, TimeSpan.FromMinutes(1), $"leagueTable-{leagueId}-{season ?? "latest"}", async () =>
+        return await Utils.GetViaCache(cache, TimeSpan.FromSeconds(1), $"leagueTable-{leagueId}-{season ?? "latest"}", async () =>
         {
             var client = new HttpClient();
             var url = $"https://www.fotmob.com/api/leagues?id={leagueId}";

@@ -38,14 +38,29 @@ var sql = builder.AddSqlServer("sql")
     .WithDataVolume()
     .AddDatabase("MPM-Betting");
 
-var api = builder.AddProject<MPM_Betting_Api>("api")
-    .WithReference(sql)
-    .WithReference(redis);
+if (builder.ExecutionContext.IsPublishMode)
+{
+    var api = builder.AddProject<MPM_Betting_Api>("api")
+        .WithReference(sql)
+        .WithReference(redis);
 
-var blazor = builder.AddProject<MPM_Betting_Blazor>("blazor")
-    .WithReference(api)
-    .WithReference(redis)
-    .WithReference(sql);
+    var blazor = builder.AddProject<MPM_Betting_Blazor>("blazor")
+        .WithReference(api)
+        .WithReference(redis)
+        .WithReference(sql);
+}
+else
+{
+    var api = builder.AddProjectWithDotnetWatch<MPM_Betting_Api>("api")
+        .WithReference(sql)
+        .WithReference(redis);
+    
+    var blazor = builder.AddProjectWithDotnetWatch<MPM_Betting_Blazor>("blazor")
+        .WithEnvironment("services__api__http__0", "http://localhost:5241")
+        .WithReference(redis)
+        .WithReference(sql);
+}
+
 
 builder.Build().Run();
 
