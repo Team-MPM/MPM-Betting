@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0-preview.3.24210.17" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.0.0-preview.3.24210.17" />
         <PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0-preview.3.24210.17" />
         <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.0.0-preview.3.24210.17" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
@@ -21,6 +22,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\MPM-Betting.Api\MPM-Betting.Api.csproj" />
       <ProjectReference Include="..\..\MPM-Betting.Blazor\MPM-Betting.Blazor.csproj" />
+      <ProjectReference Include="..\..\MPM-Betting.DbManager\MPM-Betting.DbManager.csproj" />
       <ProjectReference Include="..\..\MPM-Betting.Functions\MPM-Betting.Functions.csproj" />
     </ItemGroup>
 

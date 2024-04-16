@@ -1,0 +1,45 @@
+﻿@using BlazorApp1.Components.Account
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.DataModel.User
+
+@inject SignInManager<MpmUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+
+@if (m_ExternalLogins.Length == 0)
+{
+    <div>
+        <p>
+            @{
+                // TODO: Setup external logins
+            }
+        </p>
+    </div>
+}
+else
+{
+    <form class="form-horizontal" action="Account/PerformExternalLogin" method="post">
+        <div>
+            <AntiforgeryToken/>
+            <input type="hidden" name="ReturnUrl" value="@ReturnUrl"/>
+            <p>
+                @foreach (var provider in m_ExternalLogins)
+                {
+                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                }
+            </p>
+        </div>
+    </form>
+}
+
+@code {
+    private AuthenticationScheme[] m_ExternalLogins = [];
+
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        m_ExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToArray();
+    }
+
+}

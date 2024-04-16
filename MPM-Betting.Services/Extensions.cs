@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.User;
@@ -15,12 +12,10 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddMpmDbContext(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddDbContext<MpmDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("MPM-Betting")));
+        builder.AddNpgsqlDbContext<MpmDbContext>("MPM-Betting");
 
         builder.Services.AddIdentityCore<MpmUser>(options =>
             {
-                // TODO Olaf: Identity options go here
                 options.SignIn.RequireConfirmedAccount = true;
             })
             .AddEntityFrameworkStores<MpmDbContext>()
@@ -45,6 +40,10 @@ public static class Extensions
         app.UseAuthorization();
         app.UseAntiforgery();
 
+        //using var db = app.Services.GetRequiredService<MpmDbContext>();
+        //db.Database.EnsureCreated();
+        //db.Database.Migrate();
+        
         return app;
     }
 }

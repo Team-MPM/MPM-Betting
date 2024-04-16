@@ -11,25 +11,25 @@ namespace MPM_Betting.Blazor.Components;
 
 public class ExampleJsInterop : IAsyncDisposable
 {
-    private readonly Lazy<Task<IJSObjectReference>> moduleTask;
+    private readonly Lazy<Task<IJSObjectReference>> m_ModuleTask;
 
     public ExampleJsInterop(IJSRuntime jsRuntime)
     {
-        moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
+        m_ModuleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
             "import", "./_content/MPM_Betting.Blazor.Components/exampleJsInterop.js").AsTask());
     }
 
     public async ValueTask<string> Prompt(string message)
     {
-        var module = await moduleTask.Value;
+        var module = await m_ModuleTask.Value;
         return await module.InvokeAsync<string>("showPrompt", message);
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (moduleTask.IsValueCreated)
+        if (m_ModuleTask.IsValueCreated)
         {
-            var module = await moduleTask.Value;
+            var module = await m_ModuleTask.Value;
             await module.DisposeAsync();
         }
     }
