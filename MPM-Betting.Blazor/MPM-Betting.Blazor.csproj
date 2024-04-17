@@ -23,4 +23,8 @@
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="9.0.0-preview.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\js\" />
+    </ItemGroup>
+
 </Project>

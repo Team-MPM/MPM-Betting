@@ -45,11 +45,16 @@ builder.Services.AddHttpClient<WeatherApiClient>(client => client.BaseAddress = 
 
 var app = builder.Build();
 
-
 // Default
 app.MapDefaultEndpoints();
 app.UseStaticFiles();
-app.UseAntiforgery();
+
+// Auth
+app.MapAdditionalIdentityEndpoints();
+app.MapAuthEndpoints();
+
+// Hosting
+app.UseOutputCache();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -59,12 +64,5 @@ if (!app.Environment.IsDevelopment())
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-// Auth
-app.MapAuthEndpoints();
-app.MapAdditionalIdentityEndpoints();
-
-// Hosting
-app.UseOutputCache();
 
 app.Run();

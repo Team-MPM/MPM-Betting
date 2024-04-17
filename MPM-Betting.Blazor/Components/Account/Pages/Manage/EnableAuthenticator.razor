@@ -1,12 +1,16 @@
 ﻿@page "/Account/Manage/EnableAuthenticator"
+<PageScript Src="./Components/Account/Pages/Manage/EnableAuthenticator.razor.js" />
 
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
 @using System.Text
 @using System.Text.Encodings.Web
 @using BlazorApp1.Components.Account
+@using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.DataModel.User
+
+@attribute [RequireAntiforgeryToken]
 
 @inject UserManager<MpmUser> UserManager
 @inject IdentityUserAccessor UserAccessor
@@ -39,9 +43,8 @@ else
             </li>
             <li>
                 <p>Scan the QR Code or enter this key <kbd>@m_SharedKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</p>
-                <div class="alert alert-info">Learn how to <a href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</a>.</div>
-                <div></div>
-                <div data-url="@m_AuthenticatorUri"></div>
+                <div id="qrCode"></div>
+                <div id="qrCodeData" data-url="@m_AuthenticatorUri"></div>
             </li>
             <li>
                 <p>
@@ -59,6 +62,7 @@ else
                             </div>
                             <button type="submit" class="w-100 btn btn-lg btn-primary">Verify</button>
                             <ValidationSummary class="text-danger" role="alert"/>
+                            <AntiforgeryToken />
                         </EditForm>
                     </div>
                 </div>
@@ -156,7 +160,7 @@ else
         return string.Format(
             CultureInfo.InvariantCulture,
             AuthenticatorUriFormat,
-            UrlEncoder.Encode("Microsoft.AspNetCore.Identity.UI"),
+            UrlEncoder.Encode("MPM-Betting"),
             UrlEncoder.Encode(email),
             unformattedKey);
     }

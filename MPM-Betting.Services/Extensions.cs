@@ -29,7 +29,6 @@ public static class Extensions
 
         builder.Services.AddAuthentication();
         builder.Services.AddAuthorization();
-        builder.Services.AddAntiforgery();
         
         return builder;
     }
@@ -38,7 +37,6 @@ public static class Extensions
     {
         app.UseAuthentication();
         app.UseAuthorization();
-        app.UseAntiforgery();
 
         //using var db = app.Services.GetRequiredService<MpmDbContext>();
         //db.Database.EnsureCreated();
