@@ -10,8 +10,6 @@
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.DataModel.User
 
-@attribute [RequireAntiforgeryToken]
-
 @inject UserManager<MpmUser> UserManager
 @inject IdentityUserAccessor UserAccessor
 @inject UrlEncoder UrlEncoder
@@ -62,7 +60,6 @@ else
                             </div>
                             <button type="submit" class="w-100 btn btn-lg btn-primary">Verify</button>
                             <ValidationSummary class="text-danger" role="alert"/>
-                            <AntiforgeryToken />
                         </EditForm>
                     </div>
                 </div>

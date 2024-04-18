@@ -27,7 +27,12 @@ public static class Extensions
         builder.Services.AddDataProtection()
             .SetApplicationName("Mpm-Betting");
 
-        builder.Services.AddAuthentication();
+        builder.Services.AddAuthentication()
+            .AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+            });
         builder.Services.AddAuthorization();
         
         return builder;

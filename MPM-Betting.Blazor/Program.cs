@@ -46,12 +46,19 @@ builder.Services.AddHttpClient<WeatherApiClient>(client => client.BaseAddress = 
 var app = builder.Build();
 
 // Default
-app.MapDefaultEndpoints();
-app.UseStaticFiles();
+app.UseRouting();
+
+
+
 
 // Auth
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseAntiforgery();
 app.MapAdditionalIdentityEndpoints();
-app.MapAuthEndpoints();
+
+app.MapDefaultEndpoints();
+app.UseStaticFiles();
 
 // Hosting
 app.UseOutputCache();
