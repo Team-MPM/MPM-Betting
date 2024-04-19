@@ -30,9 +30,14 @@ public static class Extensions
         builder.Services.AddAuthentication()
             .AddGoogle(googleOptions =>
             {
-                googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
-                googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
-            });
+                googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "placeholder";
+                googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "placeholder";
+            })
+            .AddMicrosoftAccount(microsoftOptions =>
+            {
+                microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? "placeholder";
+                microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? "placeholder";
+            });;
         builder.Services.AddAuthorization();
         
         return builder;
