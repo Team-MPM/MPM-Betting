@@ -37,7 +37,7 @@ public static class Extensions
             {
                 microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? "placeholder";
                 microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? "placeholder";
-            });;
+            });
         builder.Services.AddAuthorization();
         
         return builder;
