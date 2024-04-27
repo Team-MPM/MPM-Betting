@@ -35,16 +35,13 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     }
     
     
-
+    [Profile]
     public async Task<List<GameEntry>> GetGameEntries(int leagueId, DateOnly? date)
     {
-        return await cache.GetViaCache(TimeSpan.FromSeconds(1), $"game-entries-{leagueId}-{date ?? DateOnly.MaxValue}", async () =>
+        return await cache.Get(TimeSpan.FromSeconds(1), $"game-entries-{leagueId}-{date ?? DateOnly.MaxValue}", async () =>
         {
-            var client = new HttpClient();
-            var url = $"https://www.fotmob.com/api/leagues?id={leagueId}";
-            var response = await cache.GetViaCache(TimeSpan.FromSeconds(1), url,
-                async () => await client.GetAsync(url));
-            var json = await response.Content.ReadAsStringAsync();
+            var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+            var json = await cache.GetByUri(TimeSpan.FromSeconds(1), uri);
             var jObject = JObject.Parse(json);
 
             var matches = jObject["matches"]!;
@@ -209,13 +206,10 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     
     public async Task<LeagueTable> GetLeagueTable(int leagueId, string? season)
     {
-        return await cache.GetViaCache(TimeSpan.FromSeconds(1), $"leagueTable-{leagueId}-{season ?? "latest"}", async () =>
+        return await cache.Get(TimeSpan.FromSeconds(1), $"leagueTable-{leagueId}-{season ?? "latest"}", async () =>
         {
-            var client = new HttpClient();
-            var url = $"https://www.fotmob.com/api/leagues?id={leagueId}";
-            var response = await cache.GetViaCache(TimeSpan.FromMinutes(1), url,
-                async () => await client.GetAsync(url));
-            var json = await response.Content.ReadAsStringAsync();
+            var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+            var json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
             var jObject = JObject.Parse(json);
 
             var details = jObject["details"]!;
@@ -234,10 +228,8 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
             if (season != selectedSeason)
             {
-                url = $"https://www.fotmob.com/api/table?url=https%3A%2F%2Fdata.fotmob.com%2Ftables.ext.{leagueId}.fot&selectedSeason={UrlEncoder.Default.Encode(season)}";
-                response = await cache.GetViaCache(TimeSpan.FromMinutes(1), url,
-                    async () => await client.GetAsync(url));
-                json = await response.Content.ReadAsStringAsync();
+                uri = new Uri($"https://www.fotmob.com/api/table?url=https%3A%2F%2Fdata.fotmob.com%2Ftables.ext.{leagueId}.fot&selectedSeason={UrlEncoder.Default.Encode(season)}");
+                json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
                 jObject = JObject.Parse(json);
                 data = jObject;
             }
@@ -264,7 +256,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     
     public async Task<List<Player> > GetAllFootballPlayers()
     {
-        return await cache.GetViaCache(TimeSpan.FromDays(1), $"footballPlayers", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), $"footballPlayers", async () =>
         {
             var allTeams = await GetAllFootballTeams();
             var allPlayers = new List<Player>();
@@ -283,16 +275,13 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     
     public async Task<List<Player>> GetPlayersFromTeam(int teamId)
     {
-        return await cache.GetViaCache(TimeSpan.FromDays(1), $"footballPlayers-{teamId}", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), $"footballPlayers-{teamId}", async () =>
         {
             var allPlayers = new List<Player>();
             try
             {
-                var client = new HttpClient();
-                var url = $"https://www.fotmob.com/api/teams?id={teamId}";
-                var response = await cache.GetViaCache(TimeSpan.FromMinutes(1), url,
-                    async () => await client.GetAsync(url));
-                var json = await response.Content.ReadAsStringAsync();
+                var uri = new Uri($"https://www.fotmob.com/api/teams?id={teamId}");
+                var json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
                 var jObject = JObject.Parse(json);
 
                 var squad = (JArray)jObject["squad"]!;
@@ -317,16 +306,13 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     
     public async Task<List<Team>> GetTeamsFromLeague(int leagueId)
     {
-        return await cache.GetViaCache(TimeSpan.FromDays(1), $"footballTeams-{leagueId}", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), $"footballTeams-{leagueId}", async () =>
         {
             var allTeams = new List<Team>();
             try
             {
-                var client = new HttpClient();
-                var url = $"https://www.fotmob.com/api/leagues?id={leagueId}";
-                var response = await cache.GetViaCache(TimeSpan.FromMinutes(1), url,
-                    async () => await client.GetAsync(url));
-                var json = await response.Content.ReadAsStringAsync();
+                var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+                var json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
                 var jObject = JObject.Parse(json);
 
                 var table = ((JArray)jObject["table"]!)[0]["data"]!["table"];
@@ -350,7 +336,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     
     public async Task<List<Team>> GetAllFootballTeams()
     {
-        return await cache.GetViaCache(TimeSpan.FromDays(1), "footballTeams", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), "allFootballTeams", async () =>
         {
             var allTeams = new List<Team>();
             var allLeagues = await GetAllFootballLeagues();
@@ -373,12 +359,11 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
     public async Task<List<League>> GetAllFootballLeagues()
     {
-        return await cache.GetViaCache(TimeSpan.FromDays(1), "footballLeagues", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), "allFootballLeagues", async () =>
         {
-            var client = new HttpClient();
-            var response = await client.GetAsync("https://www.fotmob.com/api/allLeagues");
+            var json = await cache.GetByUri(TimeSpan.FromDays(1),
+                new Uri("https://www.fotmob.com/api/allLeagues"));
 
-            var json = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(json);
 
             var international = (JArray)jObject["international"]!;
