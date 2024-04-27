@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MPM_Betting.Blazor;
 using MPM_Betting.Blazor.Components;
+using MPM_Betting.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Default
+// Blazor
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -23,17 +24,17 @@ builder.Services.AddAuthentication(options =>
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
-    .AddIdentityCookies(); // Tell it to use cookies for auth
+    .AddIdentityCookies();
 
-// Hosting
+// Application Services
 
 builder.AddServiceDefaults();
 builder.AddMpmDbContext();
+builder.AddMpmCache();
+builder.AddMpmAuth();
+builder.AddFootballApi();
 
-builder.AddRedisOutputCache("redis");
-
-
-// Our own services
+// Api clients
 
 builder.Services.AddHttpClient<WeatherApiClient>(client => client.BaseAddress = new("http://api"));
 

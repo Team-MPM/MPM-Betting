@@ -1,16 +1,21 @@
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
+using MPM_Betting.Services;
 using MPM_Betting.Services.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
-builder.AddMpmDbContext();
-builder.AddRedisDistributedCache("redis");
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMemoryCache();
+
+builder.AddServiceDefaults();
+builder.AddMpmDbContext();
+builder.AddMpmCache();
+builder.AddMpmAuth();
+builder.AddFootballApi();
+
+
+
 
 var app = builder.Build();
 

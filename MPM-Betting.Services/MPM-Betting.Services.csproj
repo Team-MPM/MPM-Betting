@@ -16,6 +16,8 @@
       <PackageReference Include="Aspire.Microsoft.Data.SqlClient" Version="9.0.0-preview.3.24210.17" />
       <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0-preview.3.24210.17" />
       <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-preview.3.24210.17" />
+      <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0-preview.3.24210.17" />
+      <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="8.0.0-preview.6.24214.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0-preview.3.24172.13" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.0-preview.3.24172.13" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.0-preview.3.24172.13" />
