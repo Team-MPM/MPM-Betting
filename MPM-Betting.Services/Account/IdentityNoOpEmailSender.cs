@@ -6,7 +6,7 @@ namespace MPM_Betting.Services.Account;
 
 public sealed class IdentityNoOpEmailSender : IEmailSender<MpmUser>
 {
-    private readonly IEmailSender m_EmailSender = new NoOpEmailSender(); // TODO
+    private readonly IEmailSender m_EmailSender = new NoOpEmailSender();
 
     public Task SendConfirmationLinkAsync(MpmUser user, string email, string confirmationLink) =>
         m_EmailSender.SendEmailAsync(email, "Confirm your email", $"Please confirm your account by <a href='{confirmationLink}'>clicking here</a>.");

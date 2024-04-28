@@ -72,7 +72,7 @@ public static class Extensions
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
-        builder.Services.AddSingleton<IEmailSender<MpmUser>, IdentityNoOpEmailSender>();
+        builder.Services.AddSingleton<IEmailSender<MpmUser>, IdentityEmailSender>();
 
         return builder;
     }

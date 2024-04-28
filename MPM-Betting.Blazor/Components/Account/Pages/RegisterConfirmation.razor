@@ -55,16 +55,15 @@ else
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             m_StatusMessage = "Error finding user for unspecified email";
         }
-        else if (EmailSender is IdentityNoOpEmailSender)
-        {
-            // TODO: Once you add a real email sender, you should remove this code that lets you confirm the account
-            var userId = await UserManager.GetUserIdAsync(user);
-            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            m_EmailConfirmationLink = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-        }
+        // else if (EmailSender is IdentityNoOpEmailSender)
+        // {
+        //     var userId = await UserManager.GetUserIdAsync(user);
+        //     var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        //     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        //     m_EmailConfirmationLink = NavigationManager.GetUriWithQueryParameters(
+        //         NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+        //         new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+        // }
     }
 
 }

@@ -44,6 +44,7 @@ app.MapGet("/testMail", async (SmtpClient smtpClient, string email) =>
     using var message = new MailMessage("no-reply@mpm-betting.at", email);
     message.Subject = "Take this email and wear it with proud";
     message.Body = "some data, <h1>HTML works?</h1><h2>Who knows</h2>";
+    message.IsBodyHtml = true;
     await smtpClient.SendMailAsync(message);
 });
 
