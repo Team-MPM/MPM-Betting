@@ -18,7 +18,7 @@ public class MpmCache(IMemoryCache memoryCache, IDistributedCache distributedCac
         var value = await generator.Invoke();
 
         var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(expiration);
+            .SetAbsoluteExpiration(expiration);
 
         memoryCache.Set(cacheKey, value, cacheEntryOptions);
 
@@ -35,7 +35,7 @@ public class MpmCache(IMemoryCache memoryCache, IDistributedCache distributedCac
         var value = generator.Invoke();
 
         var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(expiration);
+            .SetAbsoluteExpiration(expiration);
 
         memoryCache.Set(cacheKey, value, cacheEntryOptions);
 

@@ -1,7 +1,9 @@
+using System.Net.Mail;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MPM_Betting.DataModel;
@@ -73,7 +75,19 @@ public static class Extensions
         builder.Services.AddSingleton<IEmailSender<MpmUser>, IdentityNoOpEmailSender>();
 
         return builder;
-    } 
+    }
+
+    public static WebApplicationBuilder AddMpmMail(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<SmtpClient>((sp) =>
+        {
+            var smtpUri = new Uri(builder.Configuration.GetConnectionString("maildev")!);
+            var smtpClient = new SmtpClient(smtpUri.Host, smtpUri.Port);
+            return smtpClient;
+        });
+
+        return builder;
+    }
     
     public static WebApplication MapFootballEndpoints(this WebApplication app)
     {

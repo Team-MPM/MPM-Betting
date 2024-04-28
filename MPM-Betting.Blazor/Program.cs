@@ -32,6 +32,7 @@ builder.AddServiceDefaults();
 builder.AddMpmDbContext();
 builder.AddMpmCache();
 builder.AddMpmAuth();
+builder.AddMpmMail();
 builder.AddFootballApi();
 
 // Api clients
