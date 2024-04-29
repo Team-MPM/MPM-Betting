@@ -2,3 +2,4 @@
 bin/
 int/
 obj/
+.azure/

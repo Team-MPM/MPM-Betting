@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>MPM_Betting.UnitTests</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -17,7 +17,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0-release-24177-07" />
         <PackageReference Include="NUnit" Version="4.1.0" />
-        <PackageReference Include="NUnit.Analyzers" Version="4.1.0">
+        <PackageReference Include="NUnit.Analyzers" Version="4.2.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

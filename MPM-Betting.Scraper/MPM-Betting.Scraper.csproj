@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>MPM_Betting.Scraper</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Selenium.WebDriver" Version="4.18.1" />
+      <PackageReference Include="Selenium.WebDriver" Version="4.20.0" />
     </ItemGroup>
 
 </Project>

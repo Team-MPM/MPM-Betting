@@ -6,9 +6,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 if (!builder.ExecutionContext.IsPublishMode)
 {
     var azurite = builder.AddContainer("azurite", "mcr.microsoft.com/azure-storage/azurite")
-        .WithEndpoint(containerPort: 10000, name: "blob", hostPort: 11000)
-        .WithEndpoint(containerPort: 10001, name: "queue", hostPort: 11001)
-        .WithEndpoint(containerPort: 10002, name: "table", hostPort: 11002);
+        .WithEndpoint(port: 10000, name: "blob", targetPort: 11000)
+        .WithEndpoint(port: 10001, name: "queue", targetPort: 11001)
+        .WithEndpoint(port: 10002, name: "table", targetPort: 11002);
 
     var queueConnStrCallback = () =>  $"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint={azurite.GetEndpoint("queue").Url.Replace("tcp", "http")}/devstoreaccount1;";
 
@@ -24,11 +24,11 @@ if (!builder.ExecutionContext.IsPublishMode)
 var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana")
     .WithBindMount(GetFullPath("../grafana/dashboards"), "/var/lib/grafana/dashboards")
-    .WithEndpoint(containerPort: 3000, hostPort: 3000, name: "grafana-http", scheme: "http");
+    .WithEndpoint(port: 3000, targetPort: 3000, name: "grafana-http", scheme: "http");
 
 var prometheus = builder.AddContainer("prometheus", "prom/prometheus")
     .WithBindMount(GetFullPath("../prometheus"), "/etc/prometheus")
-    .WithEndpoint(containerPort: 9090, hostPort: 9090);
+    .WithEndpoint(port: 9090, targetPort: 9090);
 
 var redis = builder.AddRedis("redis")
     .WithPersistence()
