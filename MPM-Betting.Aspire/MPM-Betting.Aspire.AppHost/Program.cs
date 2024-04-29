@@ -51,7 +51,7 @@ if (builder.ExecutionContext.IsPublishMode)
 }
 else
 {
-    var mailDev = builder.AddMailDev("maildev");
+    var mailDev = builder.AddMailDev("maildev", 9324, 9325);
     
     var api = builder.AddProjectWithDotnetWatch<MPM_Betting_Api>("api")
         .WithReference(sql)
