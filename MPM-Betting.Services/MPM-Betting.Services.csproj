@@ -5,16 +5,25 @@
         <RootNamespace>MPM_Betting.Services</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-    </PropertyGroup>
+      <UserSecretsId>55313bcf-43ae-469d-b3ac-c6487a555836</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Aspire.Microsoft.Data.SqlClient" Version="9.0.0-preview.3.24210.17" />
+      <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0-preview.3.24210.17" />
+      <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-preview.3.24210.17" />
+      <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0-preview.3.24210.17" />
+      <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="8.0.0-preview.6.24214.1" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0-preview.3.24172.13" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.0-preview.3.24172.13" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.0-preview.3.24172.13" />
       <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0-preview.3.24172.13" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="PostSharp" Version="2024.1.2-rc" />
     </ItemGroup>
 
 </Project>

@@ -6,7 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>MPM-Betting.Blazor</RootNamespace>
         <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
-    </PropertyGroup>
+      <UserSecretsId>1566db45-78a9-4c41-9c4a-0204e6d259c8</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\MPM-Betting.Aspire\MPM-Betting.Aspire.ServiceDefaults\MPM-Betting.Aspire.ServiceDefaults.csproj" />
@@ -16,7 +17,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-preview.3.24210.17" />
       <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0-preview.3.24210.17" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0-preview.3.24172.4" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-preview.3" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="9.0.0-preview.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\js\" />
     </ItemGroup>
 
 </Project>

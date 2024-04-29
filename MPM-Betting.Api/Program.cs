@@ -1,16 +1,23 @@
+using System.Net.Mail;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
+using MPM_Betting.Services;
 using MPM_Betting.Services.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
-builder.AddMpmDbContext();
-builder.AddRedisDistributedCache("redis");
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMemoryCache();
+
+builder.AddServiceDefaults();
+builder.AddMpmDbContext();
+builder.AddMpmCache();
+builder.AddMpmAuth();
+builder.AddMpmMail();
+builder.AddFootballApi();
+
+
+
 
 var app = builder.Build();
 
@@ -31,6 +38,15 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
+
+app.MapGet("/testMail", async (SmtpClient smtpClient, string email) =>
+{
+    using var message = new MailMessage("no-reply@mpm-betting.at", email);
+    message.Subject = "Take this email and wear it with proud";
+    message.Body = "some data, <h1>HTML works?</h1><h2>Who knows</h2>";
+    message.IsBodyHtml = true;
+    await smtpClient.SendMailAsync(message);
+});
 
 app.MapGet("/weatherforecast", () =>
     {

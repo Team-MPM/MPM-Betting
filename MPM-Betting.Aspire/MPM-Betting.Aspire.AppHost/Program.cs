@@ -34,8 +34,8 @@ var redis = builder.AddRedis("redis")
     .WithPersistence()
     .WithDataVolume();
 
-var sql = builder.AddSqlServer("sql")
-    .WithDataVolume()
+var sql = builder.AddPostgres("sql", password: builder.CreateStablePassword("MPM-Betting-Password"))
+    //.WithDataVolume() // note gabriel: me too scared to touch for now....
     .AddDatabase("MPM-Betting");
 
 if (builder.ExecutionContext.IsPublishMode)
@@ -51,15 +51,22 @@ if (builder.ExecutionContext.IsPublishMode)
 }
 else
 {
+    var mailDev = builder.AddMailDev("maildev");
+    
     var api = builder.AddProjectWithDotnetWatch<MPM_Betting_Api>("api")
         .WithReference(sql)
-        .WithReference(redis);
+        .WithReference(redis)
+        .WithReference(mailDev);
     
     var blazor = builder.AddProjectWithDotnetWatch<MPM_Betting_Blazor>("blazor")
         .WithEnvironment("services__api__http__0", "http://localhost:5241")
         .WithReference(redis)
-        .WithReference(sql);
+        .WithReference(sql)
+        .WithReference(mailDev);
 }
+
+var dbManager = builder.AddProject<MPM_Betting_DbManager>("dbmanager")
+    .WithReference(sql);
 
 
 builder.Build().Run();
