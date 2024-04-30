@@ -9,13 +9,6 @@ param environmentName string
 @description('The location used for all deployed resources')
 param location string
 
-@metadata({azd: {
-  type: 'generate'
-  config: {length:22}
-  }
-})
-@secure()
-param MPM_Betting_Password string
 
 var tags = {
   'azd-env-name': environmentName
@@ -33,10 +26,18 @@ module resources 'resources.bicep' = {
   params: {
     location: location
     tags: tags
-    MPM_Betting_Password: MPM_Betting_Password
   }
 }
 
+module sql 'sql/sql.module.bicep' = {
+  name: 'sql'
+  scope: rg
+  params: {
+    location: location
+    principalId: resources.outputs.MANAGED_IDENTITY_PRINCIPAL_ID
+    principalName: resources.outputs.MANAGED_IDENTITY_NAME
+  }
+}
 output MANAGED_IDENTITY_CLIENT_ID string = resources.outputs.MANAGED_IDENTITY_CLIENT_ID
 output MANAGED_IDENTITY_NAME string = resources.outputs.MANAGED_IDENTITY_NAME
 output AZURE_LOG_ANALYTICS_WORKSPACE_NAME string = resources.outputs.AZURE_LOG_ANALYTICS_WORKSPACE_NAME
@@ -44,3 +45,5 @@ output AZURE_CONTAINER_REGISTRY_ENDPOINT string = resources.outputs.AZURE_CONTAI
 output AZURE_CONTAINER_REGISTRY_MANAGED_IDENTITY_ID string = resources.outputs.AZURE_CONTAINER_REGISTRY_MANAGED_IDENTITY_ID
 output AZURE_CONTAINER_APPS_ENVIRONMENT_ID string = resources.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_ID
 output AZURE_CONTAINER_APPS_ENVIRONMENT_DEFAULT_DOMAIN string = resources.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_DEFAULT_DOMAIN
+
+output SQL_SQLSERVERFQDN string = sql.outputs.sqlServerFqdn

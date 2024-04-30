@@ -14,28 +14,28 @@ properties:
       transport: http
       allowInsecure: true
     registries:
-    - server: {{ .Env.AZURE_CONTAINER_REGISTRY_ENDPOINT }}
-      identity: {{ .Env.AZURE_CONTAINER_REGISTRY_MANAGED_IDENTITY_ID }}
+      - server: {{ .Env.AZURE_CONTAINER_REGISTRY_ENDPOINT }}
+        identity: {{ .Env.AZURE_CONTAINER_REGISTRY_MANAGED_IDENTITY_ID }}
     secrets:
       - name: connectionstrings--mpm-betting
-        value: Host=sql;Port=5432;Username=postgres;Password={{ securedParameter "MPM_Betting_Password" }};Database=MPM-Betting
+        value: Server=tcp:{{ .Env.SQL_SQLSERVERFQDN }},1433;Encrypt=True;Authentication="Active Directory Default";Database=MPM-Betting
   template:
     containers:
-    - image: {{ .Image }}
-      name: dbmanager
-      env:
-      - name: AZURE_CLIENT_ID
-        value: {{ .Env.MANAGED_IDENTITY_CLIENT_ID }}
-      - name: ASPNETCORE_FORWARDEDHEADERS_ENABLED
-        value: "true"
-      - name: OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES
-        value: "true"
-      - name: OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES
-        value: "true"
-      - name: OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY
-        value: in_memory
-      - name: ConnectionStrings__MPM-Betting
-        secretRef: connectionstrings--mpm-betting
+      - image: {{ .Image }}
+        name: dbmanager
+        env:
+          - name: AZURE_CLIENT_ID
+            value: {{ .Env.MANAGED_IDENTITY_CLIENT_ID }}
+          - name: ASPNETCORE_FORWARDEDHEADERS_ENABLED
+            value: "true"
+          - name: OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES
+            value: "true"
+          - name: OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES
+            value: "true"
+          - name: OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY
+            value: in_memory
+          - name: ConnectionStrings__MPM-Betting
+            secretRef: connectionstrings--mpm-betting
     scale:
       minReplicas: 1
 tags:

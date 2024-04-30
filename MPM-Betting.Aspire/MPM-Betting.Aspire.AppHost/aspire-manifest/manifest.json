@@ -69,22 +69,12 @@
       }
     },
     "sql": {
-      "type": "container.v0",
-      "connectionString": "Host={sql.bindings.tcp.host};Port={sql.bindings.tcp.port};Username=postgres;Password={MPM-Betting-Password.value}",
-      "image": "docker.io/library/postgres:16.2",
-      "env": {
-        "POSTGRES_HOST_AUTH_METHOD": "scram-sha-256",
-        "POSTGRES_INITDB_ARGS": "--auth-host=scram-sha-256 --auth-local=scram-sha-256",
-        "POSTGRES_USER": "postgres",
-        "POSTGRES_PASSWORD": "{MPM-Betting-Password.value}"
-      },
-      "bindings": {
-        "tcp": {
-          "scheme": "tcp",
-          "protocol": "tcp",
-          "transport": "tcp",
-          "targetPort": 5432
-        }
+      "type": "azure.bicep.v0",
+      "connectionString": "Server=tcp:{sql.outputs.sqlServerFqdn},1433;Encrypt=True;Authentication=\u0022Active Directory Default\u0022",
+      "path": "sql.module.bicep",
+      "params": {
+        "principalId": "",
+        "principalName": ""
       }
     },
     "MPM-Betting": {
@@ -161,21 +151,6 @@
           "scheme": "https",
           "protocol": "tcp",
           "transport": "http"
-        }
-      }
-    },
-    "MPM-Betting-Password": {
-      "type": "parameter.v0",
-      "value": "{MPM-Betting-Password.inputs.value}",
-      "inputs": {
-        "value": {
-          "type": "string",
-          "secret": true,
-          "default": {
-            "generate": {
-              "minLength": 22
-            }
-          }
         }
       }
     }

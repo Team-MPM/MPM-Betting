@@ -5,8 +5,6 @@ param location string = resourceGroup().location
 param tags object = {}
 
 var resourceToken = uniqueString(resourceGroup().id)
-@secure()
-param MPM_Betting_Password string
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: 'mi-${resourceToken}'
@@ -77,6 +75,10 @@ resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' 
   name: 'cae-${resourceToken}'
   location: location
   properties: {
+    workloadProfiles: [{
+      workloadProfileType: 'Consumption'
+      name: 'consumption'
+    }]
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -198,58 +200,6 @@ resource redis 'Microsoft.App/containerApps@2023-05-02-preview' = {
     }
   }
   tags: union(tags, {'aspire-resource-name': 'redis'})
-}
-
-resource sql 'Microsoft.App/containerApps@2023-05-02-preview' = {
-  name: 'sql'
-  location: location
-  properties: {
-    environmentId: containerAppEnvironment.id
-    configuration: {
-      activeRevisionsMode: 'Single'
-      ingress: {
-        external: false
-        targetPort: 5432
-        transport: 'tcp'
-      }
-      secrets: [
-        {
-          name: 'postgres-password'
-          value: MPM_Betting_Password
-        }
-      ]
-    }
-    template: {
-      containers: [
-        {
-          image: 'docker.io/library/postgres:16.2'
-          name: 'sql'
-          env: [
-            {
-              name: 'POSTGRES_HOST_AUTH_METHOD'
-              value: 'scram-sha-256'
-            }
-            {
-              name: 'POSTGRES_INITDB_ARGS'
-              value: '--auth-host=scram-sha-256 --auth-local=scram-sha-256'
-            }
-            {
-              name: 'POSTGRES_USER'
-              value: 'postgres'
-            }
-            {
-              name: 'POSTGRES_PASSWORD'
-              secretRef: 'postgres-password'
-            }
-          ]
-        }
-      ]
-      scale: {
-        minReplicas: 1
-      }
-    }
-  }
-  tags: union(tags, {'aspire-resource-name': 'sql'})
 }
 
 output MANAGED_IDENTITY_CLIENT_ID string = managedIdentity.properties.clientId

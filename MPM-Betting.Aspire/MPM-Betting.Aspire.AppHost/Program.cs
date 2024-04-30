@@ -42,10 +42,12 @@ var sql = builder.AddSqlServer("sql", password: builder.CreateStablePassword("MP
 if (builder.ExecutionContext.IsPublishMode)
 {
     var api = builder.AddProject<MPM_Betting_Api>("api")
+        .WithExternalHttpEndpoints()
         .WithReference(sql)
         .WithReference(redis);
 
     var blazor = builder.AddProject<MPM_Betting_Blazor>("blazor")
+        .WithExternalHttpEndpoints()
         .WithReference(api)
         .WithReference(redis)
         .WithReference(sql);
