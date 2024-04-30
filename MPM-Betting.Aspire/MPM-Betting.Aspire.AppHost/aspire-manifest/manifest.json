@@ -20,7 +20,7 @@
           "scheme": "http",
           "protocol": "tcp",
           "transport": "http",
-          "containerPort": 3000
+          "targetPort": 3000
         }
       }
     },
@@ -35,49 +35,46 @@
         }
       ],
       "bindings": {
-        "prometheus-http": {
+        "tcp": {
           "scheme": "tcp",
           "protocol": "tcp",
           "transport": "tcp",
-          "containerPort": 9090
+          "targetPort": 9090
         }
       }
     },
     "redis": {
       "type": "container.v0",
       "connectionString": "{redis.bindings.tcp.host}:{redis.bindings.tcp.port}",
-      "image": "redis:7.2.4",
+      "image": "docker.io/library/redis:7.2.4",
+      "args": [
+        "--save",
+        "60",
+        "1"
+      ],
+      "volumes": [
+        {
+          "name": "MPM-Betting.Aspire.AppHost-redis-data",
+          "target": "/data",
+          "readOnly": false
+        }
+      ],
       "bindings": {
         "tcp": {
           "scheme": "tcp",
           "protocol": "tcp",
           "transport": "tcp",
-          "containerPort": 6379
+          "targetPort": 6379
         }
       }
     },
     "sql": {
-      "type": "container.v0",
-      "connectionString": "Server={sql.bindings.tcp.host},{sql.bindings.tcp.port};User ID=sa;Password={sql-password.value};TrustServerCertificate=true",
-      "image": "mcr.microsoft.com/mssql/server:2022-latest",
-      "volumes": [
-        {
-          "name": "MPM-Betting.Aspire.AppHost-sql-data",
-          "target": "/var/opt/mssql",
-          "readOnly": false
-        }
-      ],
-      "env": {
-        "ACCEPT_EULA": "Y",
-        "MSSQL_SA_PASSWORD": "{sql-password.value}"
-      },
-      "bindings": {
-        "tcp": {
-          "scheme": "tcp",
-          "protocol": "tcp",
-          "transport": "tcp",
-          "containerPort": 1433
-        }
+      "type": "azure.bicep.v0",
+      "connectionString": "Server=tcp:{sql.outputs.sqlServerFqdn},1433;Encrypt=True;Authentication=\u0022Active Directory Default\u0022",
+      "path": "sql.module.bicep",
+      "params": {
+        "principalId": "",
+        "principalName": ""
       }
     },
     "MPM-Betting": {
@@ -90,6 +87,7 @@
       "env": {
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
         "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
         "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}",
         "ConnectionStrings__redis": "{redis.connectionString}"
@@ -113,6 +111,7 @@
       "env": {
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
         "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
         "services__api__http__0": "{api.bindings.http.url}",
         "services__api__https__0": "{api.bindings.https.url}",
@@ -132,21 +131,26 @@
         }
       }
     },
-    "sql-password": {
-      "type": "parameter.v0",
-      "value": "{sql-password.inputs.value}",
-      "inputs": {
-        "value": {
-          "type": "string",
-          "secret": true,
-          "default": {
-            "generate": {
-              "minLength": 22,
-              "minLower": 1,
-              "minUpper": 1,
-              "minNumeric": 1
-            }
-          }
+    "dbmanager": {
+      "type": "project.v0",
+      "path": "../../../MPM-Betting.DbManager/MPM-Betting.DbManager.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
         }
       }
     }

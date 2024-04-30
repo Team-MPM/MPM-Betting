@@ -28,7 +28,7 @@ public static class MailDevResourceBuilderExtensions
             .WithImage(MailDevContainerImageTags.Image)
             .WithImageRegistry(MailDevContainerImageTags.Registry)
             .WithImageTag(MailDevContainerImageTags.Tag)
-            .WithHttpEndpoint(1080, httpPort, name: "http")
-            .WithEndpoint(1025, smtpPort, name: "smtp");
+            .WithHttpEndpoint(httpPort, 1080, name: "http")
+            .WithEndpoint(smtpPort, 1025, name: "smtp");
     }
 }

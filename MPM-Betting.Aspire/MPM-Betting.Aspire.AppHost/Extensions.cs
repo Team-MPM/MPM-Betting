@@ -100,7 +100,7 @@ public static class Extensions
         var configurationKey = $"Parameters:{name}";
         return configuration[configurationKey]
             ?? parameterDefault?.GetDefaultValue()
-            ?? throw new DistributedApplicationException($"Parameter resource could not be used because configuration key '{configurationKey}' is missing and the Parameter has no default value."); ;
+            ?? throw new DistributedApplicationException($"Parameter resource could not be used because configuration key '{configurationKey}' is missing and the Parameter has no default value.");
     }
 
     private class UserSecretsParameterDefault(string applicationName, string parameterName, ParameterDefault parameterDefault) : ParameterDefault
@@ -117,10 +117,13 @@ public static class Extensions
 
         private static bool TrySetUserSecret(string applicationName, string name, string value)
         {
-            if (string.IsNullOrEmpty(applicationName)) return false;
+            if (string.IsNullOrEmpty(applicationName)) 
+                return false;
+            
             var appAssembly = Assembly.Load(new AssemblyName(applicationName));
-            if (appAssembly is null || appAssembly.GetCustomAttribute<UserSecretsIdAttribute>()?.UserSecretsId is not
-                    { } userSecretsId) return false;
+            if (appAssembly?.GetCustomAttribute<UserSecretsIdAttribute>()?.UserSecretsId is not { } userSecretsId) 
+                return false;
+            
             // Save the value to the secret store
             try
             {
@@ -135,13 +138,16 @@ public static class Extensions
                 setUserSecrets?.WaitForExit(TimeSpan.FromSeconds(10));
                 return setUserSecrets?.ExitCode == 0;
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                // ignored
+            }
 
             return false;
         }
     }
 
-    private class ResourceBuilder
+    private static class ResourceBuilder
     {
         public static IResourceBuilder<T> Create<T>(T resource, IDistributedApplicationBuilder distributedApplicationBuilder) where T : IResource
         {

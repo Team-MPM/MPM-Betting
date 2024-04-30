@@ -33,7 +33,7 @@ public static class Extensions
     
     public static IHostApplicationBuilder AddMpmDbContext(this IHostApplicationBuilder builder)
     {
-        builder.AddNpgsqlDbContext<MpmDbContext>("MPM-Betting");
+        builder.AddSqlServerDbContext<MpmDbContext>("MPM-Betting");
         
         builder.Services.AddDataProtection()
             .SetApplicationName("Mpm-Betting");
