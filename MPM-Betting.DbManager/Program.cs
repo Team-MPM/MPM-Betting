@@ -5,9 +5,9 @@ using MPM_Betting.DbManager;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-builder.AddNpgsqlDbContext<MpmDbContext>("MPM-Betting", null,
-    optionsBuilder => optionsBuilder.UseNpgsql(npgsqlBuilder =>
-        npgsqlBuilder.MigrationsAssembly(typeof(Program).Assembly.GetName().Name)));
+builder.AddSqlServerDbContext<MpmDbContext>("MPM-Betting", null,
+    optionsBuilder => optionsBuilder.UseSqlServer(sqlBuilder =>
+        sqlBuilder.MigrationsAssembly(typeof(Program).Assembly.GetName().Name)));
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(tracing => tracing.AddSource(DbInitializer.ActivitySourceName));

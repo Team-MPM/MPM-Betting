@@ -34,8 +34,9 @@ var redis = builder.AddRedis("redis")
     .WithPersistence()
     .WithDataVolume();
 
-var sql = builder.AddPostgres("sql", password: builder.CreateStablePassword("MPM-Betting-Password"))
-    //.WithDataVolume() // note gabriel: me too scared to touch for now....
+var sql = builder.AddSqlServer("sql", password: builder.CreateStablePassword("MPM-Betting-Password"))
+    .WithDataVolume()
+    .PublishAsAzureSqlDatabase()
     .AddDatabase("MPM-Betting");
 
 if (builder.ExecutionContext.IsPublishMode)
