@@ -1,26 +1,30 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsAspireHost>true</IsAspireHost>
-    </PropertyGroup>
+      <UserSecretsId>09ac8703-e432-460f-8352-32adaac9cef0</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0-preview.3.24210.17" />
-        <PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0-preview.3.24210.17" />
-        <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.0.0-preview.3.24210.17" />
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.0-preview.6.24214.1" />
+        <PackageReference Include="Aspire.Hosting.Azure.Sql" Version="8.0.0-preview.6.24214.1" />
+        <PackageReference Include="Aspire.Hosting.Redis" Version="8.0.0-preview.6.24214.1" />
+        <PackageReference Include="Aspire.Hosting.SqlServer" Version="8.0.0-preview.6.24214.1" />
+        <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-preview.6.24214.1" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
-        <PackageReference Include="KubernetesClient" Version="13.0.26" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-preview.3.24172.9" />
+        <PackageReference Include="KubernetesClient" Version="13.0.37" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="Polly" Version="8.3.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\MPM-Betting.Api\MPM-Betting.Api.csproj" />
       <ProjectReference Include="..\..\MPM-Betting.Blazor\MPM-Betting.Blazor.csproj" />
+      <ProjectReference Include="..\..\MPM-Betting.DbManager\MPM-Betting.DbManager.csproj" />
       <ProjectReference Include="..\..\MPM-Betting.Functions\MPM-Betting.Functions.csproj" />
     </ItemGroup>
 

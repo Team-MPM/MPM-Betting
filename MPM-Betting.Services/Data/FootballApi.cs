@@ -2,49 +2,214 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace MPM_Betting.Services.Data;
 
-public static class FootballApi
+public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 {
-    record League(string Name, string Country, int Id);
-    record Team(int Id, string Name);
-    record Player(string Name, string Position, int Id);
-    record LeagueTable(League League, List<LeagueTableEntry> Table, string Season, List<string> Seasons); //TODO: add ongoing, last 5 and promotion/relegation
-    record LeagueTableEntry(Team Team, int Rank, int Played, int Won, int Drawn, int Lost, int GoalsFor, int GoalsAgainst, int Points);
-    
-    public static WebApplication MapFootballEndpoints(this WebApplication app)
+    public record League(string Name, string Country, int Id);
+    public record Team(int Id, string Name);
+    public record Player(string Name, string Position, int Id);
+    public record LeagueTable(League League, List<LeagueTableEntry> Table, string Season, List<string> Seasons); //TODO: add ongoing, last 5 and promotion/relegation
+    public record LeagueTableEntry(Team Team, int Rank, int Played, int Won, int Drawn, int Lost, int GoalsFor, int GoalsAgainst, int Points);
+    public record struct ScoreEntry(Team HomeTeam, Team AwayTeam, int HomeScore, int AwayScore, GameState State);
+    public record GameEntry(int Id, ScoreEntry Score, DateTime StartTime, string? Time);
+
+    public enum GameState
     {
-        // TODO: separate leagues and cups
-        app.MapGet("/football/leagues", async (IDistributedCache cache) => await GetAllFootballLeagues(cache))
-            .WithName("GetAllFootballLeagues")
-            .WithOpenApi();
-        
-        app.MapGet("/football/teams", async (IDistributedCache cache, [FromQuery] int? league) => league is null ? await GetAllFootballTeams(cache) : await GetTeamsFromLeague(cache, league.Value))
-            .WithName("GetAllFootballTeams")
-            .WithOpenApi();
-        
-        app.MapGet("/football/players", async (IDistributedCache cache, [FromQuery] int? team) => team is null ? await GetAllFootballPlayers(cache) : await GetPlayersFromTeam(cache, team.Value))
-            .WithName("GetAllFootballPlayers")
-            .WithOpenApi();
-        
-        app.MapGet("/football/table", async (IDistributedCache cache, [FromQuery] int league, [FromQuery] string? season) => await GetLeagueTable(cache, league, season))
-            .WithName("GetTable")
-            .WithOpenApi();
-        
-        return app;
+        None = 0,
+        Cancelled,
+        FirstHalf,
+        HalfTimeBreak,
+        SecondHalf,
+        EndedAfterSecondHalf,
+        BreakAfterSecondHalf,
+        FirstOvertime,
+        OvertimeBreak,
+        SecondOvertime,
+        EndedAfterOverTime,
+        PenaltyShootout,
+        EndedAfterPenaltyShootout
     }
     
-    private static async Task<LeagueTable> GetLeagueTable(IDistributedCache cache, int leagueId, string? season)
+    
+    [Profile]
+    public async Task<List<GameEntry>> GetGameEntries(int leagueId, DateOnly? date)
     {
-        return await Utils.GetViaCache(cache, TimeSpan.FromSeconds(1), $"leagueTable-{leagueId}-{season ?? "latest"}", async () =>
+        return await cache.Get(TimeSpan.FromSeconds(3), $"game-entries-{leagueId}-{date ?? DateOnly.MaxValue}", async () =>
         {
-            var client = new HttpClient();
-            var url = $"https://www.fotmob.com/api/leagues?id={leagueId}";
-            var response = await Utils.GetViaCache(cache, TimeSpan.FromMinutes(1), url,
-                async () => await client.GetAsync(url));
-            var json = await response.Content.ReadAsStringAsync();
+            var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+            var json = await cache.GetByUri(TimeSpan.FromSeconds(1), uri);
+            var jObject = JObject.Parse(json);
+
+            var matches = jObject["matches"]!;
+            var allMatches = (JArray)matches["allMatches"]!;
+            
+            List<GameEntry> gameEntries = [];
+            
+            foreach (var match in allMatches)
+            {
+                var round = match["round"]!.Value<int>();
+                var matchId = match["id"]!.Value<int>();
+                var home = new Team(match["home"]!["id"]!.Value<int>(), match["home"]!["name"]!.Value<string>()!);
+                var away = new Team(match["away"]!["id"]!.Value<int>(), match["away"]!["name"]!.Value<string>()!);
+                var status = match["status"]!;
+                var utcTime = status["utcTime"]!.Value<DateTime>();
+                var finished = status["finished"]!.Value<bool>();
+                var started = status["started"]!.Value<bool>();
+                var cancelled = status["cancelled"]!.Value<bool>();
+                var scoreStr = status["scoreStr"]?.Value<string>();
+                var scores = scoreStr is not null ? scoreStr.Split('-').Select(s => int.Parse(s.Trim())).ToArray() : [0, 0];
+                var homeScore = scores[0];
+                var awayScore = scores[1];
+                var reason = status["reason"]?["short"]?.Value<string>();
+                var live = status["liveTime"];
+                var maxTime = live?["maxTime"]?.Value<int>() ?? 0;
+                var addedTime = live?["addedTime"]?.Value<int>() ?? 0;
+                var currentTime = live?["long"]?.Value<string>();
+                var currentTimeShort = live?["short"]?.Value<string>();
+                var state = GameState.None;
+                state = maxTime switch
+                {
+                    45 => GameState.FirstHalf,
+                    90 => GameState.SecondHalf,
+                    105 => GameState.FirstOvertime,
+                    120 => GameState.SecondOvertime,
+                    _ => state
+                };
+                state = currentTimeShort switch
+                {
+                    "HT" => GameState.HalfTimeBreak,
+                    _ => state
+                };
+                state = reason switch
+                {
+                    "FT" => GameState.EndedAfterSecondHalf,
+                    _ => state
+                };
+                state = cancelled switch
+                {
+                    true => GameState.Cancelled,
+                    false => state
+                };
+                
+                gameEntries.Add(new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state), utcTime, currentTime));
+            }
+            
+            
+            //finished
+            // {
+            //     "round": "1",
+            //     "roundName": 1,
+            //     "pageUrl": "/matches/burnley-vs-manchester-city/2ai7j8#4193450",
+            //     "id": "4193450",
+            //     "home": {
+            //         "name": "Burnley",
+            //         "shortName": "Burnley",
+            //         "id": "8191"
+            //     },
+            //     "away": {
+            //         "name": "Manchester City",
+            //         "shortName": "Man City",
+            //         "id": "8456"
+            //     },
+            //     "status": {
+            //         "utcTime": "2023-08-11T19:00:00Z",
+            //         "finished": true,
+            //         "started": true,
+            //         "cancelled": false,
+            //         "scoreStr": "0 - 3",
+            //         "reason": {
+            //             "short": "FT",
+            //             "shortKey": "fulltime_short",
+            //             "long": "Full-Time",
+            //             "longKey": "finished"
+            //         }
+            //     }
+            // },
+            
+            //running
+            // {
+            //     "round": "33",
+            //     "roundName": 33,
+            //     "pageUrl": "/matches/persita-vs-persis-solo/3klkl3z6#4184143",
+            //     "id": "4184143",
+            //     "home": {
+            //         "name": "Persis Solo",
+            //         "shortName": "Persis Solo",
+            //         "id": "583034"
+            //     },
+            //     "away": {
+            //         "name": "Persita",
+            //         "shortName": "Persita",
+            //         "id": "165206"
+            //     },
+            //     "status": {
+            //         "utcTime": "2024-04-26T08:00:00.000Z",
+            //         "finished": false,
+            //         "started": true,
+            //         "cancelled": false,
+            //         "ongoing": true,
+            //         "scoreStr": "0 - 1",
+            //         "liveTime": {
+            //             "short": "28’",
+            //             "shortKey": "",
+            //             "long": "27:02",
+            //             "longKey": "",
+            //             "maxTime": 45,
+            //             "addedTime": 0
+            //         }
+            //     }
+            // },
+            
+            //not started
+            // {
+            //     "round": "33",
+            //     "roundName": 33,
+            //     "pageUrl": "/matches/persija-jakarta-vs-rans-nusantara/a9fy1lqf#4184152",
+            //     "id": "4184152",
+            //     "home": {
+            //         "name": "RANS Nusantara",
+            //         "shortName": "RANS Nusantara",
+            //         "id": "1103033"
+            //     },
+            //     "away": {
+            //         "name": "Persija Jakarta",
+            //         "shortName": "Persija Jakarta",
+            //         "id": "165191"
+            //     },
+            //     "status": {
+            //         "utcTime": "2024-04-26T12:00:00Z",
+            //         "started": false,
+            //         "cancelled": false,
+            //         "finished": false
+            //     }
+            // },
+            
+            
+            // half time
+            
+            // "liveTime": {
+            //     "short": "HT",
+            //     "shortKey": "halftime_short",
+            //     "long": "Half-Time",
+            //     "longKey": "pause_match",
+            //     "maxTime": 45,
+            //     "addedTime": 0
+            // }
+            
+            return gameEntries;
+        });
+    }
+    
+    public async Task<LeagueTable> GetLeagueTable(int leagueId, string? season)
+    {
+        return await cache.Get(TimeSpan.FromSeconds(1), $"leagueTable-{leagueId}-{season ?? "latest"}", async () =>
+        {
+            var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+            var json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
             var jObject = JObject.Parse(json);
 
             var details = jObject["details"]!;
@@ -63,10 +228,8 @@ public static class FootballApi
 
             if (season != selectedSeason)
             {
-                url = $"https://www.fotmob.com/api/table?url=https%3A%2F%2Fdata.fotmob.com%2Ftables.ext.{leagueId}.fot&selectedSeason={UrlEncoder.Default.Encode(season)}";
-                response = await Utils.GetViaCache(cache, TimeSpan.FromMinutes(1), url,
-                    async () => await client.GetAsync(url));
-                json = await response.Content.ReadAsStringAsync();
+                uri = new Uri($"https://www.fotmob.com/api/table?url=https%3A%2F%2Fdata.fotmob.com%2Ftables.ext.{leagueId}.fot&selectedSeason={UrlEncoder.Default.Encode(season)}");
+                json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
                 jObject = JObject.Parse(json);
                 data = jObject;
             }
@@ -91,16 +254,16 @@ public static class FootballApi
         });
     }
     
-    private static async Task<List<Player> > GetAllFootballPlayers(IDistributedCache cache)
+    public async Task<List<Player> > GetAllFootballPlayers()
     {
-        return await Utils.GetViaCache(cache, TimeSpan.FromDays(1), $"footballPlayers", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), $"footballPlayers", async () =>
         {
-            var allTeams = await GetAllFootballTeams(cache);
+            var allTeams = await GetAllFootballTeams();
             var allPlayers = new List<Player>();
 
             var tasks = allTeams.Select(async team =>
             {
-                var players = await GetPlayersFromTeam(cache, team.Id);
+                var players = await GetPlayersFromTeam(team.Id);
                 allPlayers.AddRange(players);
             });
 
@@ -110,18 +273,15 @@ public static class FootballApi
         });
     }
     
-    private static async Task<List<Player>> GetPlayersFromTeam(IDistributedCache cache, int teamId)
+    public async Task<List<Player>> GetPlayersFromTeam(int teamId)
     {
-        return await Utils.GetViaCache(cache, TimeSpan.FromDays(1), $"footballPlayers-{teamId}", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), $"footballPlayers-{teamId}", async () =>
         {
             var allPlayers = new List<Player>();
             try
             {
-                var client = new HttpClient();
-                var url = $"https://www.fotmob.com/api/teams?id={teamId}";
-                var response = await Utils.GetViaCache(cache, TimeSpan.FromMinutes(1), url,
-                    async () => await client.GetAsync(url));
-                var json = await response.Content.ReadAsStringAsync();
+                var uri = new Uri($"https://www.fotmob.com/api/teams?id={teamId}");
+                var json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
                 var jObject = JObject.Parse(json);
 
                 var squad = (JArray)jObject["squad"]!;
@@ -144,18 +304,15 @@ public static class FootballApi
         });
     } 
     
-    private static async Task<List<Team>> GetTeamsFromLeague(IDistributedCache cache, int leagueId)
+    public async Task<List<Team>> GetTeamsFromLeague(int leagueId)
     {
-        return await Utils.GetViaCache(cache, TimeSpan.FromDays(1), $"footballTeams-{leagueId}", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), $"footballTeams-{leagueId}", async () =>
         {
             var allTeams = new List<Team>();
             try
             {
-                var client = new HttpClient();
-                var url = $"https://www.fotmob.com/api/leagues?id={leagueId}";
-                var response = await Utils.GetViaCache(cache, TimeSpan.FromMinutes(1), url,
-                    async () => await client.GetAsync(url));
-                var json = await response.Content.ReadAsStringAsync();
+                var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+                var json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
                 var jObject = JObject.Parse(json);
 
                 var table = ((JArray)jObject["table"]!)[0]["data"]!["table"];
@@ -177,12 +334,12 @@ public static class FootballApi
         });
     }
     
-    private static async Task<List<Team>> GetAllFootballTeams(IDistributedCache cache)
+    public async Task<List<Team>> GetAllFootballTeams()
     {
-        return await Utils.GetViaCache(cache, TimeSpan.FromDays(1), "footballTeams", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), "allFootballTeams", async () =>
         {
             var allTeams = new List<Team>();
-            var allLeagues = await GetAllFootballLeagues(cache);
+            var allLeagues = await GetAllFootballLeagues();
 
             var tasks = allLeagues.Select(async leagueEntry =>
             {
@@ -191,7 +348,7 @@ public static class FootballApi
                     return;
                 }
 
-                allTeams.AddRange(await GetTeamsFromLeague(cache, leagueEntry.Id));
+                allTeams.AddRange(await GetTeamsFromLeague(leagueEntry.Id));
             });
             
             await Task.WhenAll(tasks);
@@ -200,14 +357,13 @@ public static class FootballApi
         });
     }
 
-    private static async Task<List<League>> GetAllFootballLeagues(IDistributedCache cache)
+    public async Task<List<League>> GetAllFootballLeagues()
     {
-        return await Utils.GetViaCache(cache, TimeSpan.FromDays(1), "footballLeagues", async () =>
+        return await cache.Get(TimeSpan.FromDays(1), "allFootballLeagues", async () =>
         {
-            var client = new HttpClient();
-            var response = await client.GetAsync("https://www.fotmob.com/api/allLeagues");
+            var json = await cache.GetByUri(TimeSpan.FromDays(1),
+                new Uri("https://www.fotmob.com/api/allLeagues"));
 
-            var json = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(json);
 
             var international = (JArray)jObject["international"]!;
@@ -232,6 +388,5 @@ public static class FootballApi
 
             return allLeagues;
         });
-        
     }
 }

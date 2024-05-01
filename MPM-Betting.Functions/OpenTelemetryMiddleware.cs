@@ -9,7 +9,7 @@ namespace MPM_Betting.Functions;
 
 public class OpenTelemetryMiddleware : IFunctionsWorkerMiddleware
 {
-    private static ActivitySource activitySource = new ActivitySource(
+    private static ActivitySource _activitySource = new ActivitySource(
         Assembly.GetExecutingAssembly().GetName().Name!,
         "1.0.0");
 
@@ -17,7 +17,7 @@ public class OpenTelemetryMiddleware : IFunctionsWorkerMiddleware
     {
         var parentId = GetCorrelationId(context);
 
-        using var activity = activitySource.StartActivity(
+        using var activity = _activitySource.StartActivity(
             context.FunctionDefinition.Name,
             ActivityKind.Consumer,
             parentId: parentId);
