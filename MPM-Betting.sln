@@ -28,6 +28,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{926ECAC1-E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.DbManager", "MPM-Betting.DbManager\MPM-Betting.DbManager.csproj", "{B5DC89FA-1AC3-4910-81AE-15E8B7F0D92D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{9133B5D0-DF1A-493F-A7B7-B251A88027DC}"
+	ProjectSection(SolutionItems) = preProject
+		MPM-Betting.Aspire\grafana\config\grafana.ini = MPM-Betting.Aspire\grafana\config\grafana.ini
+		MPM-Betting.Aspire\grafana\config\provisioning\dashboards\default.yaml = MPM-Betting.Aspire\grafana\config\provisioning\dashboards\default.yaml
+		MPM-Betting.Aspire\grafana\config\provisioning\datasources\default.yaml = MPM-Betting.Aspire\grafana\config\provisioning\datasources\default.yaml
+		MPM-Betting.Aspire\grafana\dashboards\aspnetcore-endpoint.json = MPM-Betting.Aspire\grafana\dashboards\aspnetcore-endpoint.json
+		MPM-Betting.Aspire\grafana\dashboards\aspnetcore.json = MPM-Betting.Aspire\grafana\dashboards\aspnetcore.json
+		MPM-Betting.Aspire\prometheus\prometheus.yml = MPM-Betting.Aspire\prometheus\prometheus.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

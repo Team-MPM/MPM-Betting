@@ -22,13 +22,13 @@ if (!builder.ExecutionContext.IsPublishMode)
 
 
 var grafana = builder.AddContainer("grafana", "grafana/grafana")
-    .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana")
-    .WithBindMount(GetFullPath("../grafana/dashboards"), "/var/lib/grafana/dashboards")
+    .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana", isReadOnly: false)
+    .WithBindMount(GetFullPath("../grafana/dashboards"), "/var/lib/grafana/dashboards", isReadOnly: false)
     .WithEndpoint(port: 3000, targetPort: 3000, name: "grafana-http", scheme: "http");
 
 var prometheus = builder.AddContainer("prometheus", "prom/prometheus")
     .WithBindMount(GetFullPath("../prometheus"), "/etc/prometheus")
-    .WithEndpoint(port: 9090, targetPort: 9090);
+    .WithEndpoint(port: 9090, targetPort: 9090, name: "prometheus-http", scheme: "http");
 
 var redis = builder.AddRedis("redis")
     .WithPersistence()

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Prometheus;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -30,7 +31,11 @@ public static class Extensions
                 {
                     metrics
                         .AddRuntimeInstrumentation()
-                        .AddBuiltInMeters();
+                        .AddBuiltInMeters()
+                        .AddHttpClientInstrumentation()
+                        .AddAspNetCoreInstrumentation()
+                        .AddProcessInstrumentation()
+                        .AddPrometheusExporter();
                 })
                 .WithTracing(tracing =>
                 {
@@ -41,7 +46,8 @@ public static class Extensions
                         .SetSampler(new AlwaysOnSampler())
                         .AddAspNetCoreInstrumentation()
                         .AddGrpcClientInstrumentation()
-                        .AddHttpClientInstrumentation();
+                        .AddHttpClientInstrumentation()
+                        .AddOtlpExporter();
                 });
             services.AddOpenTelemetryExporters(context.Configuration);
         });
@@ -78,9 +84,14 @@ public static class Extensions
             services.ConfigureOpenTelemetryTracerProvider(tracing => tracing.AddOtlpExporter());
         }
 
-        // Uncomment the following lines to enable the Prometheus exporter (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)
-        // builder.Services.AddOpenTelemetry()
-        //    .WithMetrics(metrics => metrics.AddPrometheusExporter());
+        services.AddOpenTelemetry()
+            .WithMetrics(metrics => metrics
+                .AddPrometheusExporter()
+                .AddProcessInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation()
+            );
 
         // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.Exporter package)
         // builder.Services.AddOpenTelemetry()
@@ -120,10 +131,11 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
-                metrics.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
+                metrics.AddPrometheusExporter()
                     .AddProcessInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddAspNetCoreInstrumentation();
             })
             .WithTracing(tracing =>
             {
@@ -135,7 +147,8 @@ public static class Extensions
 
                 tracing.AddAspNetCoreInstrumentation()
                     .AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter();
             });
 
         builder.AddOpenTelemetryExporters();
@@ -154,9 +167,13 @@ public static class Extensions
             builder.Services.ConfigureOpenTelemetryTracerProvider(tracing => tracing.AddOtlpExporter());
         }
 
-        // Uncomment the following lines to enable the Prometheus exporter (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)
-        // builder.Services.AddOpenTelemetry()
-        //    .WithMetrics(metrics => metrics.AddPrometheusExporter());
+        builder.Services.AddOpenTelemetry()
+           .WithMetrics(metrics => metrics.AddPrometheusExporter(options => options.DisableTotalNameSuffixForCounters = true)
+                .AddProcessInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation()
+           );
 
         // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
         // builder.Services.AddOpenTelemetry()
@@ -176,8 +193,9 @@ public static class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
-        // Uncomment the following line to enable the Prometheus endpoint (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)
-        // app.MapPrometheusScrapingEndpoint();
+        app.UseOpenTelemetryPrometheusScrapingEndpoint();
+        //app.MapPrometheusScrapingEndpoint();
+        //app.UseMetricServer();
 
         // All health checks must pass for app to be considered ready to accept traffic after starting
         app.MapHealthChecks("/health");
