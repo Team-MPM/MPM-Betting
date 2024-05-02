@@ -57,12 +57,18 @@ else
     var mailDev = builder.AddMailDev("maildev", 9324, 9325);
     
     var api = builder.AddProjectWithDotnetWatch<MPM_Betting_Api>("api")
+        .WithHttpEndpoint(targetPort: 5241, port: 5241, isProxied: false)
+        .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
+        .WithEnvironment("DOTNET_ENVIRONMENT", "Development")
         .WithReference(sql)
         .WithReference(redis)
         .WithReference(mailDev);
     
     var blazor = builder.AddProjectWithDotnetWatch<MPM_Betting_Blazor>("blazor")
+        .WithHttpEndpoint(targetPort: 5023, port: 5023, isProxied: false)
         .WithEnvironment("services__api__http__0", "http://localhost:5241")
+        .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
+        .WithEnvironment("DOTNET_ENVIRONMENT", "Development")
         .WithReference(redis)
         .WithReference(sql)
         .WithReference(mailDev);
