@@ -20,11 +20,11 @@
       "hotReloadProfile": "aspnetcore",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:15073",
+      "applicationUrl": "http://localhost:20101",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
-        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:16181"
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:20301"
       }
     },
     "generate-manifest": {
