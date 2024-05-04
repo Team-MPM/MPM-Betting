@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.100-preview.3.24204.13
+        dotnet-version: 8.0
     - name: Restore Workloads
       run: dotnet workload restore
     - name: Restore Dependencies
@@ -29,6 +29,7 @@ jobs:
         dotnet restore ./MPM-Betting.Scraper/MPM-Betting.Scraper.csproj
         dotnet restore ./MPM-Betting.Services/MPM-Betting.Services.csproj
         dotnet restore ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+        dotnet restore ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
         dotnet restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.AppHost/MPM-Betting.Aspire.AppHost.csproj
         dotnet restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.ServiceDefaults/MPM-Betting.Aspire.ServiceDefaults.csproj
     - name: Build
@@ -41,7 +42,10 @@ jobs:
         dotnet build --no-restore ./MPM-Betting.Scraper/MPM-Betting.Scraper.csproj
         dotnet build --no-restore ./MPM-Betting.Services/MPM-Betting.Services.csproj
         dotnet build --no-restore ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+        dotnet build --no-restore ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
         dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.AppHost/MPM-Betting.Aspire.AppHost.csproj
         dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.ServiceDefaults/MPM-Betting.Aspire.ServiceDefaults.csproj
     - name: Test
-      run: dotnet test --no-build --verbosity normal ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+      run: |
+        dotnet test --no-build --verbosity normal ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+        dotnet test --no-build --verbosity normal ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
