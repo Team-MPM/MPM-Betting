@@ -10,11 +10,31 @@ namespace MPM_Betting.Services.Data;
 public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 {
     public record League(string Name, string Country, int Id);
+
     public record Team(int Id, string Name);
+
     public record Player(string Name, string Position, int Id);
-    public record LeagueTable(League League, List<LeagueTableEntry> Table, string Season, List<string> Seasons); //TODO: add ongoing, last 5 and promotion/relegation
-    public record LeagueTableEntry(Team Team, int Rank, int Played, int Won, int Drawn, int Lost, int GoalsFor, int GoalsAgainst, int Points);
+
+    public record
+        LeagueTable(
+            League League,
+            List<LeagueTableEntry> Table,
+            string Season,
+            List<string> Seasons); //TODO: add ongoing, last 5 and promotion/relegation
+
+    public record LeagueTableEntry(
+        Team Team,
+        int Rank,
+        int Played,
+        int Won,
+        int Drawn,
+        int Lost,
+        int GoalsFor,
+        int GoalsAgainst,
+        int Points);
+
     public record struct ScoreEntry(Team HomeTeam, Team AwayTeam, int HomeScore, int AwayScore, GameState State);
+
     public record GameEntry(int Id, ScoreEntry Score, DateTime StartTime, string? Time);
 
     public enum GameState
@@ -33,177 +53,277 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         PenaltyShootout,
         EndedAfterPenaltyShootout
     }
-    
-    
-    [Profile]
-    public async Task<List<GameEntry>> GetGameEntries(int leagueId, DateOnly? date)
-    {
-        return await cache.Get(TimeSpan.FromSeconds(3), $"game-entries-{leagueId}-{date ?? DateOnly.MaxValue}", async () =>
-        {
-            var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
-            var json = await cache.GetByUri(TimeSpan.FromSeconds(1), uri);
-            var jObject = JObject.Parse(json);
 
-            var matches = jObject["matches"]!;
-            var allMatches = (JArray)matches["allMatches"]!;
+    public async Task<GameEntry> GetGameEntry(int gameId)
+    {
+        return await cache.Get(TimeSpan.FromSeconds(3), $"game-entry-{gameId}", async () =>
+        {
+            var uri = new Uri($"https://www.fotmob.com/api/matchDetails?matchId={gameId}");
+            var json = await cache.GetByUri(TimeSpan.FromSeconds(1), uri);
+            var match = JObject.Parse(json);
+
+            var general = match["general"]!;
+            var matchId = general["matchId"]!.Value<int>();
+            var leagueId = general["leagueId"]!.Value<int>();
+            var leagueName = general["leagueName"]!.Value<string>()!;
+            var countryCode = general["countryCode"]!.Value<string>()!;
+            var league = new League(leagueName, countryCode, leagueId);
+            var started = general["started"]!.Value<bool>();
+            var finished = general["finished"]!.Value<bool>();
+            var matchTimeUtcDate = general["matchTimeUTCDate"]!.Value<DateTime>();
+            var home = new Team(general["homeTeam"]!["id"]!.Value<int>(), general["homeTeam"]!["name"]!.Value<string>()!);
+            var away = new Team(general["awayTeam"]!["id"]!.Value<int>(), general["awayTeam"]!["name"]!.Value<string>()!);
+            var season = general["parentLeagueSeason"]!.Value<string>()!;
+            var round = general["round"]?.Value<int?>() ?? 0;
             
-            List<GameEntry> gameEntries = [];
+            var header = match["header"]!;
+            var status = header["status"]!;
+            var cancelled = status["cancelled"]!.Value<bool>();
+            var halfs = status["halfs"]!;
+            var firstHalfStarted = halfs.TryGetDateTime("firstHalfStarted", "dd.MM.yyyy HH:mm:ss");
+            var firstHalfEnded = halfs.TryGetDateTime("firstHalfEnded", "dd.MM.yyyy HH:mm:ss");
+            var secondHalfStarted = halfs.TryGetDateTime("secondHalfStarted", "dd.MM.yyyy HH:mm:ss");
+            var secondHalfEnded = halfs.TryGetDateTime("secondHalfEnded", "dd.MM.yyyy HH:mm:ss");
+            var firstExtraHalfStarted = halfs.TryGetDateTime("firstExtraHalfStarted", "dd.MM.yyyy HH:mm:ss");
+            var firstExtraHalfEnded = halfs.TryGetDateTime("firstExtraHalfEnded", "dd.MM.yyyy HH:mm:ss");
+            var secondExtraHalfStarted = halfs.TryGetDateTime("secondExtraHalfStarted", "dd.MM.yyyy HH:mm:ss");
+            var secondExtraHalfEnded = halfs.TryGetDateTime("secondExtraHalfEnded", "dd.MM.yyyy HH:mm:ss");
+            var gameEnded = halfs.TryGetDateTime("gameEnded", "dd.MM.yyyy HH:mm:ss");
+            var scoreStr = status["scoreStr"]?.Value<string>();
+            var scores = scoreStr is not null
+                ? scoreStr.Split('-').Select(s => int.Parse(s.Trim())).ToArray()
+                : [0, 0];
+            var homeScore = scores[0];
+            var awayScore = scores[1];
             
-            foreach (var match in allMatches)
+            var liveTime = status["liveTime"];
+            var currentTime = liveTime?["long"]?.Value<string>() ?? "";
+
+            logger.LogWarning(firstHalfStarted.ToString()!);
+            var state = GameState.None;
+            if (firstHalfStarted is not null)
             {
-                var round = match["round"]!.Value<int>();
-                var matchId = match["id"]!.Value<int>();
-                var home = new Team(match["home"]!["id"]!.Value<int>(), match["home"]!["name"]!.Value<string>()!);
-                var away = new Team(match["away"]!["id"]!.Value<int>(), match["away"]!["name"]!.Value<string>()!);
-                var status = match["status"]!;
-                var utcTime = status["utcTime"]!.Value<DateTime>();
-                var finished = status["finished"]!.Value<bool>();
-                var started = status["started"]!.Value<bool>();
-                var cancelled = status["cancelled"]!.Value<bool>();
-                var scoreStr = status["scoreStr"]?.Value<string>();
-                var scores = scoreStr is not null ? scoreStr.Split('-').Select(s => int.Parse(s.Trim())).ToArray() : [0, 0];
-                var homeScore = scores[0];
-                var awayScore = scores[1];
-                var reason = status["reason"]?["short"]?.Value<string>();
-                var live = status["liveTime"];
-                var maxTime = live?["maxTime"]?.Value<int>() ?? 0;
-                var addedTime = live?["addedTime"]?.Value<int>() ?? 0;
-                var currentTime = live?["long"]?.Value<string>();
-                var currentTimeShort = live?["short"]?.Value<string>();
-                var state = GameState.None;
-                state = maxTime switch
-                {
-                    45 => GameState.FirstHalf,
-                    90 => GameState.SecondHalf,
-                    105 => GameState.FirstOvertime,
-                    120 => GameState.SecondOvertime,
-                    _ => state
-                };
-                state = currentTimeShort switch
-                {
-                    "HT" => GameState.HalfTimeBreak,
-                    _ => state
-                };
-                state = reason switch
-                {
-                    "FT" => GameState.EndedAfterSecondHalf,
-                    _ => state
-                };
-                state = cancelled switch
-                {
-                    true => GameState.Cancelled,
-                    false => state
-                };
-                
-                gameEntries.Add(new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state), utcTime, currentTime));
+                state = GameState.FirstHalf;
+            }
+            if (firstHalfEnded is not null)
+            {
+                state = GameState.HalfTimeBreak;
+            }
+            if (secondHalfStarted is not null)
+            {
+                state = GameState.SecondHalf;
+            }
+            if (secondHalfEnded is not null)
+            {
+                state = GameState.BreakAfterSecondHalf;
+            }
+            if (firstExtraHalfStarted is not null)
+            {
+                state = GameState.FirstOvertime;
+            }
+            if (firstExtraHalfEnded is not null)
+            {
+                state = GameState.OvertimeBreak;
+            }
+            if (secondExtraHalfStarted is not null)
+            {
+                state = GameState.SecondOvertime;
+            }
+            if (secondExtraHalfEnded is not null)
+            {
+                state = GameState.EndedAfterOverTime;
+            }
+            if (gameEnded is null && secondExtraHalfEnded is not null)
+            {
+                state = GameState.PenaltyShootout;
+            }
+            if (cancelled)
+            {
+                state = GameState.Cancelled;
             }
             
+            if (finished && state is GameState.BreakAfterSecondHalf)
+            {
+                state = GameState.EndedAfterSecondHalf;
+            }
+            if (finished && state is GameState.PenaltyShootout)
+            {
+                state = GameState.EndedAfterPenaltyShootout;
+            }
             
-            //finished
-            // {
-            //     "round": "1",
-            //     "roundName": 1,
-            //     "pageUrl": "/matches/burnley-vs-manchester-city/2ai7j8#4193450",
-            //     "id": "4193450",
-            //     "home": {
-            //         "name": "Burnley",
-            //         "shortName": "Burnley",
-            //         "id": "8191"
-            //     },
-            //     "away": {
-            //         "name": "Manchester City",
-            //         "shortName": "Man City",
-            //         "id": "8456"
-            //     },
-            //     "status": {
-            //         "utcTime": "2023-08-11T19:00:00Z",
-            //         "finished": true,
-            //         "started": true,
-            //         "cancelled": false,
-            //         "scoreStr": "0 - 3",
-            //         "reason": {
-            //             "short": "FT",
-            //             "shortKey": "fulltime_short",
-            //             "long": "Full-Time",
-            //             "longKey": "finished"
-            //         }
-            //     }
-            // },
-            
-            //running
-            // {
-            //     "round": "33",
-            //     "roundName": 33,
-            //     "pageUrl": "/matches/persita-vs-persis-solo/3klkl3z6#4184143",
-            //     "id": "4184143",
-            //     "home": {
-            //         "name": "Persis Solo",
-            //         "shortName": "Persis Solo",
-            //         "id": "583034"
-            //     },
-            //     "away": {
-            //         "name": "Persita",
-            //         "shortName": "Persita",
-            //         "id": "165206"
-            //     },
-            //     "status": {
-            //         "utcTime": "2024-04-26T08:00:00.000Z",
-            //         "finished": false,
-            //         "started": true,
-            //         "cancelled": false,
-            //         "ongoing": true,
-            //         "scoreStr": "0 - 1",
-            //         "liveTime": {
-            //             "short": "28’",
-            //             "shortKey": "",
-            //             "long": "27:02",
-            //             "longKey": "",
-            //             "maxTime": 45,
-            //             "addedTime": 0
-            //         }
-            //     }
-            // },
-            
-            //not started
-            // {
-            //     "round": "33",
-            //     "roundName": 33,
-            //     "pageUrl": "/matches/persija-jakarta-vs-rans-nusantara/a9fy1lqf#4184152",
-            //     "id": "4184152",
-            //     "home": {
-            //         "name": "RANS Nusantara",
-            //         "shortName": "RANS Nusantara",
-            //         "id": "1103033"
-            //     },
-            //     "away": {
-            //         "name": "Persija Jakarta",
-            //         "shortName": "Persija Jakarta",
-            //         "id": "165191"
-            //     },
-            //     "status": {
-            //         "utcTime": "2024-04-26T12:00:00Z",
-            //         "started": false,
-            //         "cancelled": false,
-            //         "finished": false
-            //     }
-            // },
-            
-            
-            // half time
-            
-            // "liveTime": {
-            //     "short": "HT",
-            //     "shortKey": "halftime_short",
-            //     "long": "Half-Time",
-            //     "longKey": "pause_match",
-            //     "maxTime": 45,
-            //     "addedTime": 0
-            // }
-            
-            return gameEntries;
+            return new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state), matchTimeUtcDate, currentTime);
         });
     }
-    
+
+    public async Task<List<GameEntry>> GetGameEntries(int leagueId, DateOnly? date)
+    {
+        return await cache.Get(TimeSpan.FromSeconds(3), $"game-entries-{leagueId}-{date ?? DateOnly.MaxValue}",
+            async () =>
+            {
+                var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+                var json = await cache.GetByUri(TimeSpan.FromSeconds(1), uri);
+                var jObject = JObject.Parse(json);
+
+                var matches = jObject["matches"]!;
+                var allMatches = (JArray)matches["allMatches"]!;
+
+                List<GameEntry> gameEntries = [];
+
+                foreach (var match in allMatches)
+                {
+                    var round = match["round"]!.Value<int>();
+                    var matchId = match["id"]!.Value<int>();
+                    var home = new Team(match["home"]!["id"]!.Value<int>(), match["home"]!["name"]!.Value<string>()!);
+                    var away = new Team(match["away"]!["id"]!.Value<int>(), match["away"]!["name"]!.Value<string>()!);
+                    var status = match["status"]!;
+                    var utcTime = status["utcTime"]!.Value<DateTime>();
+                    var finished = status["finished"]!.Value<bool>();
+                    var started = status["started"]!.Value<bool>();
+                    var cancelled = status["cancelled"]!.Value<bool>();
+                    var scoreStr = status["scoreStr"]?.Value<string>();
+                    var scores = scoreStr is not null
+                        ? scoreStr.Split('-').Select(s => int.Parse(s.Trim())).ToArray()
+                        : [0, 0];
+                    var homeScore = scores[0];
+                    var awayScore = scores[1];
+                    var reason = status["reason"]?["short"]?.Value<string>();
+                    var live = status["liveTime"];
+                    var maxTime = live?["maxTime"]?.Value<int>() ?? 0;
+                    var addedTime = live?["addedTime"]?.Value<int>() ?? 0;
+                    var currentTime = live?["long"]?.Value<string>();
+                    var currentTimeShort = live?["short"]?.Value<string>();
+                    var state = GameState.None;
+                    state = maxTime switch
+                    {
+                        45 => GameState.FirstHalf,
+                        90 => GameState.SecondHalf,
+                        105 => GameState.FirstOvertime,
+                        120 => GameState.SecondOvertime,
+                        _ => state
+                    };
+                    state = currentTimeShort switch
+                    {
+                        "HT" => GameState.HalfTimeBreak,
+                        "FT" => GameState.EndedAfterSecondHalf,
+                        _ => state
+                    };
+                    state = reason switch
+                    {
+                        "FT" => GameState.EndedAfterSecondHalf,
+                        _ => state
+                    };
+
+                    state = cancelled ? GameState.Cancelled : state;
+
+                    gameEntries.Add(new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state),
+                        utcTime, currentTime));
+                }
+
+                //finished
+                // {
+                //     "round": "1",
+                //     "roundName": 1,
+                //     "pageUrl": "/matches/burnley-vs-manchester-city/2ai7j8#4193450",
+                //     "id": "4193450",
+                //     "home": {
+                //         "name": "Burnley",
+                //         "shortName": "Burnley",
+                //         "id": "8191"
+                //     },
+                //     "away": {
+                //         "name": "Manchester City",
+                //         "shortName": "Man City",
+                //         "id": "8456"
+                //     },
+                //     "status": {
+                //         "utcTime": "2023-08-11T19:00:00Z",
+                //         "finished": true,
+                //         "started": true,
+                //         "cancelled": false,
+                //         "scoreStr": "0 - 3",
+                //         "reason": {
+                //             "short": "FT",
+                //             "shortKey": "fulltime_short",
+                //             "long": "Full-Time",
+                //             "longKey": "finished"
+                //         }
+                //     }
+                // },
+
+                //running
+                // {
+                //     "round": "33",
+                //     "roundName": 33,
+                //     "pageUrl": "/matches/persita-vs-persis-solo/3klkl3z6#4184143",
+                //     "id": "4184143",
+                //     "home": {
+                //         "name": "Persis Solo",
+                //         "shortName": "Persis Solo",
+                //         "id": "583034"
+                //     },
+                //     "away": {
+                //         "name": "Persita",
+                //         "shortName": "Persita",
+                //         "id": "165206"
+                //     },
+                //     "status": {
+                //         "utcTime": "2024-04-26T08:00:00.000Z",
+                //         "finished": false,
+                //         "started": true,
+                //         "cancelled": false,
+                //         "ongoing": true,
+                //         "scoreStr": "0 - 1",
+                //         "liveTime": {
+                //             "short": "28’",
+                //             "shortKey": "",
+                //             "long": "27:02",
+                //             "longKey": "",
+                //             "maxTime": 45,
+                //             "addedTime": 0
+                //         }
+                //     }
+                // },
+
+                //not started
+                // {
+                //     "round": "33",
+                //     "roundName": 33,
+                //     "pageUrl": "/matches/persija-jakarta-vs-rans-nusantara/a9fy1lqf#4184152",
+                //     "id": "4184152",
+                //     "home": {
+                //         "name": "RANS Nusantara",
+                //         "shortName": "RANS Nusantara",
+                //         "id": "1103033"
+                //     },
+                //     "away": {
+                //         "name": "Persija Jakarta",
+                //         "shortName": "Persija Jakarta",
+                //         "id": "165191"
+                //     },
+                //     "status": {
+                //         "utcTime": "2024-04-26T12:00:00Z",
+                //         "started": false,
+                //         "cancelled": false,
+                //         "finished": false
+                //     }
+                // },
+
+
+                // half time
+
+                // "liveTime": {
+                //     "short": "HT",
+                //     "shortKey": "halftime_short",
+                //     "long": "Half-Time",
+                //     "longKey": "pause_match",
+                //     "maxTime": 45,
+                //     "addedTime": 0
+                // }
+
+                return gameEntries;
+            });
+    }
+
     public async Task<LeagueTable> GetLeagueTable(int leagueId, string? season)
     {
         return await cache.Get(TimeSpan.FromSeconds(1), $"leagueTable-{leagueId}-{season ?? "latest"}", async () =>
@@ -218,7 +338,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
             var selectedSeason = details["selectedSeason"]!.Value<string>()!;
             var allAvailableSeasons = (JArray)jObject["allAvailableSeasons"]!;
             var seasons = allAvailableSeasons.Select(availableSeason => availableSeason.Value<string>()!).ToList();
-            
+
             if (season is null || !seasons.Contains(season))
             {
                 season = seasons[0];
@@ -228,7 +348,8 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
             if (season != selectedSeason)
             {
-                uri = new Uri($"https://www.fotmob.com/api/table?url=https%3A%2F%2Fdata.fotmob.com%2Ftables.ext.{leagueId}.fot&selectedSeason={UrlEncoder.Default.Encode(season)}");
+                uri = new Uri(
+                    $"https://www.fotmob.com/api/table?url=https%3A%2F%2Fdata.fotmob.com%2Ftables.ext.{leagueId}.fot&selectedSeason={UrlEncoder.Default.Encode(season)}");
                 json = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
                 jObject = JObject.Parse(json);
                 data = jObject;
@@ -247,14 +368,15 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
                 let goalsFor = entry["scoresStr"]!.Value<string>()!.Split('-')[0]
                 let goalsAgainst = entry["scoresStr"]!.Value<string>()!.Split('-')[1]
                 let points = entry["pts"]!.Value<int>()
-                select new LeagueTableEntry(new Team(id, name), rank, played, wins, draws, losses, int.Parse(goalsFor), int.Parse(goalsAgainst), points)).ToList();
+                select new LeagueTableEntry(new Team(id, name), rank, played, wins, draws, losses, int.Parse(goalsFor),
+                    int.Parse(goalsAgainst), points)).ToList();
 
 
             return new LeagueTable(new League(leagueName, country, leagueId), entries, season, seasons);
         });
     }
-    
-    public async Task<List<Player> > GetAllFootballPlayers()
+
+    public async Task<List<Player>> GetAllFootballPlayers()
     {
         return await cache.Get(TimeSpan.FromDays(1), $"footballPlayers", async () =>
         {
@@ -272,7 +394,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
             return allPlayers;
         });
     }
-    
+
     public async Task<List<Player>> GetPlayersFromTeam(int teamId)
     {
         return await cache.Get(TimeSpan.FromDays(1), $"footballPlayers-{teamId}", async () =>
@@ -302,8 +424,8 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
             return allPlayers;
         });
-    } 
-    
+    }
+
     public async Task<List<Team>> GetTeamsFromLeague(int leagueId)
     {
         return await cache.Get(TimeSpan.FromDays(1), $"footballTeams-{leagueId}", async () =>
@@ -333,7 +455,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
             return allTeams;
         });
     }
-    
+
     public async Task<List<Team>> GetAllFootballTeams()
     {
         return await cache.Get(TimeSpan.FromDays(1), "allFootballTeams", async () =>
@@ -350,7 +472,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
                 allTeams.AddRange(await GetTeamsFromLeague(leagueEntry.Id));
             });
-            
+
             await Task.WhenAll(tasks);
 
             return allTeams;

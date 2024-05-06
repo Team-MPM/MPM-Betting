@@ -117,6 +117,11 @@ public static class Extensions
             .WithName("GetGames")
             .WithOpenApi();
         
+        app.MapGet("/football/gameDetails",
+            async ([FromServices] FootballApi api, [FromQuery] int gameId) => await api.GetGameEntry(gameId))
+            .WithName("GetGameDetails")
+            .WithOpenApi();
+        
         return app;
     }
 }
