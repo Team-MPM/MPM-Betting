@@ -1,0 +1,25 @@
+﻿.NavBar {
+    background: gray;
+    width: 100vw;
+    height: fit-content;
+    display: flex;
+}
+
+.NavBar img {
+    margin: 10px;
+    justify-self: center;
+}
+
+.NavBar > * {
+    flex-direction: row;
+    justify-content: center;
+    justify-self: center;
+    align-content: center;
+    align-self: center; 
+    display: flex;
+}
+
+.credits {
+    display: flex;
+    flex-direction: row;
+}

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using MPM_Betting.Blazor;
 using MPM_Betting.Blazor.Components;
 using MPM_Betting.Services;
+using Blazorise;
+using Blazorise.Bootstrap;
+using Blazorise.Icons.FontAwesome;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +43,15 @@ builder.AddFootballApi();
 builder.Services.AddHttpClient<WeatherApiClient>(client => client.BaseAddress = new("http://api"));
 
 
+// Blazorise
 
+builder.Services
+    .AddBlazorise( options =>
+    {
+        options.Immediate = true;
+    } )
+    .AddBootstrapProviders()
+    .AddFontAwesomeIcons();
 
 
 

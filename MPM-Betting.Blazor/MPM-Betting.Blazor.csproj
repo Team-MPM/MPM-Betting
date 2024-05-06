@@ -11,13 +11,16 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MPM-Betting.Aspire\MPM-Betting.Aspire.ServiceDefaults\MPM-Betting.Aspire.ServiceDefaults.csproj" />
-      <ProjectReference Include="..\MPM-Betting.Blazor.Components\MPM-Betting.Blazor.Components.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Blazor.ComponentLibrary\MPM-Betting.Blazor.ComponentLibrary.csproj" />
       <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
       <ProjectReference Include="..\MPM-Betting.Services\MPM-Betting.Services.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="8.0.0-preview.6.24214.1" />
+      <PackageReference Include="Blazorise" Version="1.5.2" />
+      <PackageReference Include="Blazorise.Bootstrap" Version="1.5.2" />
+      <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.5.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
     </ItemGroup>
