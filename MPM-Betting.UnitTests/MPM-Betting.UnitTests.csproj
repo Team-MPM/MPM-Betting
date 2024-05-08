@@ -30,6 +30,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Services\MPM-Betting.Services.csproj" />
     </ItemGroup>
 
 </Project>
