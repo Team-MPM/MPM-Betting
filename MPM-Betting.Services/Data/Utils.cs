@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.Contracts;
+using System.Globalization;
+using LanguageExt.Common;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json.Linq;
 
@@ -32,6 +34,18 @@ public static class Utils
         catch
         {
             return defaultValue;
+        }
+    }
+    
+    public static MpmResult<T> Try<T>(Func<T> func)
+    {
+        try
+        {
+            return func();
+        }
+        catch (Exception e)
+        {
+            return e;
         }
     }
 }
