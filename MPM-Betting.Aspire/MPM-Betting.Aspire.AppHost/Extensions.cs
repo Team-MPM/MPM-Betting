@@ -33,6 +33,7 @@ public static class Extensions
         };
 
         return builder.AddExecutable(name, "func", projectDirectory, args)
+            .WithHttpEndpoint(7122, 7122, isProxied: false)
             .WithOtlpExporter();
     }
     
