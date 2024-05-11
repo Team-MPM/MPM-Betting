@@ -39,22 +39,26 @@ var sql = builder.AddSqlServer("sql", password: builder.CreateStablePassword("MP
     .PublishAsAzureSqlDatabase()
     .AddDatabase("MPM-Betting");
 
+
+var mail = builder.AddMailDev("maildev", 9324, 9325);
+
 if (builder.ExecutionContext.IsPublishMode || Environment.GetEnvironmentVariable("CI") == "true")
 {
     var api = builder.AddProject<MPM_Betting_Api>("api")
         .WithExternalHttpEndpoints()
         .WithReference(sql)
-        .WithReference(redis);
+        .WithReference(redis)
+        .WithReference(mail);
 
     var blazor = builder.AddProject<MPM_Betting_Blazor>("blazor")
         .WithExternalHttpEndpoints()
         .WithReference(api)
         .WithReference(redis)
-        .WithReference(sql);
+        .WithReference(sql)
+        .WithReference(mail);
 }
 else
 {
-    var mailDev = builder.AddMailDev("maildev", 9324, 9325);
     
     var api = builder.AddProjectWithDotnetWatch<MPM_Betting_Api>("api")
         .WithHttpEndpoint(targetPort: 5241, port: 5241, isProxied: false)
@@ -62,7 +66,7 @@ else
         .WithEnvironment("DOTNET_ENVIRONMENT", "Development")
         .WithReference(sql)
         .WithReference(redis)
-        .WithReference(mailDev);
+        .WithReference(mail);
     
     var blazor = builder.AddProjectWithDotnetWatch<MPM_Betting_Blazor>("blazor")
         .WithHttpEndpoint(targetPort: 5023, port: 5023, isProxied: false)
@@ -71,7 +75,7 @@ else
         .WithEnvironment("DOTNET_ENVIRONMENT", "Development")
         .WithReference(redis)
         .WithReference(sql)
-        .WithReference(mailDev);
+        .WithReference(mail);
 }
 
 var dbManager = builder.AddProject<MPM_Betting_DbManager>("dbmanager")
