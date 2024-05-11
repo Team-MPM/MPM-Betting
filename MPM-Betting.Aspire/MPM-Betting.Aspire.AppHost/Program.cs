@@ -39,7 +39,7 @@ var sql = builder.AddSqlServer("sql", password: builder.CreateStablePassword("MP
     .PublishAsAzureSqlDatabase()
     .AddDatabase("MPM-Betting");
 
-if (builder.ExecutionContext.IsPublishMode)
+if (builder.ExecutionContext.IsPublishMode || Environment.GetEnvironmentVariable("CI") == "true")
 {
     var api = builder.AddProject<MPM_Betting_Api>("api")
         .WithExternalHttpEndpoints()
