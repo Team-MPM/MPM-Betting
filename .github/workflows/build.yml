@@ -54,7 +54,7 @@ jobs:
         dotnet build --no-restore ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
         dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.AppHost/MPM-Betting.Aspire.AppHost.csproj
         dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.ServiceDefaults/MPM-Betting.Aspire.ServiceDefaults.csproj
-    - name: Test
-      run: |
-        dotnet test --no-build --verbosity normal ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
-        dotnet test --no-build --verbosity normal ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
+    - name: Unit Test
+      run: dotnet test --no-build --verbosity normal ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+    - name: Integration Test
+      run: dotnet test --no-build --verbosity normal ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj

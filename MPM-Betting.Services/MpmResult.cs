@@ -12,7 +12,7 @@ namespace MPM_Betting.Services;
 public readonly struct MpmResult<T> : IEquatable<MpmResult<T>>, IComparable<MpmResult<T>>
 {
     private readonly ResultState m_State;
-    internal readonly T Value;
+    public readonly T Value;
     private readonly Exception m_Exception;
 
     internal Exception Exception => m_Exception ?? BottomException.Default;
