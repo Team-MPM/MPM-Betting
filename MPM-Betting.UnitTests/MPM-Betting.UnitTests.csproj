@@ -16,6 +16,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0-release-24177-07" />
+        <PackageReference Include="Moq" Version="4.20.70" />
         <PackageReference Include="NUnit" Version="4.1.0" />
         <PackageReference Include="NUnit.Analyzers" Version="4.2.0">
           <PrivateAssets>all</PrivateAssets>
@@ -29,7 +30,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\MPM-Betting.Api\MPM-Betting.Api.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Aspire\MPM-Betting.Aspire.AppHost\MPM-Betting.Aspire.AppHost.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Aspire\MPM-Betting.Aspire.ServiceDefaults\MPM-Betting.Aspire.ServiceDefaults.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Blazor.Components\MPM-Betting.Blazor.Components.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Blazor\MPM-Betting.Blazor.csproj" />
       <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
+      <ProjectReference Include="..\MPM-Betting.DbManager\MPM-Betting.DbManager.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Functions\MPM-Betting.Functions.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Scraper\MPM-Betting.Scraper.csproj" />
       <ProjectReference Include="..\MPM-Betting.Services\MPM-Betting.Services.csproj" />
     </ItemGroup>
 

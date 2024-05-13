@@ -24,11 +24,11 @@ if (!builder.ExecutionContext.IsPublishMode)
 var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana", isReadOnly: false)
     .WithBindMount(GetFullPath("../grafana/dashboards"), "/var/lib/grafana/dashboards", isReadOnly: false)
-    .WithEndpoint(port: 3000, targetPort: 3000, name: "grafana-http", scheme: "http");
+    .WithHttpEndpoint(port: 3000, targetPort: 3000);
 
 var prometheus = builder.AddContainer("prometheus", "prom/prometheus")
     .WithBindMount(GetFullPath("../prometheus"), "/etc/prometheus")
-    .WithEndpoint(port: 9090, targetPort: 9090, name: "prometheus-http", scheme: "http");
+    .WithHttpEndpoint(port: 9090, targetPort: 9090);
 
 var redis = builder.AddRedis("redis")
     .WithPersistence()
@@ -39,22 +39,26 @@ var sql = builder.AddSqlServer("sql", password: builder.CreateStablePassword("MP
     .PublishAsAzureSqlDatabase()
     .AddDatabase("MPM-Betting");
 
-if (builder.ExecutionContext.IsPublishMode)
+
+var mail = builder.AddMailDev("maildev", 9324, 9325);
+
+if (builder.ExecutionContext.IsPublishMode || Environment.GetEnvironmentVariable("CI") == "true")
 {
     var api = builder.AddProject<MPM_Betting_Api>("api")
         .WithExternalHttpEndpoints()
         .WithReference(sql)
-        .WithReference(redis);
+        .WithReference(redis)
+        .WithReference(mail);
 
     var blazor = builder.AddProject<MPM_Betting_Blazor>("blazor")
         .WithExternalHttpEndpoints()
         .WithReference(api)
         .WithReference(redis)
-        .WithReference(sql);
+        .WithReference(sql)
+        .WithReference(mail);
 }
 else
 {
-    var mailDev = builder.AddMailDev("maildev", 9324, 9325);
     
     var api = builder.AddProjectWithDotnetWatch<MPM_Betting_Api>("api")
         .WithHttpEndpoint(targetPort: 5241, port: 5241, isProxied: false)
@@ -62,7 +66,7 @@ else
         .WithEnvironment("DOTNET_ENVIRONMENT", "Development")
         .WithReference(sql)
         .WithReference(redis)
-        .WithReference(mailDev);
+        .WithReference(mail);
     
     var blazor = builder.AddProjectWithDotnetWatch<MPM_Betting_Blazor>("blazor")
         .WithHttpEndpoint(targetPort: 5023, port: 5023, isProxied: false)
@@ -71,7 +75,7 @@ else
         .WithEnvironment("DOTNET_ENVIRONMENT", "Development")
         .WithReference(redis)
         .WithReference(sql)
-        .WithReference(mailDev);
+        .WithReference(mail);
 }
 
 var dbManager = builder.AddProject<MPM_Betting_DbManager>("dbmanager")
