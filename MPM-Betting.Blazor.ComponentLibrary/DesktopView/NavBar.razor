@@ -3,28 +3,41 @@
 
 <div class="NavBar col-12">
     <div class="col-1 logo">
-        <img src="https://dummyimage.com/500x500/000/fff" height="50px" alt="xxx"/>
+        <div class="NavBarLogoText">MPM</div>
     </div>
-    <div class="col-2 sportarten">
-        <div>
-            <Button Color="Color.Primary">Click me</Button>
-        </div>
+    <div class="col-3 sportarten">
+        <a href="/"> <Button Color="Color.Primary">Home</Button></a>
+        <a href="/dashboard"><Button Color="Color.Secondary">Dashboard</Button></a>
+        <Dropdown>
+            <DropdownToggle Color="Color.Primary">
+                Sportarten
+            </DropdownToggle>
+            <DropdownMenu>
+                <DropdownItem>Fußball</DropdownItem>
+                <DropdownDivider />
+                <DropdownItem Disabled>Basketball</DropdownItem>
+                <DropdownDivider />
+                <DropdownItem Disabled>Formula 1</DropdownItem>
+            </DropdownMenu>
+            
+        </Dropdown>
     </div>
-    <div class="col-5">
+    <div class="col-4">
         
     </div>
     <div class="col-1 light_dark">
         
     </div>
     <div class="col-1 notifications">
-        
+        <img src="Images/bell_white.png" height="40px"/>
     </div>
     <div class="col-1 credits">
-        <img src="https://dummyimage.com/500x500/000/fff" height="20px" alt="xxx"/>
-        <span>7777</span>
+        
+        <div>7524   </div>
+        <img src="Images/coin.png" height="30px" alt="xxx"/>
     </div>
     <div class="col-1 profile-pic">
-        <img src="https://dummyimage.com/500x500/000/fff" height="50px" alt="xxx"/>
+        <img src="Images/pfp.jpg" height="50px" alt="xxx"/>
     </div>
 </div>
 

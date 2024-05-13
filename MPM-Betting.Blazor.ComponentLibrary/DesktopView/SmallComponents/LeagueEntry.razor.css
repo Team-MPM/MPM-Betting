@@ -1,0 +1,42 @@
+﻿.Box {
+    width: 80%;
+    border-radius: 10px;
+    background: lightcoral;
+    justify-self: center;
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    font-size: 18px;
+    margin: 5px 0 5px 0;
+    padding: 5px 0 5px 0;
+    align-items: center;
+}
+
+
+.Box > div {
+    border-left: black solid 2px;
+    padding-left: 10px;
+}
+
+
+.Box > img {
+    width: 30px;
+    height: 30px;
+    margin: 5px;
+}
+
+.LeagueBoxIcon {
+    justify-self: center;
+}
+
+.LeagueBoxStar {
+    justify-self: center;
+}
+
+.FavBox {
+
+}
+
+.FavBoxStar {
+    justify-self: center;
+    align-self: center;
+}

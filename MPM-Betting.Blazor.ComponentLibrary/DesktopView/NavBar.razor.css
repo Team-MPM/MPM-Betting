@@ -1,8 +1,17 @@
 ﻿.NavBar {
-    background: gray;
+    background: rgba(242, 189, 53, 1);
     width: 100vw;
     height: fit-content;
     display: flex;
+     border-bottom: black solid 1px;
+    margin-bottom: 1%;
+}
+
+.NavBarLogoText {
+    font-family: Impact, fantasy;
+    font-size: 32px;
+    font-style: italic;
+    font-weight: bold;
 }
 
 .NavBar img {
@@ -22,4 +31,19 @@
 .credits {
     display: flex;
     flex-direction: row;
+}
+
+.sportarten{
+    display: flex;
+    justify-content: space-between;
+}
+
+.credits {
+    display: flex;
+    align-items: center;
+}
+
+.credits > div {
+    font-size: 1.2em;
+    font-family: Tahoma;
 }

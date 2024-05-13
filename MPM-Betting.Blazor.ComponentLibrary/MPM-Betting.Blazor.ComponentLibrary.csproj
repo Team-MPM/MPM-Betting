@@ -15,9 +15,19 @@
     <ItemGroup>
         <PackageReference Include="Blazorise" Version="1.5.2" />
         <PackageReference Include="Blazorise.Bootstrap" Version="1.5.2" />
+        <PackageReference Include="Blazorise.Components" Version="1.5.2" />
         <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.5.2" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.4" />
         <PackageReference Include="Microsoft.JSInterop" Version="8.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\Images\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MPM-Betting.DataModel\MPM-Betting.DataModel.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Services\MPM-Betting.Services.csproj" />
     </ItemGroup>
 
 </Project>
