@@ -2,5 +2,5 @@
 
 public enum EGroupRole
 {
-    Admin, Member, Visitor
+    Owner, Admin, Member, Visitor
 }

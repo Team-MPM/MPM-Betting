@@ -2,8 +2,7 @@
 
 namespace MPM_Betting.DataModel.Betting;
 
-public class CustomSeason
+public class CustomSeason(string name, string description) : Season(name, description)
 {
-    [Key]
-    public int Id { get; set; }
+    private CustomSeason() : this(null!, null!) {}
 }

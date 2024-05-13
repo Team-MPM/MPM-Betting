@@ -19,20 +19,18 @@ public class MpmGroup
     [StringLength(1024)]
     public string? Description { get; set; }
 
-    public SeasonEntry CurrentSeason { get; set; }
     public List<SeasonEntry> Seasons { get; set; }
 
-    public MpmGroup(MpmUser creator, string name, string description, SeasonEntry currentSeason, List<SeasonEntry> seasons)
+    public MpmGroup(MpmUser creator, string name, string description, List<SeasonEntry> seasons)
     {
         Creator = creator;
         Name = name;
         Description = description;
-        CurrentSeason = currentSeason;
         Seasons = seasons;
         UserGroupEntries.Add(new UserGroupEntry(creator, this));
     }
 
-    private MpmGroup() : this(null!, null!, null!, null!, null!)
+    private MpmGroup() : this(null!, null!, null!, null!)
     {
         
     }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    [Migration("20240513082747_betting1")]
-    partial class betting1
+    [Migration("20240513164439_achievements")]
+    partial class achievements
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,21 @@ namespace MPM_Betting.DbManager.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("AchievementMpmUser", b =>
+                {
+                    b.Property<int>("AchievmentsId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AchievmentsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("AchievementMpmUser");
+                });
 
             modelBuilder.Entity("MPM_Betting.DataModel.Betting.Bet", b =>
                 {
@@ -219,6 +234,55 @@ namespace MPM_Betting.DbManager.Migrations
                     b.ToTable("SeasonEntries");
                 });
 
+            modelBuilder.Entity("MPM_Betting.DataModel.Rewarding.Achievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Achievements");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Rewarding.AchievementEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateEarned")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AchievementId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AchievementEntries");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
                     b.Property<int>("Id")
@@ -270,6 +334,9 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("LastRedeemed")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -292,6 +359,9 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -329,6 +399,12 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<string>("MpmUserId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -479,6 +555,21 @@ namespace MPM_Betting.DbManager.Migrations
                     b.HasDiscriminator().HasValue("BuiltinSeason");
                 });
 
+            modelBuilder.Entity("AchievementMpmUser", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Rewarding.Achievement", null)
+                        .WithMany()
+                        .HasForeignKey("AchievmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.Betting.Bet", b =>
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.Game", "Game")
@@ -533,15 +624,15 @@ namespace MPM_Betting.DbManager.Migrations
             modelBuilder.Entity("MPM_Betting.DataModel.Betting.ScoreEntry", b =>
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.SeasonEntry", "SeasonEntry")
-                        .WithMany()
+                        .WithMany("ScoreEntries")
                         .HasForeignKey("SeasonEntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.User.UserGroupEntry", "UserGroupEntry")
-                        .WithMany()
+                        .WithMany("ScoreEntries")
                         .HasForeignKey("UserGroupEntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("SeasonEntry");
@@ -554,7 +645,7 @@ namespace MPM_Betting.DbManager.Migrations
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
                         .WithMany("Seasons")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.Betting.Season", "Season")
@@ -566,6 +657,23 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("Season");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Rewarding.AchievementEntry", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Rewarding.Achievement", "Achievement")
+                        .WithMany()
+                        .HasForeignKey("AchievementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Achievement");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
@@ -658,6 +766,11 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Navigation("Bets");
                 });
 
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.SeasonEntry", b =>
+                {
+                    b.Navigation("ScoreEntries");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
                     b.Navigation("Seasons");
@@ -668,6 +781,11 @@ namespace MPM_Betting.DbManager.Migrations
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmUser", b =>
                 {
                     b.Navigation("UserGroupEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
+                {
+                    b.Navigation("ScoreEntries");
                 });
 #pragma warning restore 612, 618
         }

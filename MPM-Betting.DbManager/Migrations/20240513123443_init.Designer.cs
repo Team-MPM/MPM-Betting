@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    [Migration("20240430170747_init")]
+    [Migration("20240513123443_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -25,6 +25,238 @@ namespace MPM_Betting.DbManager.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AchievmentMpmUser", b =>
+                {
+                    b.Property<int>("AchievmentsId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AchievmentsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("AchievmentMpmUser");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.Bet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Completed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("DataStore")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Bets");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.CustomSeason", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomSeasons");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.CustomSeasonEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SeasonId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("SeasonId");
+
+                    b.ToTable("CustomSeasonEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.Game", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BuiltinSeasonId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReferenceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SportType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuiltinSeasonId");
+
+                    b.ToTable("Games");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.ScoreEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SeasonEntryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserGroupEntryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeasonEntryId");
+
+                    b.HasIndex("UserGroupEntryId");
+
+                    b.ToTable("ScoreEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.Season", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ReferenceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Sport")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Seasons");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Season");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.SeasonEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SeasonId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("SeasonId");
+
+                    b.ToTable("SeasonEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Rewarding.Achievment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Achievment");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
                     b.Property<int>("Id")
@@ -35,6 +267,9 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<string>("CreatorId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("CurrentSeasonId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1024)
@@ -48,6 +283,8 @@ namespace MPM_Betting.DbManager.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
+
+                    b.HasIndex("CurrentSeasonId");
 
                     b.ToTable("Groups");
                 });
@@ -71,6 +308,9 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("LastRedeemed")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -93,6 +333,9 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -130,6 +373,9 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<string>("MpmUserId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
@@ -276,13 +522,132 @@ namespace MPM_Betting.DbManager.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.BuiltinSeason", b =>
+                {
+                    b.HasBaseType("MPM_Betting.DataModel.Betting.Season");
+
+                    b.HasDiscriminator().HasValue("BuiltinSeason");
+                });
+
+            modelBuilder.Entity("AchievmentMpmUser", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Rewarding.Achievment", null)
+                        .WithMany()
+                        .HasForeignKey("AchievmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.Bet", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Betting.Game", "Game")
+                        .WithMany("Bets")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId");
+
+                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.CustomSeasonEntry", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Betting.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.Betting.CustomSeason", "Season")
+                        .WithMany()
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Season");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.Game", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Betting.BuiltinSeason", "BuiltinSeason")
+                        .WithMany()
+                        .HasForeignKey("BuiltinSeasonId");
+
+                    b.Navigation("BuiltinSeason");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.ScoreEntry", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Betting.SeasonEntry", "SeasonEntry")
+                        .WithMany("ScoreEntries")
+                        .HasForeignKey("SeasonEntryId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.User.UserGroupEntry", "UserGroupEntry")
+                        .WithMany("ScoreEntries")
+                        .HasForeignKey("UserGroupEntryId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("SeasonEntry");
+
+                    b.Navigation("UserGroupEntry");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.SeasonEntry", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
+                        .WithMany("Seasons")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.Betting.Season", "Season")
+                        .WithMany()
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Season");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
                     b.HasOne("MPM_Betting.DataModel.User.MpmUser", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId");
 
+                    b.HasOne("MPM_Betting.DataModel.Betting.SeasonEntry", "CurrentSeason")
+                        .WithMany()
+                        .HasForeignKey("CurrentSeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Creator");
+
+                    b.Navigation("CurrentSeason");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
@@ -353,14 +718,31 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.Game", b =>
+                {
+                    b.Navigation("Bets");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.SeasonEntry", b =>
+                {
+                    b.Navigation("ScoreEntries");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
+                    b.Navigation("Seasons");
+
                     b.Navigation("UserGroupEntries");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmUser", b =>
                 {
                     b.Navigation("UserGroupEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
+                {
+                    b.Navigation("ScoreEntries");
                 });
 #pragma warning restore 612, 618
         }

@@ -20,12 +20,12 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<Bet> Bets { get; set; } = null!;
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<AchievementEntry> AchievementEntries { get; set; }
+    public DbSet<Message> Messages { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MpmGroup>(builder =>
         {
-            builder.HasOne(g => g.CurrentSeason).WithMany();
             builder.HasMany(g => g.Seasons).WithOne(s => s.Group);
             
             builder
