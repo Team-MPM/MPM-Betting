@@ -4,7 +4,7 @@ public enum ERound
 {
     Last32,
     Last16,
-    Quaterfinal,
+    Quarterfinal,
     Semifinal,
     Final
 }
