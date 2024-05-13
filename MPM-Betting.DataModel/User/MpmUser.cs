@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using MPM_Betting.DataModel.Rewarding;
 
 namespace MPM_Betting.DataModel.User;
-/// <summary>
-/// User Class
-/// </summary>
+
 public class MpmUser : IdentityUser
 {
     public List<UserGroupEntry> UserGroupEntries { get; set; } = [];
@@ -16,5 +14,3 @@ public class MpmUser : IdentityUser
     
     public List<Achievment> Achievments { get; set; } = [];
 }
-
-//TODO: Punktestand (Done)
