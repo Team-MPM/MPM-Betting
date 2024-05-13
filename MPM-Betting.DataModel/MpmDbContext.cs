@@ -17,13 +17,33 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<CustomSeason> CustomSeasons { get; set; } = null!;
     public DbSet<BuiltinSeason> BuiltinSeasons { get; set; } = null!;
     public DbSet<CustomSeasonEntry> CustomSeasonEntries { get; set; } = null!;
-    public DbSet<Bet> Bets { get; set; } = null!;
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<AchievementEntry> AchievementEntries { get; set; }
     public DbSet<Message> Messages { get; set; }
     
+    public DbSet<Bet> Bets { get; set; } = null!;
+    public DbSet<Football.ResultBet> FootballResultBets { get; set; } = null!;
+    public DbSet<Football.ScoreBet> FootballScoreBets { get; set; } = null!;
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Bet>(builder =>
+        {
+            builder.ToTable(nameof(Bets));
+        });
+        
+        modelBuilder.Entity<Football.ResultBet>(builder =>
+        {
+            builder.ToTable(nameof(FootballResultBets));
+            builder.HasBaseType<Bet>();
+        });
+        
+        modelBuilder.Entity<Football.ScoreBet>(builder =>
+        {
+            builder.ToTable(nameof(FootballScoreBets));
+            builder.HasBaseType<Bet>();
+        });
+        
         modelBuilder.Entity<MpmGroup>(builder =>
         {
             builder.HasMany(g => g.Seasons).WithOne(s => s.Group);

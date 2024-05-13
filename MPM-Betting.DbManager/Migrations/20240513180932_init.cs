@@ -12,7 +12,7 @@ namespace MPM_Betting.DbManager.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Achievment",
+                name: "Achievements",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -22,7 +22,7 @@ namespace MPM_Betting.DbManager.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Achievment", x => x.Id);
+                    table.PrimaryKey("PK_Achievements", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,24 +67,13 @@ namespace MPM_Betting.DbManager.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomSeasons",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CustomSeasons", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Seasons",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     Sport = table.Column<int>(type: "int", nullable: false),
                     Start = table.Column<DateTime>(type: "datetime2", nullable: false),
                     End = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -118,7 +107,33 @@ namespace MPM_Betting.DbManager.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AchievmentMpmUser",
+                name: "AchievementEntries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AchievementId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    DateEarned = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AchievementEntries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AchievementEntries_Achievements_AchievementId",
+                        column: x => x.AchievementId,
+                        principalTable: "Achievements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AchievementEntries_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AchievementMpmUser",
                 columns: table => new
                 {
                     AchievmentsId = table.Column<int>(type: "int", nullable: false),
@@ -126,15 +141,15 @@ namespace MPM_Betting.DbManager.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AchievmentMpmUser", x => new { x.AchievmentsId, x.UsersId });
+                    table.PrimaryKey("PK_AchievementMpmUser", x => new { x.AchievmentsId, x.UsersId });
                     table.ForeignKey(
-                        name: "FK_AchievmentMpmUser_Achievment_AchievmentsId",
+                        name: "FK_AchievementMpmUser_Achievements_AchievmentsId",
                         column: x => x.AchievmentsId,
-                        principalTable: "Achievment",
+                        principalTable: "Achievements",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AchievmentMpmUser_AspNetUsers_UsersId",
+                        name: "FK_AchievementMpmUser_AspNetUsers_UsersId",
                         column: x => x.UsersId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -227,6 +242,26 @@ namespace MPM_Betting.DbManager.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Groups",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Groups", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Groups_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Games",
                 columns: table => new
                 {
@@ -248,79 +283,34 @@ namespace MPM_Betting.DbManager.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomSeasonEntries",
+                name: "Messages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SeasonId = table.Column<int>(type: "int", nullable: false),
-                    GameId = table.Column<int>(type: "int", nullable: false)
+                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    RecipientGroupId = table.Column<int>(type: "int", nullable: true),
+                    RecipientUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Time = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", maxLength: 5000, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CustomSeasonEntries", x => x.Id);
+                    table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CustomSeasonEntries_CustomSeasons_SeasonId",
-                        column: x => x.SeasonId,
-                        principalTable: "CustomSeasons",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CustomSeasonEntries_Games_GameId",
-                        column: x => x.GameId,
-                        principalTable: "Games",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Bets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    GroupId = table.Column<int>(type: "int", nullable: true),
-                    Completed = table.Column<bool>(type: "bit", nullable: false),
-                    Score = table.Column<int>(type: "int", nullable: false),
-                    GameId = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    DataStore = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Bets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Bets_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Messages_AspNetUsers_RecipientUserId",
+                        column: x => x.RecipientUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Bets_Games_GameId",
-                        column: x => x.GameId,
-                        principalTable: "Games",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Groups",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
-                    CurrentSeasonId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Groups", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Groups_AspNetUsers_CreatorId",
-                        column: x => x.CreatorId,
+                        name: "FK_Messages_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Messages_Groups_RecipientGroupId",
+                        column: x => x.RecipientGroupId,
+                        principalTable: "Groups",
                         principalColumn: "Id");
                 });
 
@@ -331,7 +321,8 @@ namespace MPM_Betting.DbManager.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     GroupId = table.Column<int>(type: "int", nullable: false),
-                    SeasonId = table.Column<int>(type: "int", nullable: false)
+                    SeasonId = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -377,6 +368,66 @@ namespace MPM_Betting.DbManager.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Bets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    GroupId = table.Column<int>(type: "int", nullable: true),
+                    Completed = table.Column<bool>(type: "bit", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    GameId = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bets_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Bets_Games_GameId",
+                        column: x => x.GameId,
+                        principalTable: "Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Bets_Groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Groups",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomSeasonEntries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SeasonId = table.Column<int>(type: "int", nullable: false),
+                    GameId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomSeasonEntries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CustomSeasonEntries_Games_GameId",
+                        column: x => x.GameId,
+                        principalTable: "Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomSeasonEntries_Seasons_SeasonId",
+                        column: x => x.SeasonId,
+                        principalTable: "Seasons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ScoreEntries",
                 columns: table => new
                 {
@@ -401,9 +452,56 @@ namespace MPM_Betting.DbManager.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "FootballResultBets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Result = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FootballResultBets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FootballResultBets_Bets_Id",
+                        column: x => x.Id,
+                        principalTable: "Bets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FootballScoreBets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    HomeScore = table.Column<int>(type: "int", nullable: false),
+                    AwayScore = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FootballScoreBets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FootballScoreBets_Bets_Id",
+                        column: x => x.Id,
+                        principalTable: "Bets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_AchievmentMpmUser_UsersId",
-                table: "AchievmentMpmUser",
+                name: "IX_AchievementEntries_AchievementId",
+                table: "AchievementEntries",
+                column: "AchievementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AchievementEntries_UserId",
+                table: "AchievementEntries",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AchievementMpmUser_UsersId",
+                table: "AchievementMpmUser",
                 column: "UsersId");
 
             migrationBuilder.CreateIndex(
@@ -481,9 +579,19 @@ namespace MPM_Betting.DbManager.Migrations
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Groups_CurrentSeasonId",
-                table: "Groups",
-                column: "CurrentSeasonId");
+                name: "IX_Messages_RecipientGroupId",
+                table: "Messages",
+                column: "RecipientGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_RecipientUserId",
+                table: "Messages",
+                column: "RecipientUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ScoreEntries_SeasonEntryId",
@@ -514,36 +622,16 @@ namespace MPM_Betting.DbManager.Migrations
                 name: "IX_UserGroupEntries_MpmUserId",
                 table: "UserGroupEntries",
                 column: "MpmUserId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Bets_Groups_GroupId",
-                table: "Bets",
-                column: "GroupId",
-                principalTable: "Groups",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Groups_SeasonEntries_CurrentSeasonId",
-                table: "Groups",
-                column: "CurrentSeasonId",
-                principalTable: "SeasonEntries",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Groups_AspNetUsers_CreatorId",
-                table: "Groups");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_SeasonEntries_Groups_GroupId",
-                table: "SeasonEntries");
+            migrationBuilder.DropTable(
+                name: "AchievementEntries");
 
             migrationBuilder.DropTable(
-                name: "AchievmentMpmUser");
+                name: "AchievementMpmUser");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -561,40 +649,46 @@ namespace MPM_Betting.DbManager.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Bets");
+                name: "CustomSeasonEntries");
 
             migrationBuilder.DropTable(
-                name: "CustomSeasonEntries");
+                name: "FootballResultBets");
+
+            migrationBuilder.DropTable(
+                name: "FootballScoreBets");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "ScoreEntries");
 
             migrationBuilder.DropTable(
-                name: "Achievment");
+                name: "Achievements");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "CustomSeasons");
-
-            migrationBuilder.DropTable(
-                name: "Games");
-
-            migrationBuilder.DropTable(
-                name: "UserGroupEntries");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Groups");
+                name: "Bets");
 
             migrationBuilder.DropTable(
                 name: "SeasonEntries");
 
             migrationBuilder.DropTable(
+                name: "UserGroupEntries");
+
+            migrationBuilder.DropTable(
+                name: "Games");
+
+            migrationBuilder.DropTable(
+                name: "Groups");
+
+            migrationBuilder.DropTable(
                 name: "Seasons");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }
