@@ -4,6 +4,7 @@ using MPM_Betting.DataModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    partial class MpmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240507085427_Betting2")]
+    partial class Betting2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,8 +50,8 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<string>("BetType")
                         .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("nvarchar(34)");
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
 
                     b.Property<int>("MatchID")
                         .HasColumnType("int");
@@ -58,12 +61,6 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("n1")
-                        .HasColumnType("int");
-
-                    b.Property<int>("n2")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -355,23 +352,15 @@ namespace MPM_Betting.DbManager.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.GoalDistanceBet", b =>
-                {
-                    b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
-
-                    b.HasDiscriminator().HasValue("FootballGoalDistanceBet");
-                });
-
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.HowManyCardsBet", b =>
-                {
-                    b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
-
-                    b.HasDiscriminator().HasValue("FootballHowManyCardsBet");
-                });
-
             modelBuilder.Entity("MPM_Betting.DataModel.Football.ResultBet", b =>
                 {
                     b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
+
+                    b.Property<int>("ActualResult")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GuessedResult")
+                        .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("FootballResultBet");
                 });
@@ -380,21 +369,13 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
 
+                    b.Property<int>("GuessedAwayScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GuessedHomeScore")
+                        .HasColumnType("int");
+
                     b.HasDiscriminator().HasValue("FootballScoreBet");
-                });
-
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.WhichBodyPartBet", b =>
-                {
-                    b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
-
-                    b.HasDiscriminator().HasValue("FootballWhichBodyPartBet");
-                });
-
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.WhichSideOfGoalBet", b =>
-                {
-                    b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
-
-                    b.HasDiscriminator().HasValue("WhichSideOfGoalBet");
                 });
 
             modelBuilder.Entity("AchievmentMpmUser", b =>

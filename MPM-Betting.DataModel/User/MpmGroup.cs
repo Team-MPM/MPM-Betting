@@ -1,27 +1,33 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using MPM_Betting.DataModel.Betting;
 
 namespace MPM_Betting.DataModel.User;
-
+/// <summary>
+/// Group Class
+/// </summary>
 public class MpmGroup
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("ID")]
+    [Key]
     public int Id { get; set; }
-    [Column("CREATOR_ID")]
-    public int CreatorId { get; set; }
+    
+    [Required]
     public MpmUser Creator { get; set; }
-    [Column("USERS")]
     public List<UserGroupEntry> UserGroupEntries { get; set; } = [];
     
     [Required]
-    [StringLength(30), Column("GROUP_NAME")]
+    [StringLength(30)]
     public string Name { get; set; } = null!;
     
-    [Column("GROUP_DESCRIPTION")]
     [StringLength(1024)]
     public string? Description { get; set; }
+    [Required]
+    public List<Bet> Bets { get; set; }
+
+    [Required] public int EntryFee { get; set; } = 0;
+
+    public int GroupLimit { get; set; } = 0;
 
     public MpmGroup(MpmUser creator)
     {
@@ -29,8 +35,5 @@ public class MpmGroup
         UserGroupEntries.Add(new UserGroupEntry(creator, this));
     }
 
-    private MpmGroup() : this(null!)
-    {
-        
-    }
+    private MpmGroup() : this(null!) { }
 }

@@ -2,5 +2,8 @@
 
 public enum EBetType
 {
-    GroupBet, SingleBet
+    Result, Score
+    
+    
+    //TODO Prolly add some more types
 }
