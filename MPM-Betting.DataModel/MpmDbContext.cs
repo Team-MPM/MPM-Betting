@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.DataModel;
@@ -48,4 +47,4 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
         
         base.OnModelCreating(modelBuilder);
     }
-} 
+}

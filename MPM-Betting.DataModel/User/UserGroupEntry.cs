@@ -11,6 +11,9 @@ public class UserGroupEntry(MpmUser user, MpmGroup group)
     
     public MpmUser MpmUser { get; set; } = user;
     public MpmGroup Group { get; set; } = group;
+
+    public int Score { get; set; } = 0;
+    public EGroupRole Role { get; set; }
     
     public List<ScoreEntry> ScoreEntries { get; set; } = [];
     
