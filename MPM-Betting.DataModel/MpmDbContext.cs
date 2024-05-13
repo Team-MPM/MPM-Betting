@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel.Betting;
+using MPM_Betting.DataModel.Rewarding;
 using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.DataModel;
@@ -17,7 +18,8 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<BuiltinSeason> BuiltinSeasons { get; set; } = null!;
     public DbSet<CustomSeasonEntry> CustomSeasonEntries { get; set; } = null!;
     public DbSet<Bet> Bets { get; set; } = null!;
-    
+    public DbSet<Achievement> Achievements { get; set; }
+    public DbSet<AchievementEntry> AchievementEntries { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

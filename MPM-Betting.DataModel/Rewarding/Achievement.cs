@@ -3,7 +3,7 @@ using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.DataModel.Rewarding;
 
-public class Achievment
+public class Achievement
 {
     [Key] 
     public int Id { get; set; }
