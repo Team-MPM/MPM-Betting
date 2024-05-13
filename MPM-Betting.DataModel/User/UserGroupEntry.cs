@@ -12,7 +12,7 @@ public class UserGroupEntry(MpmUser user, MpmGroup group)
     public MpmUser MpmUser { get; set; } = user;
     public MpmGroup Group { get; set; } = group;
     
-    List<ScoreEntry> ScoreEntries { get; set; } = [];
+    public List<ScoreEntry> ScoreEntries { get; set; } = [];
     
     private UserGroupEntry() : this(null!, null!)
     {

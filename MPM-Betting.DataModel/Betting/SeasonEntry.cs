@@ -12,5 +12,7 @@ public class SeasonEntry(string name, MpmGroup group)
 
     public Season Season { get; set; }
 
+    public List<ScoreEntry> ScoreEntries { get; set; }
+
     private SeasonEntry() : this(null!, null!) { }
 }
