@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    [Migration("20240513180932_init")]
+    [Migration("20240514162301_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -115,7 +115,8 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("ReferenceId")
                         .HasColumnType("int");
@@ -181,9 +182,6 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ReferenceId")
-                        .HasColumnType("int");
 
                     b.Property<int>("Sport")
                         .HasColumnType("int");
@@ -597,6 +595,9 @@ namespace MPM_Betting.DbManager.Migrations
             modelBuilder.Entity("MPM_Betting.DataModel.Betting.BuiltinSeason", b =>
                 {
                     b.HasBaseType("MPM_Betting.DataModel.Betting.Season");
+
+                    b.Property<int>("ReferenceId")
+                        .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("BuiltinSeason");
                 });

@@ -8,20 +8,26 @@ namespace MPM_Betting.Services.Domains;
 
 public partial class UserDomain(MpmDbContext dbContext)
 {
-    private class NoUserException : Exception {}
-    private static NoUserException s_NoUserException = new();
+    private class NoUserException : Exception;
+    private static readonly NoUserException s_NoUserException = new();
+
+    private class GroupNotFoundException : Exception;
+    private static readonly GroupNotFoundException s_GroupNotFoundException = new();
     
-    private class GroupNotFoundException : Exception {}
-    private static NoUserException s_GroupNotFoundException = new();
+    private class SeasonNotFoundException : Exception;
+    private static readonly SeasonNotFoundException s_SeasonNotFoundException = new();
+
+    private class AccessDeniedException : Exception;
+    private static readonly AccessDeniedException s_AccessDeniedException = new();
     
-    private class AccessDeniedException : Exception {}
-    private static NoUserException s_AccessDeniedException = new();
+    private class BadWordException : Exception;
+    private static readonly BadWordException s_BadWordException = new();
     
-    private class BadWordException : Exception {}
-    private static BadWordException s_BadWordException = new();
+    private class InvalidDateException : Exception;
+    private static readonly InvalidDateException s_InvalidDateException = new();
     
-    private class InvalidDateException : Exception {}
-    private static InvalidDateException s_InvalidDateException = new();
+    private class AlreadyExistsException : Exception;
+    private static readonly AlreadyExistsException s_AlreadyExistsException = new();
     
     [GeneratedRegex("^[a@][s\\$][s\\$]$\n[a@][s\\$][s\\$]h[o0][l1][e3][s\\$]?\nb[a@][s\\$][t\\+][a@]rd \nb[e3][a@][s\\$][t\\+][i1][a@]?[l1]([i1][t\\+]y)?\nb[e3][a@][s\\$][t\\+][i1][l1][i1][t\\+]y\nb[e3][s\\$][t\\+][i1][a@][l1]([i1][t\\+]y)?\nb[i1][t\\+]ch[s\\$]?\nb[i1][t\\+]ch[e3]r[s\\$]?\nb[i1][t\\+]ch[e3][s\\$]\nb[i1][t\\+]ch[i1]ng?\nb[l1][o0]wj[o0]b[s\\$]?\nc[l1][i1][t\\+]\n^(c|k|ck|q)[o0](c|k|ck|q)[s\\$]?$\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[e3]d \n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[e3]r\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[i1]ng\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[s\\$]\n^cum[s\\$]?$\ncumm??[e3]r\ncumm?[i1]ngcock\n(c|k|ck|q)um[s\\$]h[o0][t\\+]\n(c|k|ck|q)un[i1][l1][i1]ngu[s\\$]\n(c|k|ck|q)un[i1][l1][l1][i1]ngu[s\\$]\n(c|k|ck|q)unn[i1][l1][i1]ngu[s\\$]\n(c|k|ck|q)un[t\\+][s\\$]?\n(c|k|ck|q)un[t\\+][l1][i1](c|k|ck|q)\n(c|k|ck|q)un[t\\+][l1][i1](c|k|ck|q)[e3]r\n(c|k|ck|q)un[t\\+][l1][i1](c|k|ck|q)[i1]ng\ncyb[e3]r(ph|f)u(c|k|ck|q)\nd[a@]mn\nd[i1]ck\nd[i1][l1]d[o0]\nd[i1][l1]d[o0][s\\$]\nd[i1]n(c|k|ck|q)\nd[i1]n(c|k|ck|q)[s\\$]\n[e3]j[a@]cu[l1]\n(ph|f)[a@]g[s\\$]?\n(ph|f)[a@]gg[i1]ng\n(ph|f)[a@]gg?[o0][t\\+][s\\$]?\n(ph|f)[a@]gg[s\\$]\n(ph|f)[e3][l1][l1]?[a@][t\\+][i1][o0]\n(ph|f)u(c|k|ck|q)\n(ph|f)u(c|k|ck|q)[s\\$]?\ng[a@]ngb[a@]ng[s\\$]?\ng[a@]ngb[a@]ng[e3]d\ng[a@]y\nh[o0]m?m[o0]\nh[o0]rny\nj[a@](c|k|ck|q)\\-?[o0](ph|f)(ph|f)?\nj[e3]rk\\-?[o0](ph|f)(ph|f)?\nj[i1][s\\$z][s\\$z]?m?\n[ck][o0]ndum[s\\$]?\nmast(e|ur)b(8|ait|ate)\nn+[i1]+[gq]+[e3]*r+[s\\$]*\n[o0]rg[a@][s\\$][i1]m[s\\$]?\n[o0]rg[a@][s\\$]m[s\\$]?\np[e3]nn?[i1][s\\$]\np[i1][s\\$][s\\$]\np[i1][s\\$][s\\$][o0](ph|f)(ph|f) \np[o0]rn\np[o0]rn[o0][s\\$]?\np[o0]rn[o0]gr[a@]phy\npr[i1]ck[s\\$]?\npu[s\\$][s\\$][i1][e3][s\\$]\npu[s\\$][s\\$]y[s\\$]?\n[s\\$][e3]x\n[s\\$]h[i1][t\\+][s\\$]?\n[s\\$][l1]u[t\\+][s\\$]?\n[s\\$]mu[t\\+][s\\$]?\n[s\\$]punk[s\\$]?\n[t\\+]w[a@][t\\+][s\\$]?", RegexOptions.IgnoreCase)]
     private static partial Regex BadWordRegex();
@@ -70,6 +76,13 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (BadWordRegex().IsMatch(name)) return s_BadWordException;
         if (BadWordRegex().IsMatch(description)) return s_BadWordException;
         
+        if (name.Length > 30 || description.Length > 1024)
+            return s_BadWordException;
+        
+        var existingGroup = dbContext.Groups.FirstOrDefault(g => g.Name == name);
+        if (existingGroup is not null)
+            return s_AlreadyExistsException;
+        
         var group = new MpmGroup(m_User, name, description, []);
         
         dbContext.Groups.Add(group);
@@ -100,12 +113,13 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (m_User is null) return s_NoUserException;
         
         if (BadWordRegex().IsMatch(name)) return s_BadWordException;
+        
+        if (name.Length > 30)
+            return s_BadWordException;
 
         var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
-        
-        if (uge.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
         group.Name = name;
@@ -121,12 +135,13 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (m_User is null) return s_NoUserException;
         
         if (BadWordRegex().IsMatch(description)) return s_BadWordException;
+        
+        if (description.Length > 1024)
+            return s_BadWordException;
 
         var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
-        
-        if (uge.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
         group.Description = description;
@@ -143,11 +158,13 @@ public partial class UserDomain(MpmDbContext dbContext)
         
         if (role is EGroupRole.Owner) return s_AccessDeniedException;
         
-        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
+        var existingUge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == target);
+        if (existingUge is not null)
+            return s_AlreadyExistsException;
         
-        if (uge.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
         dbContext.UserGroupEntries.Add(new UserGroupEntry(target, group) { Role = role });
@@ -165,10 +182,8 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (role is EGroupRole.Owner) return s_AccessDeniedException;
         
         var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
-        
-        if (uge.Role is not EGroupRole.Owner)
+
+        if (uge?.Role is not EGroupRole.Owner)
             return s_AccessDeniedException;
         
         var targetUge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == target);
@@ -188,10 +203,8 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (m_User is null) return s_NoUserException;
         
         var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
-        
-        if (uge.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
         var targetUge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == target);
@@ -243,11 +256,13 @@ public partial class UserDomain(MpmDbContext dbContext)
         ArgumentNullException.ThrowIfNull(season);
         if (m_User is null) return s_NoUserException;
         
-        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
+        var existingSeasonEntry = dbContext.SeasonEntries.FirstOrDefault(se => se.Group == group && se.Season == season);
+        if (existingSeasonEntry is not null)
+            return s_AlreadyExistsException;
         
-        if (uge.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
         dbContext.SeasonEntries.Add(new SeasonEntry(season.Name, group, season));
@@ -263,10 +278,8 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (m_User is null) return s_NoUserException;
         
         var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
-        
-        if (uge.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
         var seasonEntry = dbContext.SeasonEntries.FirstOrDefault(se => se.Group == group && se.Season == season);
@@ -289,11 +302,12 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (BadWordRegex().IsMatch(name)) return s_BadWordException;
         if (BadWordRegex().IsMatch(description)) return s_BadWordException;
         
-        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
-        if (uge is null)
-            return s_AccessDeniedException;
+        if (name.Length > 50 || description.Length > 2000)
+            return s_BadWordException;
         
-        if (uge.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
         if (startDate < DateTime.Now)
@@ -317,5 +331,76 @@ public partial class UserDomain(MpmDbContext dbContext)
         return customSeason;
     }
     
+    public async Task<MpmResult<bool>> AddCustomSeasonEntry(MpmGroup group, CustomSeason season, Game game)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(season);
+        ArgumentNullException.ThrowIfNull(game);
+        if (m_User is null) return s_NoUserException;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+            return s_AccessDeniedException;
+        
+        var seasonEntry = dbContext.SeasonEntries.FirstOrDefault(se => se.Group == group && se.Season == season);
+        if (seasonEntry is null)
+            return s_SeasonNotFoundException;
+        
+        var existingEntry = dbContext.CustomSeasonEntries.FirstOrDefault(cse => cse.Season == season && cse.Game == game);
+        if (existingEntry is not null)
+            return s_AlreadyExistsException;
+        
+        dbContext.CustomSeasonEntries.Add(new CustomSeasonEntry(season, game));
+        await dbContext.SaveChangesAsync();
+        
+        return true;
+    }
     
+    public async Task<MpmResult<bool>> RemoveCustomSeasonEntry(MpmGroup group, CustomSeason season, Game game)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(season);
+        ArgumentNullException.ThrowIfNull(game);
+        if (m_User is null) return s_NoUserException;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+
+        if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
+            return s_AccessDeniedException;
+        
+        var seasonEntry = dbContext.SeasonEntries.FirstOrDefault(se => se.Group == group && se.Season == season);
+        if (seasonEntry is null)
+            return s_SeasonNotFoundException;
+        
+        var existingEntry = dbContext.CustomSeasonEntries.FirstOrDefault(cse => cse.Season == season && cse.Game == game);
+        if (existingEntry is null)
+            return s_GroupNotFoundException;
+        
+        dbContext.CustomSeasonEntries.Remove(existingEntry);
+        await dbContext.SaveChangesAsync();
+        
+        return true;
+    }
+    
+    public async Task<MpmResult<List<Game>>> GetSeasonEntries(MpmGroup group, CustomSeason season)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(season);
+        if (m_User is null) return s_NoUserException;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        if (uge is null)
+            return s_AccessDeniedException;
+        
+        var seasonEntry = dbContext.SeasonEntries.FirstOrDefault(se => se.Group == group && se.Season == season);
+        if (seasonEntry is null)
+            return s_SeasonNotFoundException;
+        
+        var query = dbContext.CustomSeasonEntries
+            .Where(cse => cse.Season == season)
+            .Select(cse => cse.Game);
+        
+        return await query.ToListAsync();
+    }
 }
