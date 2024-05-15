@@ -10,7 +10,9 @@
     justify-content: center;
     margin: 0 0 20px 0;
     width: 100%;
-    background: rgba(80,80,80,0.5);
+    /*background: rgba(60,60,60,1);*/
+    /*background: rgba(40,40,40,1);*/
+    background: rgba(50,50,50,1);
     border-radius: 10px;
     padding-top: 15px;
 }
@@ -72,7 +74,6 @@
     flex-direction: column;
     padding: 10px 5px 10px 5px;
     margin: 5px 0 5px 0;
-    background: lightgrey;
 }
 
 .MatchHomeTeam ,  .MatchAwayTeam {

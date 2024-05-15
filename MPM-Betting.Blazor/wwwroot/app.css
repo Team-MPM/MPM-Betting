@@ -1,6 +1,8 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     overflow-x: hidden;
+    background: rgba(15,15,15);
+    color: ghostwhite;
 }
 
 a, .btn-link {

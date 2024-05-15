@@ -1,9 +1,10 @@
 ﻿.NavBar {
-    background: rgba(242, 189, 53, 1);
+    /*background: rgba(242, 189, 53, 1);*/
+    background: rgba(50,50,50,1);
     width: 100vw;
     height: fit-content;
     display: flex;
-     border-bottom: black solid 1px;
+     border-bottom: gray solid 2px;
     margin-bottom: 1%;
 }
 
@@ -13,7 +14,6 @@
     font-style: italic;
     font-weight: bold;
     font-decoration: none;
-    color: black;
     cursor: default;
 }
 
