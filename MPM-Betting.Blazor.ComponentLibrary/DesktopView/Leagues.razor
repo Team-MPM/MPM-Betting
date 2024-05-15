@@ -4,25 +4,25 @@
 @using Blazorise
 
 <div class="Leagues">
-    <h2>Leagues</h2>
-    
-    <div class="line"></div>
-    
-    @foreach(var league in TopLeagues)
+    <h2 class="pt-3 fw-bold">Top Leagues</h2>
+
+    <div class="line"/>
+
+    @foreach (var league in TopLeagues)
     {
         <LeagueEntry league="@league"/>
     }
     
-    
     <Divider/>
+    
 </div>
 
 @code {
     [Parameter]
-    public List<FootballApi.League> LeagueList { get; set; }
-    public List<FootballApi.League> TopLeagues { get; set; }
+    public List<FootballApi.League>? LeagueList { get; set; }
+    public List<FootballApi.League>? TopLeagues { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         int[] ids = { 73, 47, 78, 55, 42, 54 };
         TopLeagues = LeagueList.Where(s => ids.Contains(s.Id)).ToList();

@@ -1,19 +1,24 @@
 ﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using Blazorise
+@attribute [StreamRendering(true)]
 
 <div class="NavBar col-12">
     <div class="col-1 logo">
-        <div class="NavBarLogoText">MPM</div>
+        <a href="/"><div class="NavBarLogoText">MPM</div></a>
     </div>
     <div class="col-3 sportarten">
-        <a href="/"> <Button Color="Color.Primary">Home</Button></a>
-        <a href="/dashboard"><Button Color="Color.Secondary">Dashboard</Button></a>
+        <a href="/">
+             <Button Color="@(Tab == ActiveTab.Home ? Color.Primary : Color.Secondary)">Home</Button>
+        </a>
+        <a href="/dashboard">
+            <Button Color="@(Tab == ActiveTab.Dashboard ? Color.Primary : Color.Secondary)" >Dashboard</Button>
+        </a>
         <Dropdown>
-            <DropdownToggle Color="Color.Primary">
+            <DropdownToggle Color="Color.Secondary">
                 Sportarten
             </DropdownToggle>
             <DropdownMenu>
-                <DropdownItem>Fußball</DropdownItem>
+                <DropdownItem TextColor="TextColor.Primary">Fußball</DropdownItem>
                 <DropdownDivider />
                 <DropdownItem Disabled>Basketball</DropdownItem>
                 <DropdownDivider />
@@ -43,5 +48,24 @@
 
 @code {
     [Parameter]
-    public string Test { get; set; }
+    public ActiveTab Tab { get; set; }
+    
+    [Parameter]
+    public SelectedSportArt SportArt { get; set; }
+    
+    
+    public enum ActiveTab
+    {
+        Home,
+        Dashboard,
+        Sportarten
+    }
+
+    public enum SelectedSportArt
+    {
+        Fußball,
+        Basketball,
+        Formula1,
+        None
+    }
 }

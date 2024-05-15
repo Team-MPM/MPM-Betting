@@ -12,6 +12,9 @@
     font-size: 32px;
     font-style: italic;
     font-weight: bold;
+    font-decoration: none;
+    color: black;
+    cursor: default;
 }
 
 .NavBar img {

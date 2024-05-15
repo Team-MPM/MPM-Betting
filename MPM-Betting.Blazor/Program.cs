@@ -7,6 +7,7 @@ using MPM_Betting.Services;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,11 @@ builder.Services
     } )
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
+
+// MudBlazor
+
+
+builder.Services.AddMudServices();
 
 
 

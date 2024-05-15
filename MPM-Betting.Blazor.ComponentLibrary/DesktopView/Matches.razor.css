@@ -1,1 +1,110 @@
-﻿
+﻿.MatchesDate {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.MatchesBox {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0 0 20px 0;
+    width: 100%;
+    background: rgba(80,80,80,0.5);
+    border-radius: 10px;
+    padding-top: 15px;
+}
+
+.MatchLeagueBoxes {
+    display: flex;
+    width: 90%;
+    justify-self: center;
+    flex-direction: column;
+    justify-content: center;    
+}
+
+.MatchLeagueEntry {
+    display: flex;
+    width: 100%;
+    border-radius: 10px;
+    font-size: 18px;
+    margin: 5px 0 5px 0;
+    padding: 5px 0 5px 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+}
+
+.MatchLeagueEntryName {
+    display: flex;
+    width: 100%;
+    border-radius: 10px;
+    font-size: 18px;
+    margin: 5px 0 5px 0;
+    padding: 5px 0 5px 0;
+    align-items: center;
+    border-bottom: 3px solid black;
+    justify-content: center;
+    
+    font-weight:  bold;
+}
+
+.NoMatchesError {
+    display: flex;
+    width: 100%;
+    font-style: italic;
+    justify-content: center;
+    padding: 15px 0px 10px 0px;
+}
+
+.LeagueMatches {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+.MatchEntry {
+    display: grid;
+    grid-template-columns: 2fr 0.2fr 1fr;
+    grid-template-rows: 1fr;
+    width: 100%;
+    flex-direction: column;
+    padding: 10px 5px 10px 5px;
+    margin: 5px 0 5px 0;
+    background: lightgrey;
+}
+
+.MatchHomeTeam ,  .MatchAwayTeam {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-size: 15px;
+}
+
+.MatchInfo {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 0.4fr 1fr 0.5fr;
+    align-content: center;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+}
+
+.MatchInfo img {
+    height: 40px;
+}
+
+.MatchAwayTeam {
+}
+
+.Match_HomeLogo {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.MatchInfoDivider{
+    border-left: 3px solid black
+}
+    

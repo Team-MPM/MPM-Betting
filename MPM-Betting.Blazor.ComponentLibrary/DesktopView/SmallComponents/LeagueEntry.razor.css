@@ -1,7 +1,6 @@
 ﻿.Box {
     width: 80%;
     border-radius: 10px;
-    background: lightcoral;
     justify-self: center;
     display: grid;
     grid-template-columns: 1fr 3fr 1fr;
@@ -9,6 +8,12 @@
     margin: 5px 0 5px 0;
     padding: 5px 0 5px 0;
     align-items: center;
+    border-bottom: 2px solid black;
+}
+
+
+.LeagueBox:hover {
+    background: lightgray;
 }
 
 
@@ -32,9 +37,6 @@
     justify-self: center;
 }
 
-.FavBox {
-
-}
 
 .FavBoxStar {
     justify-self: center;
