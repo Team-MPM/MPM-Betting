@@ -1,4 +1,4 @@
-name: .NET
+name: Build and Test .NET Projects 
 
 on:
   push:
@@ -7,11 +7,20 @@ on:
     branches: [ "master", "dev" ]
 
 jobs:
-  build:
+  build-and-test:
 
     runs-on: ubuntu-latest
 
+    env:
+      CI: true
+
     steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Install Azure Functions Core Tools
+      run: npm install -g azure-functions-core-tools@3 --unsafe-perm true
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -45,7 +54,7 @@ jobs:
         dotnet build --no-restore ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
         dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.AppHost/MPM-Betting.Aspire.AppHost.csproj
         dotnet build --no-restore ./MPM-Betting.Aspire/MPM-Betting.Aspire.ServiceDefaults/MPM-Betting.Aspire.ServiceDefaults.csproj
-    - name: Test
-      run: |
-        dotnet test --no-build --verbosity normal ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
-        dotnet test --no-build --verbosity normal ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
+    - name: Unit Test
+      run: dotnet test --no-build --verbosity normal ./MPM-Betting.UnitTests/MPM-Betting.UnitTests.csproj
+    - name: Integration Test
+      run: dotnet test --no-build --verbosity normal ./MPM-Betting.IntegrationTests/MPM-Betting.IntegrationTests.csproj
