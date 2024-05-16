@@ -136,9 +136,7 @@ public readonly struct MpmResult<T> : IEquatable<MpmResult<T>>, IComparable<MpmR
             f(Value);
         return Prelude.unit;
     }
-
     
-    // TODO: try an adding extension method for Task<MpmResult<T>> "AwaitAndMatch" that would await the task and then call Match on the result
     [Pure]
     public TR Match<TR>(Func<T, TR> suc, Func<Exception, TR> fail)
     {

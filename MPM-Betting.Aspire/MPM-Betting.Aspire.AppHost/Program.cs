@@ -79,6 +79,7 @@ else
 }
 
 var dbManager = builder.AddProject<MPM_Betting_DbManager>("dbmanager")
+    .WithReference(redis)
     .WithReference(sql);
 
 

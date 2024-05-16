@@ -1,12 +1,15 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
+using MPM_Betting.Services.Data;
+using StackExchange.Redis;
 
 namespace MPM_Betting.DbManager;
 
-internal class DbInitializer(IServiceProvider serviceProvider, ILogger<DbInitializer> logger)
+internal class DbInitializer(IServiceProvider serviceProvider, ILogger<DbInitializer> logger, FootballApi footballApi)
     : BackgroundService
 {
     public const string ActivitySourceName = "Migrations";
@@ -38,27 +41,46 @@ internal class DbInitializer(IServiceProvider serviceProvider, ILogger<DbInitial
 
     private async Task SeedAsync(MpmDbContext dbContext, CancellationToken cancellationToken)
     {
-        if (await dbContext.Seasons.AnyAsync(cancellationToken))
-        {
-            logger.LogInformation("Database already seeded");
-            return;
-        }
-
         logger.LogInformation("Seeding database");
 
-        var builtinSeasons = new[]
-        {
-            new BuiltinSeason("UEFA Champions League", "Top competition in Europe")
-            {
-                Sport = ESportType.Football,
-                Start = DateTime.ParseExact("9.7.2023", "d.M.yyyy", CultureInfo.InvariantCulture),
-                End = DateTime.ParseExact("31.5.2024", "d.M.yyyy", CultureInfo.InvariantCulture),
-                ReferenceId = 42
-            }
-        };
-
-        await dbContext.Seasons.AddRangeAsync(builtinSeasons, cancellationToken);
+        await SeedBuiltinSeasons(dbContext, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task SeedBuiltinSeasons(MpmDbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (dbContext.BuiltinSeasons.Count() > 2000)
+            return;
+        
+        var result = await footballApi.GetAllFootballLeagues();
+        var allSeasons = new ConcurrentBag<BuiltinSeason>();
+
+        if (result.IsFaulted)
+            return;
+
+        Parallel.ForEach(result.Value, league =>
+        {
+            try
+            {
+                var seasonResult = footballApi.GetSeasonsForLeague(league.Id);
+                seasonResult.Wait(cancellationToken);
+                seasonResult.Result.IfSuc(seasons =>
+                {
+                    foreach (var season in seasons.Select(s => new BuiltinSeason(league.Name, league.Name)
+                    {
+                        ReferenceId = league.Id,
+                        Start = new DateTime(int.Parse(s.Split('/')[0]), 1, 1),
+                        End = new DateTime(int.Parse(s.Split('/')[1]), 1, 1)
+                    })) allSeasons.Add(season);
+                });
+            }
+            catch (Exception e)
+            {
+                logger.LogInformation("SeedBuiltinSeasons encountered {Message} at league {LeagueId}", e.Message, league.Id);
+            }
+        });
+
+        await dbContext.BuiltinSeasons.AddRangeAsync(allSeasons, cancellationToken);
     }
 }
