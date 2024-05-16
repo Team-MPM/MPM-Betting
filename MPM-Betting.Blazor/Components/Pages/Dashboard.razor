@@ -47,7 +47,7 @@
 
     public List<FootballApi.League> LeaguesList { get; set; }
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         LeaguesList = await GetLists();
     }

@@ -1,12 +1,30 @@
-﻿.NavBar {
+﻿/*GLOBAL CLASSES*/
+
+.NoHoverUnderline {
+    text-decoration: none;   
+}
+
+.NoHoverUnderline:hover {
+    text-decoration: none;
+}
+
+.NoTransform {
+    transform: none;
+}
+
+/*NORMAL CLASSES*/
+
+.NavBar {
     /*background: rgba(242, 189, 53, 1);*/
     background: rgba(50,50,50,1);
     width: 100vw;
     height: fit-content;
     display: flex;
-     border-bottom: gray solid 2px;
+    border-bottom: gray solid 2px;
     margin-bottom: 1%;
+    justify-content: space-evenly;
 }
+
 
 .NavBarLogoText {
     font-family: Impact, fantasy;
@@ -15,6 +33,13 @@
     font-weight: bold;
     font-decoration: none;
     cursor: default;
+    color: #0BBCC7; /*TODO*/
+}
+
+.NavBarLogoText:hover {
+    transform: scale(1.04);
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .NavBar img {
@@ -50,3 +75,44 @@
     font-size: 1.2em;
     font-family: Tahoma;
 }
+
+.NavBarLink {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    text-decoration: none;
+}
+
+
+.NavBarLink:hover {
+    text-decoration: none;
+    cursor: pointer;
+    transform: scale(103%);
+}
+
+.NavBarItem {
+    font-family: "Lucida Bright";
+    font-size: 20px;
+    color: white;
+    text-decoration: none;
+}
+
+.NavBarActive {
+    font-weight: bold;
+    border-bottom: 3px solid #0BBCC7;
+}
+
+.NavBarDropDown {
+    display: grid;
+    grid-template-columns: 2fr 0.1fr;
+}
+
+.NavBarDropDownSP {
+    diplay: flex;
+    align-content: center;
+    align-items: center;
+    /*font-style: italic;*/
+    color: rgb(200,200,200);
+
+}
+
