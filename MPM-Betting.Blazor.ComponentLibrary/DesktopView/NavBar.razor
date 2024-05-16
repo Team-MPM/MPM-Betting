@@ -1,0 +1,79 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using Blazorise
+@attribute [StreamRendering(true)]
+
+<div class="NavBar col-12">
+    <div class="col-1 logo">
+        <a href="/" class="NoHoverUnderline">
+            <div class="NavBarLogoText">MPM</div></a>
+    </div>
+    <div class="col-4 sportarten">
+        <div/>
+        <a href="/" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Home ? "NavBarActive" : "")">
+            <div class="NavBarItem">Home</div>
+        </a>
+        <a href="/dashboard" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Dashboard ? "NavBarActive" : "")">
+            <div class="NavBarItem">Dashboard</div>
+        </a>
+
+        <div></div>
+
+        <div class="NavBarDropDown">
+            <div class="NavBarItem NavBarDropDownSP">@SportArt.ToString()</div>
+            <Dropdown>
+                <DropdownToggle>
+                </DropdownToggle>
+                <DropdownMenu>
+                    <DropdownItem TextColor="TextColor.Primary">Fußball</DropdownItem>
+                    <DropdownDivider/>
+                    <DropdownItem Disabled>Basketball</DropdownItem>
+                    <DropdownDivider/>
+                    <DropdownItem Disabled>Formula 1</DropdownItem>
+                </DropdownMenu>
+
+            </Dropdown>
+        </div>
+        <div/>
+    </div>
+    <div class="col-3">
+
+    </div>
+    <div class="col-1 light_dark">
+
+    </div>
+    <div class="col-1 notifications">
+        <img src="Images/bell_white.png" height="40px"/>
+    </div>
+    <div class="col-1 credits">
+
+        <div>7524</div>
+        <img src="Images/coin.png" height="30px" alt="xxx"/>
+    </div>
+    <div class="col-1 profile-pic">
+        <img src="Images/pfp.jpg" height="50px" alt="xxx"/>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ActiveTab Tab { get; set; }
+    
+    [Parameter]
+    public SelectedSportArt SportArt { get; set; }
+    
+    
+    public enum ActiveTab
+    {
+        Home,
+        Dashboard,
+        Sportarten
+    }
+
+    public enum SelectedSportArt
+    {
+        Fußball,
+        Basketball,
+        Formula1,
+        None
+    }
+}

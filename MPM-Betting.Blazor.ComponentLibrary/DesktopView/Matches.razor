@@ -1,0 +1,120 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using Blazorise
+@using Microsoft.AspNetCore.Mvc.ApiExplorer
+@using MPM_Betting.Services.Data
+@inject FootballApi Api
+@attribute [StreamRendering]
+
+<div class="MatchesDate">
+    <MatchesDatePicker/>
+</div>
+
+<Divider/>
+
+<div class="MatchesBox">
+    <h2>Matches</h2>
+    <Divider/>
+    <div class="MatchLeagueBoxes">
+        @if (GameEntries == null)
+        {
+            <div>Loading</div>
+        }
+        else
+        {
+            @foreach(var league in TopLeagues)
+            {
+                <div class="MatchLeagueEntry">
+                <div class="MatchLeagueEntryName">@league.Name</div>
+                @if (GameEntries.ContainsKey(league.Id))
+                {
+                    <div class="LeagueMatches">
+                    @foreach (var match in GameEntries[league.Id])
+                    {
+                        <div class="MatchEntry">
+                            <div class="MatchInfo">
+                                <img class="Match_HomeLogo" src="Images/logo_Cropped.png"/>
+                                <div class="MatchHomeTeam">@match.Score.HomeTeam.Name</div>
+                                <div class="MatchScore">
+                                    <span>@match.Score.HomeScore</span>
+                                    <span>:</span>
+                                    <span>@match.Score.AwayScore</span>
+                                </div>
+                                <div class="MatchAwayTeam">@match.Score.AwayTeam.Name</div>
+                                <img class="Match_HomeLogo" src="Images/logo_Cropped.png"/>
+                            </div>
+                            <div class="MatchInfoDivider"></div>
+                            <div class="BetsInfo">
+                                <span>x</span>
+                                <span>x</span>
+                                <span>x</span>
+                            </div>
+                        </div>
+                    }
+                    </div>
+                }
+                else
+                {
+                    <div class="NoMatchesError">
+                        <div class="pt-5"/>
+                        No Matches Found!
+                        <div class="pb-3"/>
+                    </div>
+                }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+
+
+ 
+@code {
+    [Parameter]
+    public List<FootballApi.League> Leagues { get; set; }
+    public List<FootballApi.League>? TopLeagues { get; set; }
+    
+    public Dictionary<int, List<FootballApi.GameEntry>>? GameEntries { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        
+        int[] ids = { 73, 47, 78, 55, 42, 54,47,37,22,32,120 };
+        TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).ToList();
+        await FillMatches();
+    }
+
+    private async Task FillMatches()
+    {
+        GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
+        foreach (var league in TopLeagues)
+        {
+            GameEntries.Add(league.Id, new List<FootballApi.GameEntry>()
+            {
+                new FootballApi.GameEntry(1, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "erfgthzewdesfgfrdedfrgfredfrgfrdedfsgrdefsgfredfsrfewsdsfgfrgfdwrfgttrfghn"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(2, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "FC Real Madrid"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(3, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "Spurs Tottenham"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(4, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(5, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(6, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
+
+            });
+        }
+        
+        // GameEntries = new Dictionary<int, List<string>>();
+        // foreach (var league in TopLeagues)
+        // {
+        //     // var games = await Api.GetGameEntries(league.Id, DateOnly.FromDateTime(DateTime.Now));
+        //     // GameEntries.Add(league.Id, games);
+        //
+        //
+        //     GameEntries.Add(league.Id, new List<string>() {"xxx", "yyy", "zzz", "aaa"});
+        // }
+ 
+    }
+    
+    
+    
+
+}

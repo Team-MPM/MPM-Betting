@@ -64,7 +64,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MPM-Betting.Blazor.Components\MPM-Betting.Blazor.Components.csproj" />
+      <ProjectReference Include="..\MPM-Betting.Blazor.ComponentLibrary\MPM-Betting.Blazor.ComponentLibrary.csproj" />
       <ProjectReference Include="..\MPM-Betting.PlatformServices\MPM-Betting.PlatformServices.csproj" />
     </ItemGroup>
 

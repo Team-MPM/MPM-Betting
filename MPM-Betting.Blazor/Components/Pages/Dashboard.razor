@@ -1,0 +1,69 @@
+﻿@page "/Dashboard"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@using Google.Protobuf.WellKnownTypes
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.Services.Data
+@inject FootballApi Api
+@using Blazorise
+<PageTitle>Home</PageTitle>
+
+
+<div id="View">
+    <div class="container-fluid">
+        <div class="row">
+            <NavBar Tab="NavBar.ActiveTab.Dashboard" SportArt="NavBar.SelectedSportArt.Fußball"/>
+        </div>
+        
+        <div class="MainPage">
+            <div class="col-2">
+                @if(LeaguesList != null)
+                {
+                    <Leagues LeagueList="@LeaguesList"/>
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>    
+            <div class="col-7">
+               @if(LeaguesList != null)
+                {
+                    <Matches Leagues="@LeaguesList"/>
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+            <div class="col-3">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    public List<FootballApi.League> LeaguesList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        LeaguesList = await GetLists();
+    }
+    
+    public async Task<List<FootballApi.League>> GetLists() => await Api.GetAllFootballLeagues();
+
+}
+
+
+
+
+
+
+
+
+
+
+
+

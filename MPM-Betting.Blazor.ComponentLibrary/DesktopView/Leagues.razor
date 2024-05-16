@@ -1,0 +1,32 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.Services.Data
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
+@using Blazorise
+
+<div class="Leagues">
+    <h2 class="pt-3 fw-bold">Top Leagues</h2>
+
+    <div class="line"/>
+
+    @foreach (var league in TopLeagues)
+    {
+        <LeagueEntry league="@league"/>
+    }
+    
+    <Divider/>
+    
+</div>
+
+@code {
+    [Parameter]
+    public List<FootballApi.League>? LeagueList { get; set; }
+    public List<FootballApi.League>? TopLeagues { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        int[] ids = { 73, 47, 78, 55, 42, 54 };
+        TopLeagues = LeagueList.Where(s => ids.Contains(s.Id)).ToList();
+    }
+
+
+}

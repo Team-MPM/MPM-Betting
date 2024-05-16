@@ -1,6 +1,6 @@
 using Microsoft.JSInterop;
 
-namespace MPM_Betting.Blazor.Components;
+namespace MPM_Betting.Blazor.ComponentLibrary;
 
 // This class provides an example of how JavaScript functionality can be wrapped
 // in a .NET class for easy consumption. The associated JavaScript module is
@@ -16,7 +16,7 @@ public class ExampleJsInterop : IAsyncDisposable
     public ExampleJsInterop(IJSRuntime jsRuntime)
     {
         m_ModuleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/MPM_Betting.Blazor.Components/exampleJsInterop.js").AsTask());
+            "import", "./_content/MPM_Betting.Blazor.ComponentLibrary/exampleJsInterop.js").AsTask());
     }
 
     public async ValueTask<string> Prompt(string message)

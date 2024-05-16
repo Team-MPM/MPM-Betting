@@ -1,0 +1,63 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using Blazorise
+@attribute [StreamRendering(true)]
+
+@* TODO - Search -> Ask gabriel *@
+
+<div class="MatchesDateBox">
+    <div class="DateBox">
+        <div onclick="@(() => UpdateDay(-1))" class="DateLeftArrow"><img src="./Images/Arrow_left.png"/></div>
+        <div class="DatePicker">
+            <Addons>
+                <Addon AddonType="AddonType.Body">
+                    <DatePicker @ref="@datePicker" TValue="DateTime?" @bind-Date="@Value"/>
+                </Addon>
+                <Addon AddonType="AddonType.End">
+                    <Button Color="Color.Light" Clicked="@(() => datePicker.ToggleAsync())">
+                        <Icon Name="IconName.CalendarDay"/>
+                    </Button>
+                </Addon>
+            </Addons>
+        </div>
+        <div onclick="@(() => UpdateDay(1))" class="DateRightArrow"><img src="./Images/Arrow_left.png"/></div>
+    </div>
+</div>
+
+
+@code {
+    DatePicker<DateTime?> datePicker;
+
+    public bool test { get; set; }
+    
+    DateTime? date;
+
+    public DateTime? Value
+    {
+        get => date;
+        set
+        {
+            date = value;
+            StateHasChanged();
+        }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Value = DateTime.Now;
+    }
+    
+    public bool _isOpen = true;
+
+    public void ToggleOpen()
+    {
+        if (_isOpen)
+            _isOpen = false;
+        else
+            _isOpen = true;
+    }
+    
+    public void UpdateDay(int amount)
+    {
+        Value = Value.Value.AddDays(amount);
+    }
+}
