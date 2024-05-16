@@ -69,6 +69,7 @@ internal class DbInitializer(IServiceProvider serviceProvider, ILogger<DbInitial
                 {
                     foreach (var season in seasons.Select(s => new BuiltinSeason(league.Name, league.Name)
                     {
+                        Sport = ESportType.Football,
                         ReferenceId = league.Id,
                         Start = new DateTime(int.Parse(s.Split('/')[0]), 1, 1),
                         End = new DateTime(int.Parse(s.Split('/')[1]), 1, 1)
