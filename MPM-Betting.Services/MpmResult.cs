@@ -15,7 +15,7 @@ public readonly struct MpmResult<T> : IEquatable<MpmResult<T>>, IComparable<MpmR
     public readonly T Value;
     private readonly Exception m_Exception;
 
-    internal Exception Exception => m_Exception ?? BottomException.Default;
+    public Exception Exception => m_Exception ?? BottomException.Default;
 
     /// <summary>Constructor of a concrete value</summary>
     /// <param name="value"></param>

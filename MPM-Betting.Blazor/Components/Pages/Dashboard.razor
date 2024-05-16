@@ -1,11 +1,11 @@
 ﻿@page "/Dashboard"
 @rendermode InteractiveServer
 @attribute [StreamRendering]
-@using Google.Protobuf.WellKnownTypes
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.Services.Data
 @inject FootballApi Api
-@using Blazorise
+@using MPM_Betting.Services
 <PageTitle>Home</PageTitle>
 
 
@@ -17,24 +17,21 @@
         
         <div class="MainPage">
             <div class="col-2">
-                @if(LeaguesList != null)
-                {
-                    <Leagues LeagueList="@LeaguesList"/>
-                }
-                else
-                {
-                    <p>Loading...</p>
-                }
+                <ResultHandler Generator="async () => await Api.GetAllFootballLeagues()">
+                    <SuccessTemplate>
+                        <Leagues LeagueList="@context"/>
+                    </SuccessTemplate>
+                    <ErrorTemplate>
+                        <p>Some custom error handler</p>
+                    </ErrorTemplate>
+                </ResultHandler>
             </div>    
             <div class="col-7">
-               @if(LeaguesList != null)
-                {
-                    <Matches Leagues="@LeaguesList"/>
-                }
-                else
-                {
-                    <p>Loading...</p>
-                }
+                <ResultHandler Generator="async () => await Api.GetAllFootballLeagues()">
+                    <SuccessTemplate>
+                        <Matches Leagues="@context"/>
+                    </SuccessTemplate>
+                </ResultHandler>
             </div>
             <div class="col-3">
                 
@@ -45,15 +42,12 @@
 
 @code {
 
-    public List<FootballApi.League> LeaguesList { get; set; }
+    private MpmResult<List<FootballApi.League>>? m_LeaguesList;
 
     protected override async Task OnInitializedAsync()
     {
-        LeaguesList = await GetLists();
+        m_LeaguesList = await Api.GetAllFootballLeagues();
     }
-    
-    public async Task<List<FootballApi.League>> GetLists() => await Api.GetAllFootballLeagues();
-
 }
 
 

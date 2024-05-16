@@ -1,0 +1,47 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.Services
+@typeparam T
+
+@if (m_Result is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @if (m_Result.Value.IsSuccess)
+    {
+        @SuccessTemplate(m_Result.Value.Value)
+    }
+    else
+    {
+        @if (ErrorTemplate is not null)
+        {
+            @ErrorTemplate(m_Result.Value.Exception)
+        }
+        else
+        {
+            switch (m_Result.Value.Exception)
+            {
+                case not null:
+                    <p>Unknown Error</p>
+                    break;
+            }
+        }
+    }
+}
+
+
+@code {
+    [Parameter] public required Func<Task<MpmResult<T>>> Generator { get; set; }
+    
+    [Parameter] public required RenderFragment<T> SuccessTemplate { get; set; }
+
+    [Parameter] public RenderFragment<Exception>? ErrorTemplate { get; set; }
+
+    private MpmResult<T>? m_Result;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        m_Result = await Generator();
+    }
+}
