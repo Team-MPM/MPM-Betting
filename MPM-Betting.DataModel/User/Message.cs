@@ -13,7 +13,7 @@ public class Message
     
     public MpmUser? RecipientUser { get; set; }
 
-    public DateTime Time { get; set; }
+    public DateTime Time { get; set; } = DateTime.Now;
 
     [StringLength(5000)]
     public string Content { get; set; }

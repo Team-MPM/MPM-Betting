@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Blazor", "MPM-B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.UnitTests", "MPM-Betting.UnitTests\MPM-Betting.UnitTests.csproj", "{EDEFF6B9-81D6-48F9-BA55-2B41B5FC840D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Blazor.Components", "MPM-Betting.Blazor.Components\MPM-Betting.Blazor.Components.csproj", "{670CE4C7-1A4A-4942-83EE-EF75B040DE39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Blazor.ComponentLibrary", "MPM-Betting.Blazor.ComponentLibrary\MPM-Betting.Blazor.ComponentLibrary.csproj", "{670CE4C7-1A4A-4942-83EE-EF75B040DE39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPM-Betting.Services", "MPM-Betting.Services\MPM-Betting.Services.csproj", "{065B9F53-71ED-4AC6-BB19-D26775C8A75D}"
 EndProject

@@ -503,6 +503,32 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         
         return new LeagueTable(new League(leagueName, country, leagueId), entries, season, seasons);
     }
+    
+    /// <summary>
+    /// Get a list of string representing the available seasons for a league
+    /// </summary>
+    /// <param name="leagueId">The league id to query the data for</param>
+    /// <returns>Result of string list</returns>
+    public async Task<MpmResult<List<string>>> GetSeasonsForLeague(int leagueId)
+    {
+        return await cache.Get(TimeSpan.FromSeconds(1), $"league-seasons-{leagueId}", async () =>
+        {
+            var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
+            var result = await cache.GetByUri(TimeSpan.FromMinutes(1), uri);
+            return result.Match(GetSeasonsForLeagueFromJson,
+                err => new LeagueNotFoundException(leagueId, err)
+            );
+        });
+    }
+
+    private static MpmResult<List<string>> GetSeasonsForLeagueFromJson(string json)
+    {
+        var jObject = JObject.Parse(json);
+        var allAvailableSeasons = (JArray)jObject["allAvailableSeasons"]!;
+        var seasons = allAvailableSeasons.Select(availableSeason => availableSeason.Value<string>()!).ToList();
+        
+        return seasons;
+    }
 
     /// <summary>
     /// Get all football players from all teams from all leagues

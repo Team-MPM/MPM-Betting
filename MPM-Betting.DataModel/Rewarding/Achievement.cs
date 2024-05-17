@@ -14,4 +14,10 @@ public class Achievement
     [StringLength(200)] public string Description { get; set; } = "";
     
     public List<MpmUser> Users { get; set; } = [];
+    
+    public Achievement(string title, string description)
+    {
+        Title = title;
+        Description = description;
+    }
 }

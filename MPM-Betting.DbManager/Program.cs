@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DbManager;
+using MPM_Betting.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddMpmCache();
+builder.AddFootballApi();
+
 builder.AddSqlServerDbContext<MpmDbContext>("MPM-Betting", null,
     optionsBuilder => optionsBuilder.UseSqlServer(sqlBuilder =>
         sqlBuilder.MigrationsAssembly(typeof(Program).Assembly.GetName().Name)));
