@@ -561,5 +561,6 @@ public partial class UserDomain(MpmDbContext dbContext)
     public async Task<MpmResult<Achievement>> CreateAchievement(string title, string description)
     {
         Achievement achievement = new Achievement(title, description);
+        return achievement;
     }
 }
