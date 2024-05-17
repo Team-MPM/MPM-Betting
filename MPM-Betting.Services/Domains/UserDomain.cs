@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
@@ -11,6 +12,8 @@ namespace MPM_Betting.Services.Domains;
 
 public partial class UserDomain(MpmDbContext dbContext)
 {
+    private class InvalidBetParameter : Exception;
+    private static readonly InvalidBetParameter s_InvalidBetParameter = new();
     private class NoUserException : Exception;
     private static readonly NoUserException s_NoUserException = new();
 
@@ -507,11 +510,13 @@ public partial class UserDomain(MpmDbContext dbContext)
         
         return message;
     }
+    
     public async Task<MpmResult<Bet>> CreateFootballResultBet(MpmGroup group, Game game, EResult result)
     {
         ArgumentNullException.ThrowIfNull(group);
         ArgumentNullException.ThrowIfNull(game);
         if (m_User is null) return s_NoUserException;
+        if(result is EResult.None) return s_InvalidBetParameter;
         
         var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
         if (uge is null)
@@ -525,9 +530,30 @@ public partial class UserDomain(MpmDbContext dbContext)
         var bet = new ResultBet(m_User, group, game, result);
         await dbContext.FootballResultBets.AddAsync(bet);
         await dbContext.SaveChangesAsync();
-        
+
         return bet;
+    }
+    
+    public async Task<MpmResult<Bet>> CreateFootballScoreBet(MpmGroup group, Game game, int HomeScore, int AwayScore)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(game);
+        if (m_User is null) return s_NoUserException;
+        if(HomeScore < 0 || AwayScore < 0) return s_InvalidBetParameter;
         
-       
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        if (uge is null)
+            return s_AccessDeniedException;
+        
+        var existingBet = dbContext.FootballResultBets.FirstOrDefault(b => b.Game == game && b.User == m_User);
+        if (existingBet is not null) return s_AlreadyExistsException;
+        if(game.GameState != EGameState.Upcoming) return s_InvalidDateException;
+        
+        
+        var bet = new ScoreBet(m_User, group, game, HomeScore, AwayScore);
+        await dbContext.FootballScoreBets.AddAsync(bet);
+        await dbContext.SaveChangesAsync();
+
+        return bet;
     }
 }
