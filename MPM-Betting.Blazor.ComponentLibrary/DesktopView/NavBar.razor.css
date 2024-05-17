@@ -15,9 +15,8 @@
 /*NORMAL CLASSES*/
 
 .NavBar {
-    /*background: rgba(242, 189, 53, 1);*/
     background: rgba(50,50,50,1);
-    width: 100vw;
+    width: 101vw;
     height: fit-content;
     display: flex;
     border-bottom: gray solid 2px;
@@ -111,8 +110,8 @@
     diplay: flex;
     align-content: center;
     align-items: center;
-    /*font-style: italic;*/
     color: rgb(200,200,200);
-
 }
+
+
 
