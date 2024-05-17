@@ -12,6 +12,7 @@ using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services.Account;
 using MPM_Betting.Services.Data;
+using MPM_Betting.Services.Domains;
 
 namespace MPM_Betting.Services;
 
@@ -39,6 +40,8 @@ public static class Extensions
         
         builder.Services.AddDataProtection()
             .SetApplicationName("Mpm-Betting");
+
+        builder.Services.AddScoped<UserDomain>();
         
         return builder;
     }

@@ -1,13 +1,20 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
+using MPM_Betting.DataModel.Football;
+using MPM_Betting.DataModel.Rewarding;
 using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
 
+//TODO: Add cancelation tokens
+
 public partial class UserDomain(MpmDbContext dbContext)
 {
+    private class InvalidBetParameter : Exception;
+    private static readonly InvalidBetParameter s_InvalidBetParameter = new();
     private class NoUserException : Exception;
     private static readonly NoUserException s_NoUserException = new();
 
@@ -65,6 +72,17 @@ public partial class UserDomain(MpmDbContext dbContext)
         if (result is null) return s_GroupNotFoundException;
         
         return result;
+    }
+    
+    public async Task<MpmResult<List<MpmGroup>>> GetGroupsBySeasonChoosen(int id)
+    {
+        if (m_User is null) return s_NoUserException;
+        
+        var query = dbContext.SeasonEntries
+            .Where(se => se.Id == id)
+            .Select(se => se.Group);
+        
+        return await query.ToListAsync();
     }
     
     public async Task<MpmResult<MpmGroup>> CreateGroup(string name, string description)
@@ -168,6 +186,8 @@ public partial class UserDomain(MpmDbContext dbContext)
             return s_AccessDeniedException;
         
         dbContext.UserGroupEntries.Add(new UserGroupEntry(target, group) { Role = role });
+
+        dbContext.Notifications.Add(new Notification(target, $"You have been added to Group {group.Name} by {m_User.UserName}"));
         await dbContext.SaveChangesAsync();
         
         return true;
@@ -193,6 +213,8 @@ public partial class UserDomain(MpmDbContext dbContext)
         targetUge.Role = role;
         await dbContext.SaveChangesAsync();
         
+        dbContext.Notifications.Add(new Notification(target, $"Your role in Group {group.Name} has been changed to {role} by {m_User.UserName}"));
+        
         return true;
     }
     
@@ -216,6 +238,8 @@ public partial class UserDomain(MpmDbContext dbContext)
         
         dbContext.UserGroupEntries.Remove(targetUge);
         await dbContext.SaveChangesAsync();
+        
+        dbContext.Notifications.Add(new Notification(target, $"You have been removed from Group {group.Name} by {m_User.UserName}"));
         
         return true;
     }
@@ -402,5 +426,141 @@ public partial class UserDomain(MpmDbContext dbContext)
             .Select(cse => cse.Game);
         
         return await query.ToListAsync();
+    }
+    
+    public async Task<MpmResult<BuiltinSeason>> GetCurrentBuiltInSeasonById(int id)
+    {
+        //Returns most current, doesnt check if season is active
+
+        var query = dbContext.BuiltinSeasons
+            .Where(bis => bis.Id == id).OrderBy(bis =>bis.Start);
+        var season = query.FirstOrDefault();
+        
+        if (season is null)
+        {
+            return s_SeasonNotFoundException;
+        }
+        
+        return season;
+    }
+    
+    public async Task<MpmResult<List<Notification>>> GetAllNotificationOfUser()
+    {
+        if (m_User is null) return s_NoUserException;
+        
+        var query = dbContext.Notifications
+            .Where(n => n.Target == m_User);
+        
+        return await query.ToListAsync();
+    }
+    
+    public async Task<MpmResult<List<Notification>>> GetAllNewNotificationOfUser()
+    {
+        if (m_User is null) return s_NoUserException;
+
+        var query = dbContext.Notifications
+            .Where(n => n.Target == m_User && !n.IsRead);
+        
+        return await query.ToListAsync();
+    }
+    
+    public async Task<MpmResult<bool>> MarkAllNewNotificationAsRead()
+    {
+        if (m_User is null) return s_NoUserException;
+        
+        var query = dbContext.Notifications
+            .Where(n => n.Target == m_User && !n.IsRead);
+
+
+        foreach (var notification in query)
+        {
+            notification.IsRead = true;
+        }
+        
+        await dbContext.SaveChangesAsync();
+        
+        return true;
+    }
+    
+    public async Task<MpmResult<List<Message>>> GetAllMessagesOfgroup(MpmGroup group)
+    {
+        if (m_User is null) return s_NoUserException;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        if (uge is null)
+            return s_AccessDeniedException;
+        
+        var query = dbContext.Messages
+            .Where(m => m.RecipientGroup == group);
+        
+        return await query.ToListAsync();
+    }
+
+    public async Task<MpmResult<Message>> SendMessage(MpmGroup group, string text)
+    {       
+        ArgumentNullException.ThrowIfNull(text);
+        ArgumentNullException.ThrowIfNull(group);
+        if (m_User is null) return s_NoUserException;
+        if(BadWordRegex().IsMatch(text)) return s_BadWordException;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        if (uge is null)
+            return s_AccessDeniedException;
+        
+        var message = new Message(m_User, group, text);
+        
+        return message;
+    }
+    
+    public async Task<MpmResult<Bet>> CreateFootballResultBet(MpmGroup group, Game game, EResult result)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(game);
+        if (m_User is null) return s_NoUserException;
+        if(result is EResult.None) return s_InvalidBetParameter;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        if (uge is null)
+            return s_AccessDeniedException;
+        
+        var existingBet = dbContext.FootballResultBets.FirstOrDefault(b => b.Game == game && b.User == m_User);
+        if (existingBet is not null) return s_AlreadyExistsException;
+        if(game.GameState != EGameState.Upcoming) return s_InvalidDateException;
+        
+        
+        var bet = new ResultBet(m_User, group, game, result);
+        await dbContext.FootballResultBets.AddAsync(bet);
+        await dbContext.SaveChangesAsync();
+
+        return bet;
+    }
+    
+    public async Task<MpmResult<Bet>> CreateFootballScoreBet(MpmGroup group, Game game, int HomeScore, int AwayScore)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(game);
+        if (m_User is null) return s_NoUserException;
+        if(HomeScore < 0 || AwayScore < 0) return s_InvalidBetParameter;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        if (uge is null)
+            return s_AccessDeniedException;
+        
+        var existingBet = dbContext.FootballResultBets.FirstOrDefault(b => b.Game == game && b.User == m_User);
+        if (existingBet is not null) return s_AlreadyExistsException;
+        if(game.GameState != EGameState.Upcoming) return s_InvalidDateException;
+        
+        
+        var bet = new ScoreBet(m_User, group, game, HomeScore, AwayScore);
+        await dbContext.FootballScoreBets.AddAsync(bet);
+        await dbContext.SaveChangesAsync();
+
+        return bet;
+    }
+
+    public async Task<MpmResult<Achievement>> CreateAchievement(string title, string description)
+    {
+        Achievement achievement = new Achievement(title, description);
+        return achievement;
     }
 }
