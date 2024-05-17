@@ -6,6 +6,8 @@ using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
 
+//TODO: Add cancelation tokens
+
 public partial class UserDomain(MpmDbContext dbContext)
 {
     private class NoUserException : Exception;
@@ -402,5 +404,21 @@ public partial class UserDomain(MpmDbContext dbContext)
             .Select(cse => cse.Game);
         
         return await query.ToListAsync();
+    }
+    
+    public async Task<MpmResult<BuiltinSeason>> GetCurrentBuiltInSeasonById( int id)
+    {
+        //Returns most current, doesnt check if season is active
+
+        var query = dbContext.BuiltinSeasons
+            .Where(bis => bis.Id == id).OrderBy(bis =>bis.Start);
+        var season = query.FirstOrDefault();
+        
+        if (season is null)
+        {
+            return s_SeasonNotFoundException;
+        }
+        
+        return season;
     }
 }
