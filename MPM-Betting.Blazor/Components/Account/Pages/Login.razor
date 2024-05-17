@@ -18,7 +18,7 @@
         <div class="LoginTitle">Login</div>
         <div class="LoginData">
             <StatusMessage Message="@m_ErrorMessage"/>
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <EditForm class="LoginDataBox" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator/>
                 <div class="Username">
                     <ValidationSummary class="text-danger" role="alert"/>
@@ -53,14 +53,14 @@
                         <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
                     </div>
                 </div>
-                <div class="ExternalLogin">
-                    <section>
-                        <h3>Use another service to log in.</h3>
-                        <hr/>
-                        <ExternalLoginPicker/>
-                    </section>
-                </div>
             </EditForm>
+            <div class="ExternalLogin">
+                <section>
+                    <h3>Use another service to log in.</h3>
+                    <hr/>
+                    <ExternalLoginPicker/>
+                </section>
+            </div>
         </div>
     </div>
 </div>
