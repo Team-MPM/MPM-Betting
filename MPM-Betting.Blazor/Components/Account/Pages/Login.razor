@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.DataModel.User
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @inject SignInManager<MpmUser> SignInManager
 @inject ILogger<Login> Logger
@@ -13,53 +14,56 @@
 
 <PageTitle>Login</PageTitle>
 
-<div class="LoginPage">
-    <div class="LoginPageContainer">
-        <div class="LoginTitle">Login</div>
-        <div class="LoginData">
-            <StatusMessage Message="@m_ErrorMessage"/>
-            <EditForm class="LoginDataBox" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator/>
-                <div class="Username">
-                    <ValidationSummary class="text-danger" role="alert"/>
-                    <label for="email" class="form-label">Email</label>
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
-                    <ValidationMessage For="() => Input.Email" class="text-danger"/>
-                </div>
-                <div class="Password">
-                    <div class="PasswordLabelBox">
-                        <label for="password" class="form-label">Password</label>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
+<div class="LoginPageMainBox">
+    <div class="row">
+        <NavBar Tab="NavBar.ActiveTab.Home" SportArt="NavBar.SelectedSportArt.None"/>
+    </div>
+
+    <div class="LoginPage row">
+        <div class="LoginPageContainer">
+            <div class="LoginTitle">Login</div>
+            <div class="LoginData">
+                <EditForm class="LoginDataBox" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+
+                    <DataAnnotationsValidator/>
+                    <div class="Username">
+                        <label for="email" class="form-label">E-Mail</label>
+                        <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
+                        <ValidationMessage For="() => Input.Email" class="ErrorFont"/>
                     </div>
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
-                    <ValidationMessage For="() => Input.Password" class="text-danger"/>
-                </div>
-                <div class="RememberMe">
-                    <label class="form-label"> 
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input"/>
-                        Remember me
-                    </label>
-                </div>
-                <div class="SubmitButton">
-                    <button class="SubmitButton" type="submit" >Log in</button>
-                </div>
-                <div class="OtherLoginOptions">
-                    <div>
-                        <div>Don't have an account?</div>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                    <div class="Password">
+                        <div class="PasswordLabelBox">
+                            <label for="password" class="form-label">Password</label>
+                            <a href="Account/ForgotPassword">Forgot your password?</a>
+                        </div>
+                        <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
+                        <ValidationMessage For="() => Input.Password" class="ErrorFont"/>
                     </div>
-                    <div>
-                        <div>Didn't get the email?</div>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                    <div class="SubmitButton">
+                        <button class="SubmitButton" type="submit" >Log in</button>
                     </div>
+                    <div class="Error">
+                        <ValidationSummary class="text-danger" role="alert"/>
+                        <StatusMessage Message="@m_ErrorMessage"/>
+                    </div>
+                    <div class="OtherLoginOptions">
+                        <div>
+                            <div>Don't have an account?</div>
+                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                        </div>
+                        <div>
+                            <div>Didn't get the email?</div>
+                            <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                        </div>
+                    </div>
+                </EditForm>
+                <div class="ExternalLogin">
+                    <section>
+                        <h3>Use another service to log in.</h3>
+                        <hr/>
+                        <ExternalLoginPicker/>
+                    </section>
                 </div>
-            </EditForm>
-            <div class="ExternalLogin">
-                <section>
-                    <h3>Use another service to log in.</h3>
-                    <hr/>
-                    <ExternalLoginPicker/>
-                </section>
             </div>
         </div>
     </div>
