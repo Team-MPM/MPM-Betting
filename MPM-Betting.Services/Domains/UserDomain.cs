@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
+using MPM_Betting.DataModel.Football;
 using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
@@ -505,5 +506,28 @@ public partial class UserDomain(MpmDbContext dbContext)
         var message = new Message(m_User, group, text);
         
         return message;
+    }
+    public async Task<MpmResult<Bet>> CreateFootballResultBet(MpmGroup group, Game game, EResult result)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(game);
+        if (m_User is null) return s_NoUserException;
+        
+        var uge = dbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        if (uge is null)
+            return s_AccessDeniedException;
+        
+        var existingBet = dbContext.FootballResultBets.FirstOrDefault(b => b.Game == game && b.User == m_User);
+        if (existingBet is not null) return s_AlreadyExistsException;
+        if(game.GameState != EGameState.Upcoming) return s_InvalidDateException;
+        
+        
+        var bet = new ResultBet(m_User, group, game, result);
+        await dbContext.FootballResultBets.AddAsync(bet);
+        await dbContext.SaveChangesAsync();
+        
+        return bet;
+        
+       
     }
 }
