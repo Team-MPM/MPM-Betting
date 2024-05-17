@@ -1,6 +1,7 @@
 ﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using Blazorise
 @using Microsoft.AspNetCore.Mvc.ApiExplorer
+@using MPM_Betting.DataModel.Betting
 @using MPM_Betting.Services.Data
 @inject FootballApi Api
 @attribute [StreamRendering]
@@ -80,12 +81,24 @@
     protected override async Task OnInitializedAsync()
     {
         
-        int[] ids = { 73, 47, 78, 55, 42, 54,47,37,22,32,120 };
+        int[] ids = { 47, 42,73, 78, 55, 54,47,37,22,32,120 };
         TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).ToList();
         await FillMatches();
     }
 
     private async Task FillMatches()
+    {
+        GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
+        foreach (var league in TopLeagues)
+        {
+            var result = await Api.GetGameEntries(league.Id, null);
+            if (result.IsSuccess)
+                GameEntries.Add(league.Id, result.Value.Take(5).ToList());
+
+        }
+    }
+
+    private async Task FillMatchesNoApi()
     {
         GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
         foreach (var league in TopLeagues)

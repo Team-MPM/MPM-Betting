@@ -5,15 +5,14 @@
     display: grid;
     grid-template-columns: 1fr 3fr 1fr;
     font-size: 18px;
-    margin: 5px 0 5px 0;
+    margin: 7px 0 7px 0;
     padding: 5px 0 5px 0;
     align-items: center;
-    border-bottom: 2px solid black;
 }
 
 
 .LeagueBox:hover {
-    background: lightgray;
+    background: rgb(90,90,90);
 }
 
 
