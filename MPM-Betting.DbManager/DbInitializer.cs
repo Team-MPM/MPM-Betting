@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
+using MPM_Betting.DataModel.Rewarding;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services;
 using MPM_Betting.Services.Data;
@@ -54,9 +55,22 @@ internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, ISe
             await SeedTestGoups(dbContext);
         }
 
+        await SeedAchievments(dbContext);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    private async Task SeedAchievments(MpmDbContext dbContext)
+    {
+        List<MpmResult<Achievement>> achievements = new List<MpmResult<Achievement>>();
+        
+        achievements.Add(await userDomain.CreateAchievement("First Steps", "Place your first bet"));
+        achievements.Add(await userDomain.CreateAchievement("Victory Royale", "Win your first bet"));
+        achievements.Add(await userDomain.CreateAchievement("Womp Womp", "Lose your first bet"));
+        achievements.Add(await userDomain.CreateAchievement("Getting Started", "Place 10 Bets"));
+        achievements.Add(await userDomain.CreateAchievement("High Roller", "Place 100 Bets"));
+        
+        //TODO: Insert achiements in db
+    }
     private async Task SeedTestGoups(MpmDbContext dbContext)
     {
         if(dbContext.Groups.Count() < 200)

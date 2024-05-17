@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.Football;
+using MPM_Betting.DataModel.Rewarding;
 using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
@@ -555,5 +556,10 @@ public partial class UserDomain(MpmDbContext dbContext)
         await dbContext.SaveChangesAsync();
 
         return bet;
+    }
+
+    public async Task<MpmResult<Achievement>> CreateAchievement(string title, string description)
+    {
+        Achievement achievement = new Achievement(title, description);
     }
 }
