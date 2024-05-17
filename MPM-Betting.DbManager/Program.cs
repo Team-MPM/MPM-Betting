@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddMpmCache();
 builder.AddFootballApi();
+builder.AddDomainLayer();
 
 builder.AddSqlServerDbContext<MpmDbContext>("MPM-Betting", null,
     optionsBuilder => optionsBuilder.UseSqlServer(sqlBuilder =>

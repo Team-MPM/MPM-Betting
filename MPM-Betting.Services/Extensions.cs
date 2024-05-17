@@ -33,6 +33,12 @@ public static class Extensions
         builder.Services.AddSingleton<MpmCache>();
         return builder;
     }
+
+    public static IHostApplicationBuilder AddDomainLayer(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<UserDomain>();
+        return builder;
+    }
     
     public static IHostApplicationBuilder AddMpmDbContext(this IHostApplicationBuilder builder)
     {
@@ -40,8 +46,6 @@ public static class Extensions
         
         builder.Services.AddDataProtection()
             .SetApplicationName("Mpm-Betting");
-
-        builder.Services.AddScoped<UserDomain>();
         
         return builder;
     }

@@ -14,92 +14,99 @@ using StackExchange.Redis;
 
 namespace MPM_Betting.DbManager;
 
-internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<DbInitializer> logger, FootballApi footballApi)
+internal class DbInitializer(IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<DbInitializer> logger, FootballApi footballApi)
     : BackgroundService
 {
     public const string ActivitySourceName = "Migrations";
 
     private readonly ActivitySource m_ActivitySource = new(ActivitySourceName);
 
+    private UserDomain m_UserDomain = null!;
+    private MpmDbContext m_DbContext = null!;
+
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<MpmDbContext>();
-
-        await InitializeDatabaseAsync(dbContext, cancellationToken);
+        m_DbContext = scope.ServiceProvider.GetRequiredService<MpmDbContext>();
+        m_UserDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
+        await InitializeDatabaseAsync(cancellationToken);
     }
 
-    private async Task InitializeDatabaseAsync(MpmDbContext dbContext, CancellationToken cancellationToken)
+    private async Task InitializeDatabaseAsync(CancellationToken cancellationToken)
     {
         using var activity = m_ActivitySource.StartActivity(ActivityKind.Client);
 
         var sw = Stopwatch.StartNew();
 
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(dbContext.Database.MigrateAsync, cancellationToken);
+        var strategy = m_DbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(m_DbContext.Database.MigrateAsync, cancellationToken);
 
-        await SeedAsync(dbContext, cancellationToken);
+        await SeedAsync(cancellationToken);
 
         logger.LogInformation("Database initialization completed after {ElapsedMilliseconds}ms",
             sw.ElapsedMilliseconds);
     }
 
-    private async Task SeedAsync(MpmDbContext dbContext, CancellationToken cancellationToken)
+    private async Task SeedAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Seeding database");
 
-        await SeedBuiltinSeasons(dbContext, cancellationToken);
+        await SeedBuiltinSeasons(cancellationToken);
+        //await SeedAchievements();
 
         if (env.IsDevelopment())
         {
-            await SeedTestGoups(dbContext);
+            await SeedTestGroups();
         }
 
-        await SeedAchievments(dbContext);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await m_DbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SeedAchievments(MpmDbContext dbContext)
+    private async Task SeedAchievements()
     {
-        List<MpmResult<Achievement>> achievements = new List<MpmResult<Achievement>>();
-        
-        achievements.Add(await userDomain.CreateAchievement("First Steps", "Place your first bet"));
-        achievements.Add(await userDomain.CreateAchievement("Victory Royale", "Win your first bet"));
-        achievements.Add(await userDomain.CreateAchievement("Womp Womp", "Lose your first bet"));
-        achievements.Add(await userDomain.CreateAchievement("Getting Started", "Place 10 Bets"));
-        achievements.Add(await userDomain.CreateAchievement("High Roller", "Place 100 Bets"));
-        
-        //TODO: Insert achiements in db
+        var achievements = new List<MpmResult<Achievement>>
+        {
+            await m_UserDomain.CreateAchievement("First Steps", "Place your first bet"),
+            await m_UserDomain.CreateAchievement("Victory Royale", "Win your first bet"),
+            await m_UserDomain.CreateAchievement("Womp Womp", "Lose your first bet"),
+            await m_UserDomain.CreateAchievement("Getting Started", "Place 10 Bets"),
+            await m_UserDomain.CreateAchievement("High Roller", "Place 100 Bets")
+        };
+
+        //TODO: Insert achievements in db
     }
-    private async Task SeedTestGoups(MpmDbContext dbContext)
+    private async Task SeedTestGroups()
     {
-        if(dbContext.Groups.Count() < 200)
+        if(m_DbContext.Groups.Count() < 200)
            return; 
 
-        List<MpmResult<MpmGroup>> TestGroups = new List<MpmResult<MpmGroup>>();
+        var testGroups = new List<MpmResult<MpmGroup>>();
 
         for (int i = 0; i < 300; i++)
         {
-            TestGroups.Add(await userDomain.CreateGroup("Test"+i.ToString(), "Test Group"+ i.ToString()));
+            testGroups.Add(await m_UserDomain.CreateGroup("Test"+i.ToString(), "Test Group"+ i.ToString()));
         }
 
-        List<MpmResult<CustomSeason>> testCustomSeasons = new List<MpmResult<CustomSeason>>();
+        var testCustomSeasons = new List<MpmResult<CustomSeason>>();
 
         for (int i = 0; i < 100; i++)
         {
-            testCustomSeasons.Add(await userDomain.CreateCustomSeason(TestGroups[i].Value,$"Mixed League{i}", $"Mixed League{i}", new DateTime(2024, 9, 1), new DateTime(2025, 6, 31)));             
+            testCustomSeasons.Add(await m_UserDomain.CreateCustomSeason(testGroups[i].Value,$"Mixed League{i}", $"Mixed League{i}", new DateTime(2024, 9, 1), new DateTime(2025, 6, 31)));             
         }
+        
+        // TODO: Julian: add games to custom seasons
             
-        for (int i = 101; i < TestGroups.Count-1; i++)
+        for (int i = 101; i < testGroups.Count-1; i++)
         {
-            var curentBuiltInSeason = await userDomain.GetCurrentBuiltInSeasonById(87);
-            await userDomain.AddSeasonToGroup(TestGroups[i].Value, curentBuiltInSeason.Value);
+            var currentBuiltInSeasonById = await m_UserDomain.GetCurrentBuiltInSeasonById(87);
+            if (currentBuiltInSeasonById.IsSuccess)
+                await m_UserDomain.AddSeasonToGroup(testGroups[i].Value, currentBuiltInSeasonById.Value);
         }
     }
 
-    private async Task SeedBuiltinSeasons(MpmDbContext dbContext, CancellationToken cancellationToken)
+    private async Task SeedBuiltinSeasons(CancellationToken cancellationToken)
     {
-        if (dbContext.BuiltinSeasons.Count() > 2000)
+        if (m_DbContext.BuiltinSeasons.Count() > 2000)
             return;
         
         var result = await footballApi.GetAllFootballLeagues();
@@ -131,6 +138,6 @@ internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, ISe
             }
         });
 
-        await dbContext.BuiltinSeasons.AddRangeAsync(allSeasons, cancellationToken);
+        await m_DbContext.BuiltinSeasons.AddRangeAsync(allSeasons, cancellationToken);
     }
 }
