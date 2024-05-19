@@ -2,6 +2,6 @@
 
 public class SyncContextWithPayload<T>
 {
-    public ManualResetEventSlim SyncEvent { get; } = new();
+    public TaskCompletionSource<bool> SyncEvent { get; } = new(false);
     public T? Payload { get; set; }
 }

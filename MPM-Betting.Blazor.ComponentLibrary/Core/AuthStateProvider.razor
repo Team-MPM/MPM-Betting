@@ -22,7 +22,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         m_Data.Payload = await UserManager.GetUserAsync(authState.User);
-        m_Data.SyncEvent.Set();
+        m_Data.SyncEvent.SetResult(true);
     }
 
 }
