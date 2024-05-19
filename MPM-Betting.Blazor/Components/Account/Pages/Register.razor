@@ -22,7 +22,7 @@
     <div class="LoginTitle">Login</div>
     <div class="RegisterData">
         <EditForm class="RegisterDataBox" Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <StatusMessage Message="@Message"/>
+            <p>@Message</p>
             <DataAnnotationsValidator/>
             <div class="Username">
                 <label for="email">Email</label>

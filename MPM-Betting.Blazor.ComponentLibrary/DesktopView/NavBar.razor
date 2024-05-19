@@ -77,7 +77,7 @@
     [Parameter] public ESportType SportType { get; set; } = ESportType.None;
 
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
-    MpmUser m_UserInstance;
+    MpmUser? m_UserInstance;
     
     const string LoginUrl = "/account/login";
     const string RegisterUrl = "/account/register";
@@ -90,8 +90,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (User is null) return;
-        
         await User.SyncEvent.Task;
         Console.WriteLine("here");
         if (User.Payload is not null)

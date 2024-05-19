@@ -1,5 +1,6 @@
 using System.Net.Mail;
 using LanguageExt;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -52,7 +53,11 @@ public static class Extensions
 
     public static WebApplicationBuilder AddMpmAuth(this WebApplicationBuilder builder)
     {
-        builder.Services.AddAuthentication()
+        builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
             .AddGoogle(googleOptions =>
             {
                 googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "placeholder";
@@ -62,9 +67,11 @@ public static class Extensions
             {
                 microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? "placeholder";
                 microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? "placeholder";
-            });
+            })
+            .AddCookie("Identity.Application");
         
         builder.Services.AddAuthorization();
+       
         
         builder.Services.AddIdentityCore<MpmUser>(options =>
             {
