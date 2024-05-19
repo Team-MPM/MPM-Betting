@@ -24,7 +24,8 @@
     </div>
 
     <div class="LoginPage row">
-        <div class="LoginPageContainer">
+        <div class="col-1 col-sm-2 col-md-3 col-xl-4"/>
+        <div class="LoginPageContainer col-10 col-sm-8  col-md-6 col-xl-4">
             <div class="LoginTitle">Login</div>
             <div class="LoginData">
                 <EditForm class="LoginDataBox" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
@@ -44,7 +45,7 @@
                         <ValidationMessage For="() => Input.Password" class="ErrorFont"/>
                     </div>
                     <div class="SubmitButton">
-                        <button class="SubmitButton" type="submit" >Log in</button>
+                        <button class="SubmitButton" type="submit">Log in</button>
                     </div>
                     <div class="Error">
                         <ValidationSummary class="text-danger" role="alert"/>
@@ -70,6 +71,7 @@
                 </div>
             </div>
         </div>
+        <div class="col-1 col-sm-2 col-md-3 col-xl-4"/>
     </div>
 </div>
 

@@ -2,3 +2,6 @@
     display: flex;
     flex-direction: row;
 }
+.page {
+    min-width: 100vw;
+}
