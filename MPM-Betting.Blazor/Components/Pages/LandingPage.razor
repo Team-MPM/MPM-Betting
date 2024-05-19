@@ -4,10 +4,33 @@
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using Blazorise
 
+
 <div class="container-fluid">
     <div class="row">
         <NavBar Tab="NavBar.ActiveTab.Home" SportArt="NavBar.SelectedSportArt.None"/>
     </div>
+    <div class="row">
+        <div class="col-1"/>
+        <div class="col-12 col-md-5  LandingMainContainer">
+            <div class="MainText">
+                <div>You have the <span>knowledge</span></div>
+                <div>We have the <span>bets</span>!</div>
+            </div>
+            <div class="SideText">
+                Join many different players and bet on your favourite sports and Leagues. <br/> 
+                Join groups and compete with your friends! <br/>
+                Enter the world of betting and win big!
+            </div>
+            <div class="LandingButtons">
+                <Button>Start Betting</Button>
+                <Button>Sign up</Button>
+            </div>
+        </div>
+
+        <div class="d-none d-md-flex col-6 LandingPageImage">
+            <img src="Images/player.png" alt="Player"/>
+        </div>
+    </div>    
 </div>
 
 @code {
