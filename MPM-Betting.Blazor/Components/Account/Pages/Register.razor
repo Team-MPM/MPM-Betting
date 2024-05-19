@@ -7,7 +7,6 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using MPM_Betting.DataModel.User
-@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @inject UserManager<MpmUser> UserManager
 @inject IUserStore<MpmUser> UserStore
@@ -19,102 +18,54 @@
 
 <PageTitle>Register</PageTitle>
 
-<div class="Background"/>
-
-<div class="LoginPageMainBox">
-    <div class="row">
-        <NavBar Tab="NavBar.ActiveTab.Home" SportArt="NavBar.SelectedSportArt.None"/>
-    </div>
-
-    <div class="LoginPage row">
-        <div class="RegisterPageContainer">
-            <div class="LoginTitle">Login</div>
-            <div class="RegisterData">
-                <EditForm class="RegisterDataBox" Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-                    <StatusMessage Message="@Message"/>
-                    <DataAnnotationsValidator/>
-                    <div class="Username">
-                        <label for="email">Email</label>
-                        <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
-                        <ValidationMessage For="() => Input.Email" class="ErrorFont"/>
-                    </div>
-                    <div class="Password">
-                        <label for="password">Password</label>
-                        <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
-                        <ValidationMessage For="() => Input.Password" class="ErrorFont"/>
-                    </div>
-                    <div class="Password">
-                        <label for="confirm-password">Confirm Password</label>
-                        <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
-                        @* <ValidationMessage For="() => Input.ConfirmPassword" class="ErrorFont"/> *@
-                    </div>
-                    <div class="SubmitButton">
-                        <button class="SubmitButton" type="submit" >Log in</button>
-                    </div>
-                    <div class="Error">
-                        <ValidationSummary class="text-danger" role="alert"/>
-                    </div>
-                    <div class="OtherLoginOptions">
-                        <div>
-                            <div>Already have an Account?</div>
-                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                        </div>
-                        @* <div> *@
-                        @*     <div>Didn't get the email?</div> *@
-                        @*     <a href="Account/ResendEmailConfirmation">Resend email confirmation</a> *@
-                        @* </div> *@
-                    </div>
-                </EditForm>
-                <div class="ExternalLogin">
-                    <section>
-                        <h3>Use another service to log in.</h3>
-                        <hr/>
-                        <ExternalLoginPicker/>
-                    </section>
-                </div>
+<div class="RegisterPageContainer">
+    <div class="LoginTitle">Login</div>
+    <div class="RegisterData">
+        <EditForm class="RegisterDataBox" Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+            <StatusMessage Message="@Message"/>
+            <DataAnnotationsValidator/>
+            <div class="Username">
+                <label for="email">Email</label>
+                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
+                <ValidationMessage For="() => Input.Email" class="ErrorFont"/>
             </div>
+            <div class="Password">
+                <label for="password">Password</label>
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
+                <ValidationMessage For="() => Input.Password" class="ErrorFont"/>
+            </div>
+            <div class="Password">
+                <label for="confirm-password">Confirm Password</label>
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
+                @* <ValidationMessage For="() => Input.ConfirmPassword" class="ErrorFont"/> *@
+            </div>
+            <div class="SubmitButton">
+                <button class="SubmitButton" type="submit">Log in</button>
+            </div>
+            <div class="Error">
+                <ValidationSummary class="text-danger" role="alert"/>
+            </div>
+            <div class="OtherLoginOptions">
+                <div>
+                    <div>Already have an Account?</div>
+                    <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                </div>
+                @* <div> *@
+                @*     <div>Didn't get the email?</div> *@
+                @*     <a href="Account/ResendEmailConfirmation">Resend email confirmation</a> *@
+                @* </div> *@
+            </div>
+        </EditForm>
+        <div class="ExternalLogin">
+            <section>
+                <h3>Use another service to log in.</h3>
+                <hr/>
+                <ExternalLoginPicker/>
+            </section>
         </div>
     </div>
 </div>
 
-
-
-@* <h1>Register</h1> *@
-@* *@
-@* <div class="row"> *@
-@*     <div class="col-md-4"> *@
-@*         <StatusMessage Message="@Message"/> *@
-@*         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register"> *@
-@*             <DataAnnotationsValidator/> *@
-@*             <h2>Create a new account.</h2> *@
-@*             <hr/> *@
-@*             <ValidationSummary class="text-danger" role="alert"/> *@
-@*             <div class="form-floating mb-3"> *@
-@*                 <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/> *@
-@*                 <label for="email">Email</label> *@
-@*                 <ValidationMessage For="() => Input.Email" class="text-danger"/> *@
-@*             </div> *@
-@*             <div class="form-floating mb-3"> *@
-@*                 <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/> *@
-@*                 <label for="password">Password</label> *@
-@*                 <ValidationMessage For="() => Input.Password" class="text-danger"/> *@
-@*             </div> *@
-@*             <div class="form-floating mb-3"> *@
-@*                 <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/> *@
-@*                 <label for="confirm-password">Confirm Password</label> *@
-@*                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger"/> *@
-@*             </div> *@
-@*             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button> *@
-@*         </EditForm> *@
-@*     </div> *@
-@*     <div class="col-md-6 col-md-offset-2"> *@
-@*         <section> *@
-@*             <h3>Use another service to register.</h3> *@
-@*             <hr/> *@
-@*             <ExternalLoginPicker/> *@
-@*         </section> *@
-@*     </div> *@
-@* </div> *@
 
 @code {
     private IEnumerable<IdentityError>? m_IdentityErrors;

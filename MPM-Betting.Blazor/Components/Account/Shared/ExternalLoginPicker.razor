@@ -6,34 +6,21 @@
 @inject SignInManager<MpmUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-@if (m_ExternalLogins.Length == 0)
-{
+<form class="form-horizontal" action="Account/PerformExternalLogin" method="post">
     <div>
+        <AntiforgeryToken/>
+        <input type="hidden" name="ReturnUrl" value="@ReturnUrl"/>
         <p>
-            @{
-                // TODO: Setup external logins
+            @foreach (var provider in m_ExternalLogins)
+            {
+                <button type="submit" class="" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                    <img class="providerImg" src="Images/@(provider.DisplayName)_logo.png" height="40px" alt="@provider.DisplayName"/>
+                </button>
             }
         </p>
     </div>
-}
-else
-{
-    <form class="form-horizontal" action="Account/PerformExternalLogin" method="post">
-        <div>
-            <AntiforgeryToken/>
-            <input type="hidden" name="ReturnUrl" value="@ReturnUrl"/>
-            <p>
-                @foreach (var provider in m_ExternalLogins)
-                {
-                    <button type="submit" class="" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
-                        <img class="providerImg" src="Images/@(provider.DisplayName)_logo.png" height="40px" alt="@provider.DisplayName"/>
-                         @* @provider.DisplayName  *@
-                    </button>
-                }
-            </p>
-        </div>
-    </form>
-}
+</form>
+
 
 @code {
     private AuthenticationScheme[] m_ExternalLogins = [];

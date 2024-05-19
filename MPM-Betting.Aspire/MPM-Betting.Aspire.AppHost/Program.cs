@@ -24,11 +24,11 @@ if (!builder.ExecutionContext.IsPublishMode)
 var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana", isReadOnly: false)
     .WithBindMount(GetFullPath("../grafana/dashboards"), "/var/lib/grafana/dashboards", isReadOnly: false)
-    .WithHttpEndpoint(port: 3000, targetPort: 3000);
+    .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false);
 
 var prometheus = builder.AddContainer("prometheus", "prom/prometheus")
     .WithBindMount(GetFullPath("../prometheus"), "/etc/prometheus")
-    .WithHttpEndpoint(port: 9090, targetPort: 9090);
+    .WithHttpEndpoint(port: 9090, targetPort: 9090, isProxied: false);
 
 var redis = builder.AddRedis("redis")
     .WithPersistence()

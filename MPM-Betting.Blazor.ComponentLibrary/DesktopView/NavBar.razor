@@ -1,79 +1,100 @@
-﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
-@using Blazorise
-@attribute [StreamRendering(true)]
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.User
+@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
-<div class="NavBar col-12">
-    <div class="col-1 logo">
-        <a href="/" class="NoHoverUnderline">
-            <div class="NavBarLogoText">MPM</div></a>
-    </div>
-    <div class="col-4 sportarten">
-        <div/>
-        <a href="/" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Home ? "NavBarActive" : "")">
-            <div class="NavBarItem">Home</div>
-        </a>
-        <a href="/dashboard" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Dashboard ? "NavBarActive" : "")">
-            <div class="NavBarItem">Dashboard</div>
-        </a>
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
-        <div></div>
+@rendermode InteractiveServer
 
-        <div class="NavBarDropDown">
-            <div class="NavBarItem NavBarDropDownSP">@SportArt.ToString()</div>
-            <Dropdown>
-                <DropdownToggle>
-                </DropdownToggle>
-                <DropdownMenu>
-                    <DropdownItem TextColor="TextColor.Primary">Fußball</DropdownItem>
-                    <DropdownDivider/>
-                    <DropdownItem Disabled>Basketball</DropdownItem>
-                    <DropdownDivider/>
-                    <DropdownItem Disabled>Formula 1</DropdownItem>
-                </DropdownMenu>
-
-            </Dropdown>
+<div class="NavBar flex flex-row justify-between align-center">
+    <div class="nav-left flex flex-row h-full align-center">
+        <div class="logo">
+            <a href="/" class="NoHoverUnderline">
+                <span class="NavBarLogoText">MPM</span>
+            </a>
         </div>
-        <div/>
-    </div>
-    <div class="col-3">
 
-    </div>
-    <div class="col-1 light_dark">
+        <ul class="nav-list">
+            <li>
+                <a href="/" class="NoHoverUnderline nav-link @(Tab == ActiveTab.Home ? "nav-active" : "")">
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/dashboard" class="NoHoverUnderline nav-link @(Tab == ActiveTab.Dashboard ? "nav-active" : "")">
+                    Dashboard
+                </a>
+            </li>
+        </ul>
 
+        <div class="nav-sport-menu">
+            <Select @bind-SelectedValue="@SportType">
+                <SelectItem Value="@ESportType.None">None</SelectItem>
+                <SelectItem Value="@ESportType.Football">Football</SelectItem>
+                <SelectItem Value="@ESportType.Basketball">Basketball</SelectItem>
+                <SelectItem Value="@ESportType.Tennis">Tennis</SelectItem>
+                <SelectItem Value="@ESportType.Hockey">Hockey</SelectItem>
+                <SelectItem Value="@ESportType.Baseball">Baseball</SelectItem>
+                <SelectItem Value="@ESportType.AmericanFootball">American Football</SelectItem>
+                <SelectItem Value="@ESportType.Formula1">Formula1</SelectItem>
+                <SelectItem Value="@ESportType.Handball">Handball</SelectItem>
+                <SelectItem Value="@ESportType.Volleyball">Volleyball</SelectItem>
+            </Select>
+        </div>
     </div>
-    <div class="col-1 notifications">
-        <img src="Images/bell_white.png" height="40px"/>
-    </div>
-    <div class="col-1 credits">
 
-        <div>7524</div>
-        <img src="Images/coin.png" height="30px" alt="xxx"/>
-    </div>
-    <div class="col-1 profile-pic">
-        <img src="Images/pfp.jpg" height="50px" alt="xxx"/>
+
+    <div class="nav-right flex flex-row">
+        @if (User?.Payload is null)
+        {
+            <div>
+                <Button Color="Color.Primary" Clicked="@(() => NavigationManager.NavigateTo(LoginUrl))">Login</Button>
+                <Button Color="Color.Primary" Clicked="@(() => NavigationManager.NavigateTo(RegisterUrl))">Register</Button>
+            </div>
+        }
+        else
+        {
+            @if (User.Payload.ProfilePictureUrl is null)
+            {
+                <img src="/images/default-profile-picture.png" alt="Profile Picture" class="profile-picture"/>
+            }
+            else
+            {
+                <img src="@User.Payload.ProfilePictureUrl" alt="Profile Picture" class="profile-picture"/>
+            }
+        }
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public ActiveTab Tab { get; set; }
+    [Parameter] public ActiveTab Tab { get; set; }
+
+    [Parameter] public ESportType SportType { get; set; } = ESportType.None;
+
+    [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
     
-    [Parameter]
-    public SelectedSportArt SportArt { get; set; }
-    
-    
+    const string LoginUrl = "/account/login";
+    const string RegisterUrl = "/account/register";
+
     public enum ActiveTab
     {
         Home,
-        Dashboard,
-        Sportarten
+        Dashboard
     }
 
-    public enum SelectedSportArt
+    protected override async Task OnInitializedAsync()
     {
-        Fußball,
-        Basketball,
-        Formula1,
-        None
+        if (User is null) return;
+        
+        Console.WriteLine("here");
+        User.SyncEvent.Wait();
+        if (User.Payload is not null)
+            Console.WriteLine(User.Payload.UserName);
     }
+
 }

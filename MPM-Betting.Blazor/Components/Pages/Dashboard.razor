@@ -14,10 +14,6 @@
 
 <div id="View">
     <div class="container-fluid">
-        <div class="row">
-            <NavBar Tab="NavBar.ActiveTab.Dashboard" SportArt="NavBar.SelectedSportArt.Fußball"/>
-        </div>
-        
         <div class="MainPage">
             <div class="col-2">
                 <ResultHandler Generator="async () => await Api.GetAllFootballLeagues()">

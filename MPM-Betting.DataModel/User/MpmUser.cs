@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using MPM_Betting.DataModel.Rewarding;
@@ -12,5 +13,7 @@ public class MpmUser : IdentityUser
     public int Points { get; set; } = 0;
     public DateTime LastRedeemed { get; set; } = DateTime.Now;
     
-    public List<Achievement> Achievments { get; set; } = [];
+    public List<Achievement> Achievements { get; set; } = [];
+
+    [StringLength(200)] public string? ProfilePictureUrl { get; set; } 
 }
