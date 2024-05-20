@@ -34,11 +34,4 @@
       <ProjectReference Include="..\MPM-Betting.Services\MPM-Betting.Services.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Update="DesktopView\NavBar.razor.css">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-    </ItemGroup>
-
 </Project>
