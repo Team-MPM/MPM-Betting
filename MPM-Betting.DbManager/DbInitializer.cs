@@ -14,7 +14,7 @@ using StackExchange.Redis;
 
 namespace MPM_Betting.DbManager;
 
-internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<DbInitializer> logger, FootballApi footballApi)
+internal class DbInitializer(IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<DbInitializer> logger, FootballApi footballApi)
     : BackgroundService
 {
     public const string ActivitySourceName = "Migrations";
@@ -50,12 +50,12 @@ internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, ISe
 
         await SeedBuiltinSeasons(dbContext, cancellationToken);
 
-        if (env.IsDevelopment())
-        {
-            await SeedTestGoups(dbContext);
-        }
-
-        await SeedAchievments(dbContext);
+        // if (env.IsDevelopment())
+        // {
+        //     await SeedTestGoups(dbContext);
+        // }
+        //
+        // await SeedAchievments(dbContext);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -63,39 +63,39 @@ internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, ISe
     {
         List<MpmResult<Achievement>> achievements = new List<MpmResult<Achievement>>();
         
-        achievements.Add(await userDomain.CreateAchievement("First Steps", "Place your first bet"));
-        achievements.Add(await userDomain.CreateAchievement("Victory Royale", "Win your first bet"));
-        achievements.Add(await userDomain.CreateAchievement("Womp Womp", "Lose your first bet"));
-        achievements.Add(await userDomain.CreateAchievement("Getting Started", "Place 10 Bets"));
-        achievements.Add(await userDomain.CreateAchievement("High Roller", "Place 100 Bets"));
+        // achievements.Add(await userDomain.CreateAchievement("First Steps", "Place your first bet"));
+        // achievements.Add(await userDomain.CreateAchievement("Victory Royale", "Win your first bet"));
+        // achievements.Add(await userDomain.CreateAchievement("Womp Womp", "Lose your first bet"));
+        // achievements.Add(await userDomain.CreateAchievement("Getting Started", "Place 10 Bets"));
+        // achievements.Add(await userDomain.CreateAchievement("High Roller", "Place 100 Bets"));
         
         //TODO: Insert achiements in db
     }
-    private async Task SeedTestGoups(MpmDbContext dbContext)
-    {
-        if(dbContext.Groups.Count() < 200)
-           return; 
-
-        List<MpmResult<MpmGroup>> TestGroups = new List<MpmResult<MpmGroup>>();
-
-        for (int i = 0; i < 300; i++)
-        {
-            TestGroups.Add(await userDomain.CreateGroup("Test"+i.ToString(), "Test Group"+ i.ToString()));
-        }
-
-        List<MpmResult<CustomSeason>> testCustomSeasons = new List<MpmResult<CustomSeason>>();
-
-        for (int i = 0; i < 100; i++)
-        {
-            testCustomSeasons.Add(await userDomain.CreateCustomSeason(TestGroups[i].Value,$"Mixed League{i}", $"Mixed League{i}", new DateTime(2024, 9, 1), new DateTime(2025, 6, 31)));             
-        }
-            
-        for (int i = 101; i < TestGroups.Count-1; i++)
-        {
-            var curentBuiltInSeason = await userDomain.GetCurrentBuiltInSeasonById(87);
-            await userDomain.AddSeasonToGroup(TestGroups[i].Value, curentBuiltInSeason.Value);
-        }
-    }
+    // private async Task SeedTestGoups(MpmDbContext dbContext)
+    // {
+    //     if(dbContext.Groups.Count() < 200)
+    //        return; 
+    //
+    //     List<MpmResult<MpmGroup>> TestGroups = new List<MpmResult<MpmGroup>>();
+    //
+    //     for (int i = 0; i < 300; i++)
+    //     {
+    //         TestGroups.Add(await userDomain.CreateGroup("Test"+i.ToString(), "Test Group"+ i.ToString()));
+    //     }
+    //
+    //     List<MpmResult<CustomSeason>> testCustomSeasons = new List<MpmResult<CustomSeason>>();
+    //
+    //     for (int i = 0; i < 100; i++)
+    //     {
+    //         testCustomSeasons.Add(await userDomain.CreateCustomSeason(TestGroups[i].Value,$"Mixed League{i}", $"Mixed League{i}", new DateTime(2024, 9, 1), new DateTime(2025, 6, 31)));             
+    //     }
+    //         
+    //     for (int i = 101; i < TestGroups.Count-1; i++)
+    //     {
+    //         var curentBuiltInSeason = await userDomain.GetCurrentBuiltInSeasonById(87);
+    //         await userDomain.AddSeasonToGroup(TestGroups[i].Value, curentBuiltInSeason.Value);
+    //     }
+    // }
 
     private async Task SeedBuiltinSeasons(MpmDbContext dbContext, CancellationToken cancellationToken)
     {

@@ -1,0 +1,132 @@
+﻿@using MPM_Betting.Blazor.Components.Layout
+@using MPM_Betting.Services.Domains
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.Blazor.Components.Account.Shared
+@using MPM_Betting.DataModel.User
+@using Color = Blazorise.Color
+@using Blazorise
+
+@layout MainLayout
+@inherits LayoutComponentBase
+
+@inject UserDomain UserDomain
+@inject NavigationManager NavigationManager
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<AuthorizeView>
+    <Authorized>
+        <div class="flex flex-row groups">
+            <div class="flex flex-column h-full text-primary side-nav">
+                @foreach(var group in m_Groups)
+                {
+                    <button class="mb-4">
+                        <div>
+                            <img src="@(group.ProfilePictureUrl ?? "images/coin.png")" alt="group logo"/>
+                        </div>
+                        <div class="bar"></div>
+                    </button>
+                }
+
+                <button class="mb-4" @onclick="ShowNewGroupModal">
+                    <div>
+                        <img src="images/coin.png" alt="group logo"/>
+                    </div>
+                    <div class="bar"></div>
+                </button>
+            </div>
+            <div>
+                @Body
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin/>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+<Blazorise.Modal @bind-Visible="m_NewGroupModalVisible">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Employee edit</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody Background="Background.Dark">
+            <Text>@m_NewGroupModalStatus</Text>
+            <Field>
+                <FieldLabel>Name</FieldLabel>
+                <TextEdit @bind-Text="m_NewGroupName" Placeholder="Enter name..."/>
+            </Field>
+            <Field>
+                <FieldLabel>Surname</FieldLabel>
+                <TextEdit @bind-Text="m_NewGroupDescription" Placeholder="Enter surname..."/>
+            </Field>
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Color.Secondary" Clicked="@HideNewGroupModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@(async () => await CreateGroup())">Create</Button>
+        </ModalFooter>
+    </ModalContent>
+</Blazorise.Modal>
+
+@code {
+
+    [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
+    MpmUser? m_UserInstance;
+    
+    private List<MpmGroup> m_Groups = [];
+    
+    private bool m_NewGroupModalVisible;
+    private string? m_NewGroupModalStatus;
+    private string m_NewGroupName = "", m_NewGroupDescription = "";
+
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (User is null) return;
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+            m_UserInstance = User.Payload;
+        
+        if (m_UserInstance is null) return;
+        UserDomain.SetUser(m_UserInstance);
+        var groupResult = await UserDomain.GetGroups();
+        if (groupResult.IsSuccess)
+        {
+            m_Groups = groupResult.Value;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task CreateGroup()
+    {
+        var result = await UserDomain.CreateGroup(m_NewGroupName, m_NewGroupDescription);
+        if (result.IsSuccess)
+        {
+            m_Groups.Add(result.Value);
+            HideNewGroupModal();
+            StateHasChanged();
+            m_NewGroupModalStatus = null;
+        }
+        else
+        {
+            m_NewGroupModalStatus = result.Exception switch
+            {
+                _ => "An error occurred"
+            };
+        }
+    }
+
+    private void ShowNewGroupModal()
+    {
+        m_NewGroupModalVisible = true;
+    }
+    
+    private void HideNewGroupModal()
+    {
+        m_NewGroupModalVisible = false;
+    }
+}

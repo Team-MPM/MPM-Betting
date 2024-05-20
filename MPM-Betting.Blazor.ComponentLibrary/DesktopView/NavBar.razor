@@ -9,8 +9,6 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-@rendermode InteractiveServer
-
 <div class="NavBar flex flex-row justify-between align-center">
     <div class="nav-left flex flex-row h-full align-center">
         <div class="logo">
@@ -21,12 +19,12 @@
 
         <ul class="nav-list">
             <li>
-                <a href="/" class="NoHoverUnderline nav-link @(Tab == ActiveTab.Home ? "nav-active" : "")">
-                    Home
+                <a href="/groups" class="NoHoverUnderline nav-link @(NavigationManager.Uri.Contains("groups") ? "nav-active" : "")">
+                    Groups
                 </a>
             </li>
             <li>
-                <a href="/dashboard" class="NoHoverUnderline nav-link @(Tab == ActiveTab.Dashboard ? "nav-active" : "")">
+                <a href="/dashboard" class="NoHoverUnderline nav-link @(NavigationManager.Uri.Contains("dashboard") ? "nav-active" : "")">
                     Dashboard
                 </a>
             </li>
@@ -78,8 +76,6 @@
 </div>
 
 @code {
-    [Parameter] public ActiveTab Tab { get; set; }
-
     [Parameter] public ESportType SportType { get; set; } = ESportType.None;
 
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
@@ -89,13 +85,7 @@
 
     const string LoginUrl = "/account/login";
     const string RegisterUrl = "/account/register";
-
-    public enum ActiveTab
-    {
-        Home,
-        Dashboard
-    }
-
+    
     protected override async Task OnInitializedAsync()
     {
         await User.SyncEvent.Task;
