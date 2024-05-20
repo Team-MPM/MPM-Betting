@@ -59,14 +59,20 @@
         }
         else
         {
-            @if (m_UserInstance.ProfilePictureUrl is null)
-            {
-                <img src="/images/default-profile-picture.png" alt="Profile Picture" class="profile-picture"/>
-            }
-            else
-            {
-                <img src="@m_UserInstance.ProfilePictureUrl" alt="Profile Picture" class="profile-picture"/>
-            }
+            <Dropdown>
+                <DropdownToggle Color="Color.Dark" Border="null">
+                    <img src="@m_UserInstance.ProfilePictureUrl" alt="Profile Picture" class="profile-picture"/>
+                </DropdownToggle>
+                <DropdownMenu>
+                    <DropdownItem><a href="/bets/history" class="NoHoverUnderline">Bet History</a></DropdownItem>
+                    <DropdownItem><a href="/groups" class="NoHoverUnderline">Groups</a></DropdownItem>
+                    <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem>
+                    <DropdownDivider/>
+                    <DropdownItem><a href="/profile" class="NoHoverUnderline">Profile</a></DropdownItem>
+                    <DropdownItem><a href="/account/manage" class="NoHoverUnderline">Manage</a></DropdownItem>
+                    <DropdownItem><a href="/account/login" class="NoHoverUnderline">Logout</a></DropdownItem>
+                </DropdownMenu>
+            </Dropdown>
         }
     </div>
 </div>
@@ -77,8 +83,10 @@
     [Parameter] public ESportType SportType { get; set; } = ESportType.None;
 
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
-    MpmUser m_UserInstance;
+    MpmUser? m_UserInstance;
     
+    private string m_ImageUrl = "/Images/default-profile-picture.png";
+
     const string LoginUrl = "/account/login";
     const string RegisterUrl = "/account/register";
 
@@ -90,8 +98,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (User is null) return;
-        
         await User.SyncEvent.Task;
         Console.WriteLine("here");
         if (User.Payload is not null)
@@ -101,6 +107,8 @@
         }
         else
             Console.WriteLine("User is null");
+        
+        m_ImageUrl = m_UserInstance?.ProfilePictureUrl ?? m_ImageUrl;
     }
 
 }

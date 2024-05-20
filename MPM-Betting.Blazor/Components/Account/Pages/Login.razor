@@ -2,6 +2,7 @@
 
 @using System.ComponentModel.DataAnnotations
 @using BlazorApp1.Components.Account
+@using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.DataModel.User
@@ -11,8 +12,6 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
-@implements IDisposable
 
 <PageTitle>Login</PageTitle>
 
@@ -29,6 +28,7 @@
                 <div class="login-wrap p-0">
                     <h3 class="mb-4 text-center">Have an account?</h3>
                     <EditForm action="Account/Login" class="signin-form" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+                        <StatusMessage Message="@m_ErrorMessage"/>
                         <DataAnnotationsValidator/>
                         <div class="form-group">
                             <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="E-Mail"/>
