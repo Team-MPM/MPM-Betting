@@ -25,12 +25,13 @@
                 <h1 class="heading-section">Register</h1>
             </div>
         </div>
-
+        
         <div class="row justify-content-center align-center">
             <div class="col-md-6 col-lg-4 pt-4 soft-bg">
                 <div class="login-wrap p-0">
                     <h3 class="mb-4 text-center">Create new account</h3>
                     <EditForm action="Account/Login" class="signin-form" Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="login">
+                        <StatusMessage Message="@Message"/>
                         <DataAnnotationsValidator/>
                         <div class="form-group">
                             <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="E-Mail"/>
