@@ -54,6 +54,12 @@ h1:focus {
 }
 
 
+/* Auth */
+
+.soft-bg {
+    background: rgba(30,30,30,0.7);
+    border-radius: 0.8rem;
+}
 
 
 

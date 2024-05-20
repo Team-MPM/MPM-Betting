@@ -7,12 +7,13 @@
 @inject IdentityRedirectManager RedirectManager
 
 <form class="form-horizontal" action="Account/PerformExternalLogin" method="post">
+    <AntiforgeryToken />
     <div>
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl"/>
         <p>
             @foreach (var provider in m_ExternalLogins)
             {
-                <button type="submit" class="" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                <button type="submit" class="mx-3" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
                     <img class="providerImg" src="Images/@(provider.DisplayName)_logo.png" height="40px" alt="@provider.DisplayName"/>
                 </button>
             }

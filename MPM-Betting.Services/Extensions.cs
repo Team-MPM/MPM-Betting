@@ -1,6 +1,7 @@
 using System.Net.Mail;
 using LanguageExt;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +14,7 @@ using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services.Account;
 using MPM_Betting.Services.Data;
+using Solutaris.InfoWARE.ProtectedBrowserStorage.Extensions;
 
 namespace MPM_Betting.Services;
 
@@ -53,6 +55,8 @@ public static class Extensions
 
     public static WebApplicationBuilder AddMpmAuth(this WebApplicationBuilder builder)
     {
+        //builder.Services.AddSingleton<ITicketStore, SessionTicketStore>();
+        
         builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
