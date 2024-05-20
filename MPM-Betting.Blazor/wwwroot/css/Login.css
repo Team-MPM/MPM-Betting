@@ -13,140 +13,16 @@
 }
 
 .Background::after {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     z-index: -1;
     backdrop-filter: blur(6px);
     background: rgba(0, 0, 0, 0.3);
+
 }
 
 
-
-.LoginPage {
-    display: flex;
-    justify-items: center;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100%;
-    min-height: 80vh;
-    height: fit-content;
-    font-size: 19px;
-    justify-self: center;
-}
-
-input:focus {
-    border: 2px solid #0BBCC7;
-}
-
-ul {
-    font-size: 15px;
-}
-
-.LoginTitle {
-    font-size: 33px;
-    font-weight: bolder;
-    color: #0BBCC7;
-}
-
-.LoginPageContainer {
-    display: grid;
-    justify-items: center;
-    max-width: fit-content ;
-    padding: 3%;
-    background: rgb(70,70,70);
-    border-radius: 10px;
-    grid-template-rows: 1fr 8fr 2fr;
-    grid-template-columns: 1fr ;
-}
-
-.LoginDataBox {
-    display: grid;
-    grid-template-rows: 0.7fr 0.7fr 0.5fr 0.2fr 1fr;
-    grid-template-columns: 1fr;
-    justify-items: center;
-    align-items: center;
-    justify-content: center;
-    align-content: center;
-    height: 100%;
-    width: 100%;
-}
-
-.PasswordLabelBox {
-    display: flex;
-    align-content: center;
-    align-items: center;
-    justify-content: space-between;
-}
-
-
-.Password > div > a {
-    font-size: 11px;
-    color: white;
-    text-decoration: none;
-    color: lightblue;
-}
-
-.SubmitButton{
-    background: #0BBCC7;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 5px 10px 5px 10px;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-.OtherLoginOptions {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    justify-content: left;
-    font-size: 15px;
-    align-content: center;
-}
-
-.OtherLoginOptions > div {
-    margin-bottom: 10px;
-  
-    
-}
-
-.OtherLoginOptions > div > a {
-    color: #0BBCC7;
-}
-
-.providerImg {
-    height: 40px;
-    margin-right: 15px;
-}
-
-/*REGISTER THINGYS*/
-
-.RegisterPageContainer {
-    display: grid;
-    justify-items: center;
-
-    width: 100vw;
-    max-width: fit-content ;
-    padding: 3%;
-    background: rgb(70,70,70);
-    border-radius: 10px;
-    grid-template-rows: 1fr 8fr 2fr;
-    grid-template-columns: 1fr ;
-}
-
-.RegisterDataBox {
-    display: grid;
-    grid-template-rows: 0.7fr 0.7fr 0.7fr 0.8fr 0.5fr 0.5fr;
-    grid-template-columns: 1fr;
-    justify-items: center;
-    align-items: center;
-    justify-content: center;
-    align-content: center;
-    height: 100%;
-    width: 100%;
-}

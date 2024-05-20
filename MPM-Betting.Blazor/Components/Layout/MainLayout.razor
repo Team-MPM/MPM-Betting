@@ -1,20 +1,16 @@
-﻿@inherits LayoutComponentBase
+﻿@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@inherits LayoutComponentBase
 
 <div class="page">
-    @Body
-    @* <div class="sidebar"> *@
-    @*     <NavMenu/> *@
-    @* </div> *@
-    @* *@
-    @* <main> *@
-    @*     <div class="top-row px-4"> *@
-    @*         <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
-    @*     </div> *@
-    @* *@
-    @*     <article class="content px-4"> *@
-    @*         @Body *@
-    @*     </article> *@
-    @* </main> *@
+    <AuthStateProvider>
+        <NavBar/>
+
+        <main style="margin-top: 100px">
+            @Body
+        </main>
+    </AuthStateProvider>
+
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
