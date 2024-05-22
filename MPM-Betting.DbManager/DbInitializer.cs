@@ -92,7 +92,7 @@ internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, ISe
             
         for (int i = 101; i < TestGroups.Count-1; i++)
         {
-            var curentBuiltInSeason = await userDomain.GetCurrentBuiltInSeasonById(87);
+            var curentBuiltInSeason = await userDomain.GetCurrentBuiltInSeasonById(i);
             await userDomain.AddSeasonToGroup(TestGroups[i].Value, curentBuiltInSeason.Value);
         }
     }
