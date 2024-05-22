@@ -32,7 +32,7 @@
 
                 <button class="mb-4" @onclick="ShowNewGroupModal">
                     <div>
-                        <img src="images/coin.png" alt="group logo"/>
+                        <img src="Images/plus-icon-design-png.webp" alt="group logo"/>
                     </div>
                     <div class="bar"></div>
                 </button>
@@ -51,7 +51,7 @@
 <Blazorise.Modal @bind-Visible="m_NewGroupModalVisible">
     <ModalContent Centered>
         <ModalHeader Background="Background.Dark">
-            <ModalTitle>Employee edit</ModalTitle>
+            <ModalTitle>Create Group</ModalTitle>
             <CloseButton />
         </ModalHeader>
         <ModalBody Background="Background.Dark">
@@ -61,7 +61,7 @@
                 <TextEdit @bind-Text="m_NewGroupName" Placeholder="Enter name..."/>
             </Field>
             <Field>
-                <FieldLabel>Surname</FieldLabel>
+                <FieldLabel>Description</FieldLabel>
                 <TextEdit @bind-Text="m_NewGroupDescription" Placeholder="Enter surname..."/>
             </Field>
         </ModalBody>
