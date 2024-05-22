@@ -1,0 +1,89 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.Services.Data
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
+@using Blazorise
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+<div class="row GroupsContainer">
+    <div class="col-11 GroupsMainBox">
+        <h2 class="pt-3 fw-bold">Your Groups</h2>
+        <div class="line"></div>
+        
+        @foreach(var group in GroupsList.Take(4))
+        {
+            <div class="GroupEntry row">
+                <img class="col-2" src="./Images/Logo_cropped.png"/>
+                <div class="col-7">@group.Name</div>
+                @switch(group.Position)
+                {
+                    case 1:
+                        <div class="col-3 gold">1st</div>
+                        break;
+                    case 2:
+                        <div class="col-3 silver">2nd</div>
+                        break;
+                    case 3:
+                        <div class="col-3 bronze">3rd</div>
+                        break;
+                    default:
+                        <div class="col-3">@(group.Position)th</div>
+                        break;
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    public List<TestGroups> GroupsList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReadGroups();
+    }
+
+    private async Task ReadGroups()
+    {
+        //TODO Read groups instead of Testdata
+        
+        // Test data entries for the TestGroups class
+
+        GroupsList = new List<TestGroups>();
+        GroupsList.Add(new TestGroups("Alpha Team", 5, "Top performers in the project.", 1500, 1));
+        GroupsList.Add(new TestGroups("Beta Squad", 8, "Strong in research and analysis.", 1200, 2));
+        GroupsList.Add(new TestGroups("Gamma Group", 4, "Focused on innovation and creativity.", 1100, 3));
+        GroupsList.Add(new TestGroups("Delta Force", 6, "Experts in execution and delivery.", 1000, 4));
+        GroupsList.Add(new TestGroups("Epsilon Crew", 7, "Collaborative and cohesive unit.", 950, 5));
+        GroupsList.Add(new TestGroups("Zeta Unit", 5, "Strategic thinkers and planners.", 900, 6));
+        GroupsList.Add(new TestGroups("Eta Team", 3, "Specialists in technical solutions.", 850, 7));
+        GroupsList.Add(new TestGroups("Theta Group", 4, "Innovative and dynamic team.", 800, 8));
+        GroupsList.Add(new TestGroups("Iota Squad", 6, "Efficient and reliable performers.", 750, 9));
+        GroupsList.Add(new TestGroups("Kappa Crew", 7, "Resourceful and adaptable members.", 700, 10));
+
+        
+    }
+
+    public class TestGroups
+    {
+        public TestGroups() {}
+
+        public TestGroups(string name, int members, string description, int points, int position)
+        {
+            Name = name;
+            Members = members;
+            Description = description;
+            Points = points;
+            Position = position;
+        }
+        
+        public string Name { get; set; }
+        public int Members { get; set; }
+        public string Description { get; set; }
+        public int Points { get; set; }
+        public int Position { get; set; }
+    }
+    
+    
+
+}
