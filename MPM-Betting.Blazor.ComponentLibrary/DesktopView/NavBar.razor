@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Blazorise.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.Betting
@@ -47,7 +48,7 @@
     </div>
 
 
-    <div class="nav-right flex flex-row">
+    <div class="nav-right flex flex-row mr-4">
         @if (m_UserInstance is null)
         {
             <div>
@@ -59,7 +60,7 @@
         {
             <Dropdown>
                 <DropdownToggle Color="Color.Dark" Border="null">
-                    <img src="@m_UserInstance.ProfilePictureUrl" alt="Profile Picture" class="profile-picture"/>
+                    <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
                 </DropdownToggle>
                 <DropdownMenu>
                     <DropdownItem><a href="/bets/history" class="NoHoverUnderline">Bet History</a></DropdownItem>
@@ -81,7 +82,7 @@
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
     MpmUser? m_UserInstance;
     
-    private string m_ImageUrl = "Images/default-profile-picture.png";
+    private string m_ImageUrl = "./Images/default-profile-picture.png";
 
     const string LoginUrl = "/account/login";
     const string RegisterUrl = "/account/register";
@@ -89,16 +90,17 @@
     protected override async Task OnInitializedAsync()
     {
         await User.SyncEvent.Task;
-        Console.WriteLine("here");
         if (User.Payload is not null)
         {
-            Console.WriteLine(User.Payload.UserName);
             m_UserInstance = User.Payload;
         }
         else
-            Console.WriteLine("User is null");
+        {
+            return;
+        }
         
-        m_ImageUrl = m_UserInstance?.ProfilePictureUrl ?? m_ImageUrl;
+        // m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_UserInstance?.ProfilePictureUrl : m_ImageUrl;
+        m_ImageUrl = "./Images/default-profile-picture.png";
     }
 
 }
