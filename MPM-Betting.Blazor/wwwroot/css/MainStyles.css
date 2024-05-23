@@ -1,7 +1,14 @@
 ﻿.MainPage {
     display: flex;
     flex-direction: row;
+    justify-content: center;
+    justify-items: center;
 }
 .page {
     min-width: 100vw;
+}
+
+.LeftPart {
+    justify-content: center;
+    justify-items: center;
 }
