@@ -1,0 +1,60 @@
+﻿@page "/Groups/{GroupId:int}"
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.User
+@using MPM_Betting.Services
+@using MPM_Betting.Services.Domains
+
+@inject UserDomain UserDomain
+@inject NavigationManager NavigationManager
+@inject IServiceProvider ServiceProvider
+
+<div>
+    @if (m_GroupResult.IsSuccess)
+    {
+        <h2>Welcome to group @m_GroupResult.Value.group.Name</h2>
+    }
+    else
+    {
+        <p>Failed to load group id:@GroupId</p>
+        <p>@m_GroupResult.Exception</p>
+        <p>@m_GroupResult.Exception.Message</p>
+    }
+</div>
+
+@code {
+    [Parameter] public int GroupId { get; set; } = default!;
+
+    [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
+    MpmUser? m_UserInstance;
+
+    MpmResult<(MpmGroup group, UserGroupEntry entry)> m_GroupResult;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (User is null) return;
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+            m_UserInstance = User.Payload;
+
+        if (m_UserInstance is null)
+        {
+            NavigationManager.NavigateTo("/account/login");
+            return;
+        }
+
+        UserDomain.SetUser(m_UserInstance);
+        
+        await OnParametersSetAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (m_UserInstance is null) return;
+        
+        using var scope = ServiceProvider.CreateScope();
+        var userDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
+        userDomain.SetUser(m_UserInstance);
+        m_GroupResult = await userDomain.GetGroupByIdWithAccess(GroupId);
+        StateHasChanged();
+    }
+}
