@@ -119,6 +119,56 @@ h1:focus {
     }
 }
 
+.group-view {
+    .side-nav {
+        width: 250px;
+        background: #1b1b1b;
+        border-right: 1px solid #333;
+        height: calc(100vh - 100px);
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        -ms-overflow-style: none; /* Internet Explorer 10+ */
+        scrollbar-width: none; /* Firefox */
+
+        .group-title {
+            width: 250px;
+            background-clip: content-box;
+            transition: all 0.1s ease-in-out;
+
+            img {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+            }
+
+            div {
+                width: 180px;
+                font-size: 20px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            i {
+                margin-left: auto;
+                margin-right: 15px;
+            }
+        }
+
+        .group-title:hover {
+            cursor: pointer;
+            background-color: #333;
+        }
+        
+        .list {
+            div:hover {
+                background-color: #333;
+            }
+        }
+    }
+}
+
 
 /* Utils */
 

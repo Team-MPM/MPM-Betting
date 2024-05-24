@@ -6,6 +6,7 @@
 @using MPM_Betting.Blazor.Components.Account.Shared
 @using MPM_Betting.DataModel.User
 @using Color = Blazorise.Color
+@using Microsoft.AspNetCore.Authorization
 @using Blazorise
 
 @layout MainLayout
@@ -15,6 +16,8 @@
 @inject NavigationManager NavigationManager
 @inject UserManager<MpmUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+
+@attribute [Authorize]
 
 <AuthorizeView>
     <Authorized>
