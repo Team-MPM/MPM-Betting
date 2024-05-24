@@ -55,7 +55,7 @@ internal class DbInitializer(UserDomain userDomain, IWebHostEnvironment env, ISe
             await SeedTestGoups(dbContext);
         }
 
-        await SeedAchievments(dbContext);
+        //await SeedAchievments(dbContext);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 

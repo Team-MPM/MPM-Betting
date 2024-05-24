@@ -21,6 +21,7 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<AchievementEntry> AchievementEntries { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<FavoriteSeasons> FavoriteSeasons { get; set; }
     
     public DbSet<Bet> Bets { get; set; } = null!;
     public DbSet<Football.ResultBet> FootballResultBets { get; set; } = null!;
