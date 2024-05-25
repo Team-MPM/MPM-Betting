@@ -120,6 +120,11 @@ h1:focus {
 }
 
 .group-view {
+    
+     .side-nav::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+    
     .side-nav {
         width: 250px;
         background: #1b1b1b;
