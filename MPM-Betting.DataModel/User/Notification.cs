@@ -15,6 +15,6 @@ public class Notification(MpmUser target, string message)
     public bool IsRead { get; set; } = false;
     
     public DateTime Date { get; set; } = DateTime.Now;
-
-    private Notification(): this(null!, null!) {}
+    
+    private Notification() : this(null!, null!) {}
 }

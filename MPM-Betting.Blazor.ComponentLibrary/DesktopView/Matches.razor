@@ -1,10 +1,68 @@
 ﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using Blazorise
+@using LanguageExt.ClassInstances.Const
 @using Microsoft.AspNetCore.Mvc.ApiExplorer
 @using MPM_Betting.DataModel.Betting
 @using MPM_Betting.Services.Data
 @inject FootballApi Api
 @attribute [StreamRendering]
+
+@if (SelectedTeams != null)
+{
+    <Modal @ref="modalRef" Class="ModalSettings">
+        <ModalContent Centered>
+            <ModalHeader Background="Background.Dark">
+                <ModalTitle TextColor="TextColor.Default">Enter a new Bet</ModalTitle>
+                <CloseButton TextColor="TextColor.White"/>
+            </ModalHeader>
+            <ModalBody Background="Background.Dark" Class="ModalSettings">
+                <Field>
+                    <h4 class="fw-bold">@SelectedTeams.Item1.Item1.Name.ToString() vs @SelectedTeams.Item1.Item2.Name.ToString()</h4>
+                </Field>
+                <Divider></Divider>
+                <Field>
+                    <div class="ModalTeamEntries ModalEntries" >
+                        <span>Home Win</span>
+                        <span>Draw</span>
+                        <span>Away Win</span>
+                    </div>
+                    <div class="ModalBetEntries ModalEntries">
+                        <span class="BetEntry @(ChosenTeam == BetType.HomeWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.HomeWin))">x @SelectedTeams.Item2.HomeWinPayOut</span>
+                        <span class="BetEntry @(ChosenTeam == BetType.Draw ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.Draw))">x @SelectedTeams.Item2.DrawPayOut</span>
+                        <span class="BetEntry @(ChosenTeam == BetType.AwayWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.AwayWin))">x @SelectedTeams.Item2.AwayWinPayOut</span>
+                    </div>
+                </Field>
+                <Field>
+                    <FieldLabel>Amount of credits to bet:</FieldLabel>
+                    <TextEdit Placeholder="Enter Credits" />
+                </Field>
+            </ModalBody>
+            <ModalFooter Background="Background.Dark">
+                <Button Color="Blazorise.Color.Secondary" Clicked="@HideModal">Close</Button>
+                <Button Color="Blazorise.Color.Primary" Clicked="@HideModal">PlaceBet</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+else
+{
+    <Modal @ref="modalRef" Class="ModalSettings">
+        <ModalContent Centered>
+            <ModalHeader Background="Background.Dark">
+                <ModalTitle>Error Loading</ModalTitle>
+                <CloseButton/>
+            </ModalHeader>
+            <ModalBody Background="Background.Dark" Class="ModalSettings">
+                <Field>
+                    <FieldLabel>Either try again or click the quote again</FieldLabel>
+                </Field>
+            </ModalBody>
+            <ModalFooter Background="Background.Dark">
+                <Button Color="Blazorise.Color.Primary" Clicked="@HideModal">OK</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
 
 <div class="MatchesDate">
     <MatchesDatePicker/>
@@ -33,7 +91,7 @@
                     {
                         <div class="MatchEntry">
                             <div class="MatchInfo">
-                                <img class="Match_HomeLogo" src="Images/logo_Cropped.png"/>
+                                <img class="Match_HomeLogo" src="./Images/logo_Cropped.png"/>
                                 <div class="MatchHomeTeam">@match.Score.HomeTeam.Name</div>
                                 <div class="MatchScore">
                                     <span>@match.Score.HomeScore</span>
@@ -41,13 +99,25 @@
                                     <span>@match.Score.AwayScore</span>
                                 </div>
                                 <div class="MatchAwayTeam">@match.Score.AwayTeam.Name</div>
-                                <img class="Match_HomeLogo" src="Images/logo_Cropped.png"/>
+                                <img class="Match_HomeLogo" src="./Images/logo_Cropped.png"/>
                             </div>
                             <div class="MatchInfoDivider"></div>
                             <div class="BetsInfo">
-                                <span>x</span>
-                                <span>x</span>
-                                <span>x</span>
+                               @foreach (var entry in GameBetEntries.Where(s => s.Item1 == match).Select(s => s.Item2))
+                               {
+                                   <div class="col-4 ">
+                                       <div>1</div>
+                                       <span onclick="@(() => EnterSelectedTeamsAndQuotes(match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.HomeWin))">@entry.HomeWinPayOut</span>
+                                   </div>
+                                   <div class="col-4">
+                                       <div>X</div>
+                                       <span onclick="@(() => EnterSelectedTeamsAndQuotes(match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.Draw))">@entry.DrawPayOut</span>
+                                   </div>
+                                   <div class="col-4">
+                                       <div>2</div>
+                                       <span onclick="@(() => EnterSelectedTeamsAndQuotes(match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.AwayWin))">@entry.AwayWinPayOut</span>
+                                   </div>
+                               }
                             </div>
                         </div>
                     }
@@ -56,9 +126,9 @@
                 else
                 {
                     <div class="NoMatchesError">
-                        <div class="pt-5"/>
+                        <div class="pt-5"></div>
                         No Matches Found!
-                        <div class="pb-3"/>
+                        <div class="pb-3"></div>
                     </div>
                 }
                 </div>
@@ -72,18 +142,19 @@
 
  
 @code {
-    [Parameter]
-    public List<FootballApi.League> Leagues { get; set; }
+    [Parameter] public List<FootballApi.League> Leagues { get; set; }
     public List<FootballApi.League>? TopLeagues { get; set; }
-    
+
     public Dictionary<int, List<FootballApi.GameEntry>>? GameEntries { get; set; }
-    
+    public List<Tuple<FootballApi.GameEntry, BetEntries>> GameBetEntries { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        
-        int[] ids = { 47, 42,73, 78, 55, 54,47,37,22,32,120 };
+
+        int[] ids = { 47, 42, 73, 78, 55, 54, 47, 37, 22, 32, 120 };
         TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).ToList();
         await FillMatches();
+        ChosenTeam = BetType.None;
     }
 
     private async Task FillMatches()
@@ -94,7 +165,15 @@
             var result = await Api.GetGameEntries(league.Id, null);
             if (result.IsSuccess)
                 GameEntries.Add(league.Id, result.Value.Take(5).ToList());
+        }
 
+        GameBetEntries = new List<Tuple<FootballApi.GameEntry, BetEntries>>();
+        foreach (var league in GameEntries)
+        {
+            foreach (var game in league.Value)
+            {
+                GameBetEntries.Add(new Tuple<FootballApi.GameEntry, BetEntries>(game, new BetEntries(2.26, 1.99, 1.45)));
+            }
         }
     }
 
@@ -105,29 +184,72 @@
         {
             GameEntries.Add(league.Id, new List<FootballApi.GameEntry>()
             {
-                new FootballApi.GameEntry(1, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "erfgthzewdesfgfrdedfrgfredfrgfrdedfsgrdefsgfredfsrfewsdsfgfrgfdwrfgttrfghn"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(2, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "FC Real Madrid"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(3, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "Spurs Tottenham"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(4, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(5, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(6, new FootballApi.ScoreEntry() {HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy")}, DateTime.Now, "15:30"),
-
+                new FootballApi.GameEntry(1, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "erfgthzewdesfgfrdedfrgfredfrgfrdedfsgrdefsgfredfsrfewsdsfgfrgfdwrfgttrfghn"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(2, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "FC Real Madrid"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(3, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "Spurs Tottenham"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(4, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(5, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+                new FootballApi.GameEntry(6, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
             });
         }
-        
-        // GameEntries = new Dictionary<int, List<string>>();
-        // foreach (var league in TopLeagues)
-        // {
-        //     // var games = await Api.GetGameEntries(league.Id, DateOnly.FromDateTime(DateTime.Now));
-        //     // GameEntries.Add(league.Id, games);
-        //
-        //
-        //     GameEntries.Add(league.Id, new List<string>() {"xxx", "yyy", "zzz", "aaa"});
-        // }
- 
     }
-    
-    
-    
+
+    public void EnterSelectedTeamsAndQuotes(FootballApi.Team hometeam, FootballApi.Team awayteam, BetEntries entry, BetType type = BetType.None)
+    {
+        SelectedTeams = new Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries>(new Tuple<FootballApi.Team, FootballApi.Team>(hometeam, awayteam), entry);
+        ChosenTeam = type;
+        ShowModal();
+    }
+
+    public record struct BetEntries(double HomeWinPayOut, double DrawPayOut, double AwayWinPayOut);
+
+    private Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries> selectedTeams;
+
+    public Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries> SelectedTeams
+    {
+        get => selectedTeams;
+        set
+        {
+            selectedTeams = value;
+            StateHasChanged();
+        }
+    }
+
+    public BetType chosenTeam;
+
+    public BetType ChosenTeam
+    {
+        get => chosenTeam;
+        set
+        {
+            chosenTeam = value;
+            StateHasChanged();
+        }
+    }
+
+
+    public void SetChosenTeam(BetType type) => ChosenTeam = type;
+
+    // MODAL
+    private Modal modalRef;
+
+    private Task ShowModal()
+    {
+        return modalRef.Show();
+    }
+
+    private Task HideModal()
+    {
+        return modalRef.Hide();
+    }
+
+    public enum BetType
+    {
+        None,
+        HomeWin,
+        Draw,
+        AwayWin
+    }
+
 
 }

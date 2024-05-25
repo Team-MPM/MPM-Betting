@@ -1,0 +1,58 @@
+﻿@page "/Account/Manage/upload-profile-picture"
+
+@using BlazorApp1.Components.Account
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.DataModel.User
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.IO
+
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+<h3>Upload Profile Picture</h3>
+
+<InputFile OnChange="HandleSelected" />
+<button @onclick="UploadFile">Upload</button>
+
+@if (!string.IsNullOrEmpty(m_Message))
+{
+    <p>@m_Message</p>
+}
+
+@code {
+    private string? m_Message;
+    private IBrowserFile? m_SelectedFile;
+    [CascadingParameter] private MpmUser? User { get; set; }
+    
+    private void HandleSelected(InputFileChangeEventArgs e)
+    {
+        m_SelectedFile = e.File;
+        m_Message = $"You selected {m_SelectedFile.Name}";
+    }
+
+    private async Task UploadFile()
+    {
+        if (User is null) NavigationManager.NavigateTo("/Account/Login", true);
+        
+        if (m_SelectedFile != null)
+        {
+            var uniqueFileName = Path.GetRandomFileName() + Path.GetExtension(m_SelectedFile.Name);
+            var filePath = Path.Combine("wwwroot", "uploads", uniqueFileName);
+
+            await using var fileStream = new FileStream(filePath, FileMode.Create);
+            await m_SelectedFile.OpenReadStream().CopyToAsync(fileStream);
+
+            User.ProfilePictureUrl = $"/uploads/{uniqueFileName}";
+            var result = await UserManager.UpdateAsync(User);
+
+            m_Message = result.Succeeded ? "Profile picture updated successfully." : "Error updating profile picture.";
+        }
+        else
+        {
+            m_Message = "No file selected.";
+        }
+    }
+}

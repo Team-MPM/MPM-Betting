@@ -1,0 +1,95 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.Services.Data
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
+@using Blazorise
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.User
+@using MPM_Betting.Services.Domains
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+@inject UserDomain UserDomain
+
+<div class="row GroupsContainer">
+    <div class="col-11 GroupsMainBox">
+        <h2 class="pt-3 fw-bold">Your Groups</h2>
+        <div class="line"></div>
+        
+        @if(GroupsList == null)
+        {
+            <div> Loading... (I think)</div>
+        }
+        else
+        {
+            @foreach(var group in GroupsList)
+            {
+                <div class="GroupEntry row">
+                    <img class="col-2" src="./Images/Logo_cropped.png"/>
+                    <div class="col-7">@group.Name</div>
+                    @* TODO Abfrage >:c *@
+                    @switch(1)
+                    {
+                        case 1:
+                            <div class="col-3 gold">1st</div>
+                            break;
+                        case 2:
+                            <div class="col-3 silver">2nd</div>
+                            break;
+                        case 3:
+                            <div class="col-3 bronze">3rd</div>
+                            break;
+                        default:
+                            <div class="col-3">4th</div>
+                            break;
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
+    MpmUser? m_UserInstance;
+    public List<MpmGroup> GroupsList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (User is null) return;
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+            m_UserInstance = User.Payload;
+        
+        if (m_UserInstance is null) return;
+        UserDomain.SetUser(m_UserInstance);
+        var groupResult = await UserDomain.GetGroups();
+        if (groupResult.IsSuccess)
+        {
+            GroupsList = groupResult.Value;
+            StateHasChanged();
+        }
+    }
+
+    public class TestGroups
+    {
+        public TestGroups() {}
+
+        public TestGroups(string name, int members, string description, int points, int position)
+        {
+            Name = name;
+            Members = members;
+            Description = description;
+            Points = points;
+            Position = position;
+        }
+        
+        public string Name { get; set; }
+        public int Members { get; set; }
+        public string Description { get; set; }
+        public int Points { get; set; }
+        public int Position { get; set; }
+    }
+    
+    
+    
+
+}

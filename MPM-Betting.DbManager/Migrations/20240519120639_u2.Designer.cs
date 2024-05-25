@@ -4,6 +4,7 @@ using MPM_Betting.DataModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    partial class MpmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240519120639_u2")]
+    partial class u2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,9 +113,6 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<int?>("BuiltinSeasonId")
                         .HasColumnType("int");
 
-                    b.Property<int>("GameState")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -123,9 +123,6 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<int>("SportType")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -332,10 +329,6 @@ namespace MPM_Betting.DbManager.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
@@ -416,35 +409,6 @@ namespace MPM_Betting.DbManager.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("MPM_Betting.DataModel.User.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("TargetId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TargetId");
-
-                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
@@ -798,15 +762,6 @@ namespace MPM_Betting.DbManager.Migrations
                         .HasForeignKey("CreatorId");
 
                     b.Navigation("Creator");
-                });
-
-            modelBuilder.Entity("MPM_Betting.DataModel.User.Notification", b =>
-                {
-                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", "Target")
-                        .WithMany()
-                        .HasForeignKey("TargetId");
-
-                    b.Navigation("Target");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>

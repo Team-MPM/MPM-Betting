@@ -15,15 +15,20 @@
 /*NORMAL CLASSES*/
 
 .NavBar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 0;
     background: rgba(50,50,50,1);
-    width: 101vw;
-    height: fit-content;
-    display: flex;
-    border-bottom: gray solid 2px;
-    margin-bottom: 1%;
-    justify-content: space-evenly;
+    box-shadow: 0 4px 8px rgba(50, 50, 50, 0.4);
 }
 
+/* LOGO */
+
+.logo {
+    margin: 0 10%;
+}
 
 .NavBarLogoText {
     font-family: Impact, fantasy;
@@ -36,82 +41,43 @@
 }
 
 .NavBarLogoText:hover {
-    transform: scale(1.04);
     text-decoration: none;
     cursor: pointer;
 }
 
-.NavBar img {
-    margin: 10px;
-    justify-self: center;
-}
+/* NAVIGATION */
 
-.NavBar > * {
-    flex-direction: row;
-    justify-content: center;
-    justify-self: center;
-    align-content: center;
-    align-self: center; 
+.nav-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
     display: flex;
 }
 
-.credits {
-    display: flex;
-    flex-direction: row;
-}
-
-.sportarten{
-    display: flex;
-    justify-content: space-between;
-}
-
-.credits {
-    display: flex;
-    align-items: center;
-}
-
-.credits > div {
-    font-size: 1.2em;
-    font-family: Tahoma;
-}
-
-.NavBarLink {
-    display: flex;
-    align-items: center;
-    align-content: center;
-    text-decoration: none;
-}
-
-
-.NavBarLink:hover {
-    text-decoration: none;
-    cursor: pointer;
-    transform: scale(103%);
-}
-
-.NavBarItem {
-    font-family: "Lucida Bright";
+.nav-link {
+    margin: 0 15px;
     font-size: 20px;
-    color: white;
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #fff;
+    align-content: center;
     text-decoration: none;
 }
 
-.NavBarActive {
+.nav-active {
     font-weight: bold;
     border-bottom: 3px solid #0BBCC7;
 }
 
-.NavBarDropDown {
-    display: grid;
-    grid-template-columns: 2fr 0.1fr;
+.nav-sport-menu{
+    width: 300px;
 }
 
-.NavBarDropDownSP {
-    diplay: flex;
-    align-content: center;
-    align-items: center;
-    color: rgb(200,200,200);
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 0 10px;
 }
-
-
-
