@@ -43,7 +43,7 @@ public static class Extensions
 
     public static IHostApplicationBuilder AddDomainLayer(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddScoped<UserDomain>();
+        builder.Services.AddTransient<UserDomain>();
         return builder;
     }
     
@@ -108,7 +108,7 @@ public static class Extensions
         builder.Services.AddDataProtection()
             .SetApplicationName("Mpm-Betting");
 
-        builder.Services.AddScoped<UserDomain>();
+        builder.Services.AddTransient<UserDomain>();
         
         return builder;
 
@@ -116,7 +116,7 @@ public static class Extensions
         {
             dbContextOptionsBuilder.UseSqlServer(settings.ConnectionString, builder =>
             {
-                if (settings.Retry)
+                if (!settings.DisableRetry)
                 {
                     builder.EnableRetryOnFailure();
                 }
