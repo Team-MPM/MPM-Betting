@@ -46,7 +46,7 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
         var strategy = m_DbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(m_DbContext.Database.MigrateAsync, cancellationToken);
 
-        //await SeedAsync(cancellationToken);
+        await SeedAsync(cancellationToken);
 
         logger.LogInformation("Database initialization completed after {ElapsedMilliseconds}ms",
             sw.ElapsedMilliseconds);
@@ -61,7 +61,7 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
 
         if (env.IsDevelopment())
         {
-            await SeedTestGroups();
+            //await SeedTestGroups();
         }
 
         await m_DbContext.SaveChangesAsync(cancellationToken);

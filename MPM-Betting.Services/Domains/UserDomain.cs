@@ -345,19 +345,19 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
             return s_AccessDeniedException;
 
         var query = m_DbContext.SeasonEntries
-            .Where(se => se.Group == group);
+            .Where(se => se.Group == group)
+            .Include(se => se.Season);
 
         return await query.ToListAsync();
     }
 
-    public async Task<MpmResult<bool>> AddSeasonToGroup(MpmGroup group, Season season)
+    public async Task<MpmResult<bool>> AddSeasonToGroup(MpmGroup group, int seasonId)
     {
         ArgumentNullException.ThrowIfNull(group);
-        ArgumentNullException.ThrowIfNull(season);
         if (m_User is null) return s_NoUserException;
 
         var existingSeasonEntry =
-            m_DbContext.SeasonEntries.FirstOrDefault(se => se.Group == group && se.Season == season);
+            m_DbContext.SeasonEntries.FirstOrDefault(se => se.Group == group && se.SeasonId == seasonId);
         if (existingSeasonEntry is not null)
             return s_AlreadyExistsException;
 
@@ -366,7 +366,11 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
 
-        m_DbContext.SeasonEntries.Add(new SeasonEntry(season.Name, group, season));
+        m_DbContext.SeasonEntries.Add(new SeasonEntry
+        {
+            GroupId = group.Id,
+            SeasonId = seasonId
+        });
         await m_DbContext.SaveChangesAsync();
 
         return true;
@@ -394,7 +398,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
     }
 
     public async Task<MpmResult<CustomSeason>> CreateCustomSeason(MpmGroup group, string name, string description,
-        DateTime startDate, DateTime endDate)
+        DateTime startDate, DateTime endDate, ESportType sport)
     {
         ArgumentNullException.ThrowIfNull(group);
         ArgumentNullException.ThrowIfNull(name);
@@ -421,11 +425,11 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         var customSeason = new CustomSeason(name, description)
         {
             Start = startDate,
-            End = endDate
+            End = endDate,
+            Sport = sport
         };
-        m_DbContext.CustomSeasons.Add(customSeason);
-
-        var seasonEntry = new SeasonEntry(name, group, customSeason);
+        
+        var seasonEntry = new SeasonEntry{ GroupId = group.Id, Season = customSeason};
         m_DbContext.SeasonEntries.Add(seasonEntry);
 
         await m_DbContext.SaveChangesAsync();
@@ -642,5 +646,21 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
     {
         Achievement achievement = new Achievement(title, description);
         return achievement;
+    }
+
+    private static readonly Func<MpmDbContext, IAsyncEnumerable<BuiltinSeason>> s_GetAllBuiltinSeasonsQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext) =>
+            dbContext.BuiltinSeasons);
+
+    public async Task<List<BuiltinSeason>> GetAllBuiltinSeasons()
+    {
+        List<BuiltinSeason> seasons = [];
+
+        await foreach (var season in s_GetAllBuiltinSeasonsQuery.Invoke(m_DbContext))
+        {
+            seasons.Add(season);
+        }
+
+        return seasons;
     }
 }
