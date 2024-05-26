@@ -46,6 +46,7 @@ namespace MPM_Betting.DbManager.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Points = table.Column<int>(type: "int", nullable: false),
                     LastRedeemed = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -136,15 +137,15 @@ namespace MPM_Betting.DbManager.Migrations
                 name: "AchievementMpmUser",
                 columns: table => new
                 {
-                    AchievmentsId = table.Column<int>(type: "int", nullable: false),
+                    AchievementsId = table.Column<int>(type: "int", nullable: false),
                     UsersId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AchievementMpmUser", x => new { x.AchievmentsId, x.UsersId });
+                    table.PrimaryKey("PK_AchievementMpmUser", x => new { x.AchievementsId, x.UsersId });
                     table.ForeignKey(
-                        name: "FK_AchievementMpmUser_Achievements_AchievmentsId",
-                        column: x => x.AchievmentsId,
+                        name: "FK_AchievementMpmUser_Achievements_AchievementsId",
+                        column: x => x.AchievementsId,
                         principalTable: "Achievements",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -247,7 +248,8 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
                 },
@@ -257,6 +259,28 @@ namespace MPM_Betting.DbManager.Migrations
                     table.ForeignKey(
                         name: "FK_Groups_AspNetUsers_CreatorId",
                         column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TargetId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Message = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_AspNetUsers_TargetId",
+                        column: x => x.TargetId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
@@ -270,7 +294,9 @@ namespace MPM_Betting.DbManager.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     SportType = table.Column<int>(type: "int", nullable: false),
                     BuiltinSeasonId = table.Column<int>(type: "int", nullable: true),
-                    ReferenceId = table.Column<int>(type: "int", nullable: false)
+                    ReferenceId = table.Column<int>(type: "int", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GameState = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -346,7 +372,7 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MpmUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    MpmUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     GroupId = table.Column<int>(type: "int", nullable: false),
                     Score = table.Column<int>(type: "int", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false)
@@ -358,13 +384,13 @@ namespace MPM_Betting.DbManager.Migrations
                         name: "FK_UserGroupEntries_AspNetUsers_MpmUserId",
                         column: x => x.MpmUserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserGroupEntries_Groups_GroupId",
                         column: x => x.GroupId,
                         principalTable: "Groups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -594,6 +620,11 @@ namespace MPM_Betting.DbManager.Migrations
                 column: "SenderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_TargetId",
+                table: "Notifications",
+                column: "TargetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ScoreEntries_SeasonEntryId",
                 table: "ScoreEntries",
                 column: "SeasonEntryId");
@@ -659,6 +690,9 @@ namespace MPM_Betting.DbManager.Migrations
 
             migrationBuilder.DropTable(
                 name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "ScoreEntries");

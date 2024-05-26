@@ -14,6 +14,10 @@ using StackExchange.Redis;
 
 namespace MPM_Betting.DbManager;
 
+// @Note Julian:
+// No domain layer available in DbInitializer because db not yet initialized and factory not available in this context
+// Resort to inserting data into DbContext directly
+
 internal class DbInitializer(IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<DbInitializer> logger, FootballApi footballApi)
     : BackgroundService
 {
@@ -21,14 +25,15 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
 
     private readonly ActivitySource m_ActivitySource = new(ActivitySourceName);
 
-    private UserDomain m_UserDomain = null!;
+    //private UserDomain m_UserDomain = null!;
     private MpmDbContext m_DbContext = null!;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
         m_DbContext = scope.ServiceProvider.GetRequiredService<MpmDbContext>();
-        m_UserDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
+        //m_UserDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
+        
         await InitializeDatabaseAsync(cancellationToken);
     }
 
@@ -41,7 +46,7 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
         var strategy = m_DbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(m_DbContext.Database.MigrateAsync, cancellationToken);
 
-        await SeedAsync(cancellationToken);
+        //await SeedAsync(cancellationToken);
 
         logger.LogInformation("Database initialization completed after {ElapsedMilliseconds}ms",
             sw.ElapsedMilliseconds);
@@ -66,11 +71,11 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
     {
         var achievements = new List<MpmResult<Achievement>>
         {
-            await m_UserDomain.CreateAchievement("First Steps", "Place your first bet"),
-            await m_UserDomain.CreateAchievement("Victory Royale", "Win your first bet"),
-            await m_UserDomain.CreateAchievement("Womp Womp", "Lose your first bet"),
-            await m_UserDomain.CreateAchievement("Getting Started", "Place 10 Bets"),
-            await m_UserDomain.CreateAchievement("High Roller", "Place 100 Bets")
+            //await m_UserDomain.CreateAchievement("First Steps", "Place your first bet"),
+            //await m_UserDomain.CreateAchievement("Victory Royale", "Win your first bet"),
+            //await m_UserDomain.CreateAchievement("Womp Womp", "Lose your first bet"),
+            //await m_UserDomain.CreateAchievement("Getting Started", "Place 10 Bets"),
+            //await m_UserDomain.CreateAchievement("High Roller", "Place 100 Bets")
         };
 
         //TODO: Insert achievements in db
@@ -84,23 +89,23 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
 
         for (int i = 0; i < 300; i++)
         {
-            testGroups.Add(await m_UserDomain.CreateGroup("Test"+i.ToString(), "Test Group"+ i.ToString()));
+           // testGroups.Add(await m_UserDomain.CreateGroup("Test"+i.ToString(), "Test Group"+ i.ToString()));
         }
 
         var testCustomSeasons = new List<MpmResult<CustomSeason>>();
 
         for (int i = 0; i < 100; i++)
         {
-            testCustomSeasons.Add(await m_UserDomain.CreateCustomSeason(testGroups[i].Value,$"Mixed League{i}", $"Mixed League{i}", new DateTime(2024, 9, 1), new DateTime(2025, 6, 31)));             
+            //testCustomSeasons.Add(await m_UserDomain.CreateCustomSeason(testGroups[i].Value,$"Mixed League{i}", $"Mixed League{i}", new DateTime(2024, 9, 1), new DateTime(2025, 6, 31)));             
         }
         
         // TODO: Julian: add games to custom seasons
             
         for (int i = 101; i < testGroups.Count-1; i++)
         {
-            var currentBuiltInSeasonById = await m_UserDomain.GetCurrentBuiltInSeasonById(87);
-            if (currentBuiltInSeasonById.IsSuccess)
-                await m_UserDomain.AddSeasonToGroup(testGroups[i].Value, currentBuiltInSeasonById.Value);
+            //var currentBuiltInSeasonById = await m_UserDomain.GetCurrentBuiltInSeasonById(87);
+            //if (currentBuiltInSeasonById.IsSuccess)
+            //    await m_UserDomain.AddSeasonToGroup(testGroups[i].Value, currentBuiltInSeasonById.Value);
         }
     }
 
