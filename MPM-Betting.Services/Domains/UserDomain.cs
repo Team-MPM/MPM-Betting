@@ -92,6 +92,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
             dbContext.UserGroupEntries
                 .Where(uge => uge.MpmUser == user && uge.Group.Id == id)
                 .Select(uge => uge.Group)
+                .AsNoTracking()
                 .FirstOrDefault());
 
     private static readonly Func<MpmDbContext, MpmUser, int, Task<UserGroupEntry?>>
@@ -100,6 +101,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
                 dbContext.UserGroupEntries
                     .Where(uge => uge.MpmUser == user && uge.Group.Id == id)
                     .Include(uge => uge.Group)
+                    .AsNoTracking()
                     .FirstOrDefault());
 
     public async Task<MpmResult<(MpmGroup group, UserGroupEntry entry)>> GetGroupByIdWithAccess(int id)
