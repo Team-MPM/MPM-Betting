@@ -143,8 +143,8 @@
     }
 </div>
 
-<div>
-    @switch(Page)
+<div class="p-4 flex flex-column">
+    @switch (Page)
     {
         case "overview":
             <p>overview</p>
@@ -159,7 +159,32 @@
             <p>chat</p>
             break;
         case "settings":
-            <p>settings</p>
+            @if (m_Model.Entry?.Role is EGroupRole.Admin or EGroupRole.Owner)
+            {
+                <div>
+                    <h3>Settings</h3>
+                </div>
+
+                <div>
+                    <h4>General</h4>
+                    <EditForm Model="@m_UpdateGroupModel" OnValidSubmit="UpdateGroup">
+                        <Field>
+                            <FieldLabel>Name</FieldLabel>
+                            <TextEdit @bind-Text="m_UpdateGroupModel.Name"/>
+                        </Field>
+                        <Field>
+                            <FieldLabel>Description</FieldLabel>
+                            <TextEdit @bind-Text="m_UpdateGroupModel.Description"/>
+                        </Field>
+                        <Button TextColor="TextColor.Light" Background="Background.Primary">Update</Button>
+                    </EditForm>
+                </div>
+            }
+            else
+            {
+                <h3>Access Denied</h3>
+            }
+
             break;
         case "league":
             <p>league</p>
@@ -242,9 +267,10 @@
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
     MpmUser? m_UserInstance;
     MpmResult<(MpmGroup group, UserGroupEntry entry)> m_GroupResult;
-    
+
     private readonly Model m_Model = new();
     private readonly NewSeasonModel m_NewSeasonModel = new();
+    private readonly UpdateGroupModel m_UpdateGroupModel = new();
 
     private class Model
     {
@@ -267,6 +293,12 @@
         public string Tab = "Builtin";
         public int SelectedSeasonId = -1;
         public ESportType SelectedSportType = ESportType.None;
+    }
+
+    private class UpdateGroupModel
+    {
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
     }
 
     protected override async Task OnInitializedAsync()
@@ -292,7 +324,7 @@
     {
         if (m_UserInstance is null) return;
         if (GroupId is null) return;
-        
+
         if (string.IsNullOrEmpty(Page)) Page = "overview";
 
         using var scope = ServiceProvider.CreateScope();
@@ -314,7 +346,7 @@
             .Select(se => se.Season)
             .GroupBy(s => s.Sport)
             .ToDictionary(g => g.Key, g => g.ToList());
-        
+
         StateHasChanged();
     }
 
@@ -353,13 +385,13 @@
                 m_NewSeasonModel.Status = "Please enter a name";
                 return;
             }
-            
+
             if (string.IsNullOrWhiteSpace(m_NewSeasonModel.Description))
             {
                 m_NewSeasonModel.Status = "Please enter a description";
                 return;
             }
-            
+
             if (m_NewSeasonModel.SelectedSportType is ESportType.None)
             {
                 m_NewSeasonModel.Status = "Please select a sport";
@@ -368,7 +400,7 @@
 
             var result = await UserDomain.CreateCustomSeason(
                 m_Model.Group!, m_NewSeasonModel.Name, m_NewSeasonModel.Description, m_NewSeasonModel.StartDate, m_NewSeasonModel.EndDate, m_NewSeasonModel.SelectedSportType);
-            
+
             switch (result.IsFaulted)
             {
                 case true when result.Exception is UserDomain.InvalidDateException:
@@ -379,7 +411,7 @@
                     return;
             }
         }
-        
+
         await OnParametersSetAsync();
 
         m_NewSeasonModel.Visible = false;
@@ -390,13 +422,17 @@
         m_NewSeasonModel.StartDate = DateTime.Today;
         m_NewSeasonModel.EndDate = DateTime.Today;
         m_NewSeasonModel.SelectedSportType = ESportType.None;
-        
     }
 
     private Task OnNewSeasonSelectedTabChanged(string name)
     {
         m_NewSeasonModel.Tab = name;
         return Task.CompletedTask;
+    }
+
+    private void UpdateGroup(EditContext context)
+    {
+        // TODO
     }
 
 }

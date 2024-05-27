@@ -4,6 +4,7 @@
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.Betting
 @using MPM_Betting.DataModel.User
+@using Microsoft.AspNetCore.Components.Forms
 @namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @inject UserManager<MpmUser> UserManager
@@ -69,7 +70,15 @@
                     <DropdownDivider/>
                     <DropdownItem><a href="/profile" class="NoHoverUnderline">Profile</a></DropdownItem>
                     <DropdownItem><a href="/account/manage" class="NoHoverUnderline">Manage</a></DropdownItem>
-                    <DropdownItem><a href="/account/login" class="NoHoverUnderline">Logout</a></DropdownItem>
+                    <DropdownItem>
+                        <form action="Account/Logout" method="post">
+                            <AntiforgeryToken/>
+                            <input type="hidden" name="ReturnUrl" value=""/>
+                            <button type="submit">
+                                <a class="NoHoverUnderline" aria-hidden="true">Logout</a> 
+                            </button>
+                        </form>
+                    </DropdownItem>
                 </DropdownMenu>
             </Dropdown>
         }
