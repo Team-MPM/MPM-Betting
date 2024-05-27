@@ -92,7 +92,6 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
             dbContext.UserGroupEntries
                 .Where(uge => uge.MpmUser == user && uge.Group.Id == id)
                 .Select(uge => uge.Group)
-                .AsNoTracking()
                 .FirstOrDefault());
 
     private static readonly Func<MpmDbContext, MpmUser, int, Task<UserGroupEntry?>>
@@ -101,7 +100,6 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
                 dbContext.UserGroupEntries
                     .Where(uge => uge.MpmUser == user && uge.Group.Id == id)
                     .Include(uge => uge.Group)
-                    .AsNoTracking()
                     .FirstOrDefault());
 
     public async Task<MpmResult<(MpmGroup group, UserGroupEntry entry)>> GetGroupByIdWithAccess(int id)
@@ -214,7 +212,12 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
 
-        group.Name = name;
+        var groupEntry = m_DbContext.Groups.FirstOrDefault(g => g.Id == group.Id);
+
+        if (groupEntry is null)
+            return s_GroupNotFoundException;
+        
+        groupEntry.Name = name; 
         await m_DbContext.SaveChangesAsync();
 
         return true;
@@ -235,8 +238,13 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
+        
+        var groupEntry = m_DbContext.Groups.FirstOrDefault(g => g.Id == group.Id);
 
-        group.Description = description;
+        if (groupEntry is null)
+            return s_GroupNotFoundException;
+        
+        groupEntry.Description = description;
         await m_DbContext.SaveChangesAsync();
 
         return true;
@@ -332,7 +340,8 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
             return s_AccessDeniedException;
 
         var query = m_DbContext.UserGroupEntries
-            .Where(e => e.Group == group);
+            .Where(e => e.Group == group)
+            .Include(uge => uge.MpmUser);
 
         return await query.ToListAsync();
     }

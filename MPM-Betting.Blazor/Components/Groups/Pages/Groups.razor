@@ -143,7 +143,7 @@
     }
 </div>
 
-<div class="p-4 flex flex-column">
+<div class="px-4 py-2 group-page">
     @switch (Page)
     {
         case "overview":
@@ -161,23 +161,96 @@
         case "settings":
             @if (m_Model.Entry?.Role is EGroupRole.Admin or EGroupRole.Owner)
             {
-                <div>
-                    <h3>Settings</h3>
+                <div class="mx-4 mt-2">
+                    <h3 class="alert-heading">Group Settings</h3>
                 </div>
 
-                <div>
-                    <h4>General</h4>
-                    <EditForm Model="@m_UpdateGroupModel" OnValidSubmit="UpdateGroup">
-                        <Field>
+                <div class="px-4 pt-1 pb-5 m-4 settings-box">
+                    <div class="mx-2 my-4">
+                        <h4>General</h4>
+                    </div>
+                    <div class="flex flex-row grow justify-between">
+                        <Field Class="mx-2 w-50">
                             <FieldLabel>Name</FieldLabel>
                             <TextEdit @bind-Text="m_UpdateGroupModel.Name"/>
                         </Field>
-                        <Field>
+                        <Field Class="mx-2 w-50">
                             <FieldLabel>Description</FieldLabel>
                             <TextEdit @bind-Text="m_UpdateGroupModel.Description"/>
                         </Field>
-                        <Button TextColor="TextColor.Light" Background="Background.Primary">Update</Button>
-                    </EditForm>
+                    </div>
+                    <div class="flex flex-row">
+                        <Button TextColor="TextColor.Light" Background="Background.Primary" @onclick="@(async () => await UpdateGroup())" Class="mx-2">Update</Button>
+                        <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                    </div>
+                </div>
+
+                <div class="px-4 pt-1 pb-1 m-4 settings-box">
+                    <div class="mx-2 my-4">
+                        <h4>Users</h4>
+                    </div>
+                    
+                    <div class="flex flex-row grow justify-between">
+                        <MudDataGrid Items="@m_Model.Users" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
+                                     Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
+                            <Columns>
+                                <PropertyColumn Property="entry => entry.MpmUser.UserName" Editable="false" />
+                                <PropertyColumn Property="entry => entry.Score" Editable="false" />
+                                <PropertyColumn Property="entry => entry.Role">
+                                    <EditTemplate>
+                                        <MudSelect T="string" Margin="@MudBlazor.Margin.Dense" @bind-Value="context.Item.RoleAsString" Required RequiredError="Role can not be empty">
+                                            @foreach (var role in Enum.GetValues<EGroupRole>())
+                                            {
+                                                // TODO: WHYHHYHYHHY NOT WORK I ZUCK AUS, ICH KANN NICHT MEHR, ICH WILL NICHT MEHR, OLAV HILF MIR
+                                                <MudSelectItem Value="role.ToString()">@role.ToString()</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </EditTemplate>
+                                </PropertyColumn>
+                                <TemplateColumn Editable="false">
+                                    <CellTemplate>
+                                        <MudStack Row>
+                                            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
+                                        </MudStack>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    </div>
+                    
+                    <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                </div>
+                
+                
+                <div class="px-4 pt-1 pb-1 m-4 settings-box">
+                    <div class="mx-2 my-4">
+                        <h4>Leagues</h4>
+                    </div>
+
+                    <div class="flex flex-row grow justify-between my-2">
+                        <MudDataGrid Items="@m_Model.ActiveSeasons!.Values.SelectMany(x => x)" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
+                                     Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
+                            <Columns>
+                                <PropertyColumn Property="entry => entry.Name" Editable="false"/>
+                                <PropertyColumn Property="entry => entry.Start" Editable="false"/>
+                                <PropertyColumn Property="entry => entry.End" Editable="false"/>
+                                <PropertyColumn Property="x => x.Sport.ToString()" Grouping GroupBy="@(e => e.Sport)" />
+                                <TemplateColumn Editable="false">
+                                    <CellTemplate>
+                                        <MudStack Row>
+                                            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
+                                            @if (context.Item is CustomSeason)
+                                            {
+                                                <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Size="Size.Small">Edit</MudButton>
+                                            }
+                                        </MudStack>
+                                     </CellTemplate>
+                                 </TemplateColumn>
+                             </Columns>
+                         </MudDataGrid>
+                    </div>
+                    
+                    <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
                 </div>
             }
             else
@@ -261,9 +334,11 @@
 </Blazorise.Modal>
 
 @code {
+    private int m_OldId = -1;
     [Parameter] public int? GroupId { get; set; } = default!;
     [Parameter] public string? Page { get; set; } = "overview";
-
+    
+    
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
     MpmUser? m_UserInstance;
     MpmResult<(MpmGroup group, UserGroupEntry entry)> m_GroupResult;
@@ -280,6 +355,7 @@
         public List<SeasonEntry>? SeasonEntries { get; set; }
         public List<BuiltinSeason>? BuiltinSeasons { get; set; }
         public MpmUser? User { get; set; }
+        public List<UserGroupEntry>? Users { get; set; } = [];
     }
 
     private class NewSeasonModel
@@ -297,8 +373,9 @@
 
     private class UpdateGroupModel
     {
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
+        public string Name = "";
+        public string Description = "";
+        public string Status = "";
     }
 
     protected override async Task OnInitializedAsync()
@@ -325,27 +402,40 @@
         if (m_UserInstance is null) return;
         if (GroupId is null) return;
 
-        if (string.IsNullOrEmpty(Page)) Page = "overview";
+        //if (m_OldId != GroupId)
+        {
+            m_OldId = GroupId.Value;
 
-        using var scope = ServiceProvider.CreateScope();
-        var userDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
-        userDomain.SetUser(m_UserInstance);
+            if (string.IsNullOrEmpty(Page)) Page = "overview";
 
-        m_GroupResult = await userDomain.GetGroupByIdWithAccess(GroupId.Value);
-        if (m_GroupResult.IsFaulted) NavigationManager.NavigateTo("/error");
+            using var scope = ServiceProvider.CreateScope();
+            var userDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
+            userDomain.SetUser(m_UserInstance);
 
-        m_Model.Group = m_GroupResult.Value.group;
-        m_Model.Entry = m_GroupResult.Value.entry;
+            m_GroupResult = await userDomain.GetGroupByIdWithAccess(GroupId.Value);
+            if (m_GroupResult.IsFaulted) NavigationManager.NavigateTo("/error");
 
-        var seasonsResult = await userDomain.GetGroupSeasons(m_Model.Group);
-        if (seasonsResult.IsFaulted) NavigationManager.NavigateTo("/error");
+            m_Model.Group = m_GroupResult.Value.group;
+            m_Model.Entry = m_GroupResult.Value.entry;
 
-        m_Model.SeasonEntries = seasonsResult.Value;
-        m_Model.ActiveSeasons = m_Model.SeasonEntries
-            .Where(se => se.IsActive)
-            .Select(se => se.Season)
-            .GroupBy(s => s.Sport)
-            .ToDictionary(g => g.Key, g => g.ToList());
+            var seasonsResult = await userDomain.GetGroupSeasons(m_Model.Group);
+            if (seasonsResult.IsFaulted) NavigationManager.NavigateTo("/error");
+
+            m_Model.SeasonEntries = seasonsResult.Value;
+            m_Model.ActiveSeasons = m_Model.SeasonEntries
+                .Where(se => se.IsActive)
+                .Select(se => se.Season)
+                .GroupBy(s => s.Sport)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            m_UpdateGroupModel.Name = m_Model.Group.Name;
+            m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
+
+            var usersResult = await userDomain.GetGroupUsers(m_Model.Group);
+            if (usersResult.IsFaulted) NavigationManager.NavigateTo("/error");
+            m_Model.Users = usersResult.Value;
+        }
+
 
         StateHasChanged();
     }
@@ -430,9 +520,33 @@
         return Task.CompletedTask;
     }
 
-    private void UpdateGroup(EditContext context)
+    private async Task UpdateGroup()
     {
-        // TODO
-    }
+        if (m_Model.Group is null) return;
 
+        if (m_Model.Group.Name != m_UpdateGroupModel.Name)
+        {
+            var result = await UserDomain.UpdateGroupName(m_Model.Group, m_UpdateGroupModel.Name);
+            if (result.IsFaulted)
+            {
+                m_UpdateGroupModel.Status = "An error occurred";
+                return;
+            }
+        }
+        
+        if (m_Model.Group.Description != m_UpdateGroupModel.Description)
+        {
+            var result = await UserDomain.UpdateGroupDescription(m_Model.Group, m_UpdateGroupModel.Description);
+            if (result.IsFaulted)
+            {
+                m_UpdateGroupModel.Status = "An error occurred";
+                return;
+            }
+        }
+
+        await OnParametersSetAsync();
+        m_UpdateGroupModel.Status = "Updated";
+        m_UpdateGroupModel.Name = m_Model.Group.Name;
+        m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
+    }
 }

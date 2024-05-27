@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using MPM_Betting.Blazor.Components.Account.Shared
 @using Blazorise
+@using MudBlazor
 
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
@@ -18,3 +19,10 @@
 
 <ModalProvider UseModalStructure Animated Size="ModalSize.Fullscreen" />
 <ToastProvider />
+
+@{
+    var darkMode = true;
+    <MudThemeProvider @bind-IsDarkMode="@darkMode" @rendermode="InteractiveServer"/>
+    <MudDialogProvider/>
+    <MudSnackbarProvider/>
+}

@@ -26,7 +26,6 @@
 
     <ItemGroup>
       <Folder Include="wwwroot\Images\NewDirectory1\" />
-      <Folder Include="wwwroot\NewDirectory1\" />
     </ItemGroup>
 
     <ItemGroup>

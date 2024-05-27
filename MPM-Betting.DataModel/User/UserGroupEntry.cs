@@ -17,6 +17,21 @@ public class UserGroupEntry(string userId, MpmGroup group)
 
     public int Score { get; set; } = 0;
     public EGroupRole Role { get; set; } = EGroupRole.Visitor;
+
+    [NotMapped]
+    public int RoleAsInt
+    {
+        get => (int) Role;
+        set => Role = (EGroupRole) value;
+    }
+    
+    [NotMapped]
+    public string RoleAsString
+    {
+        get => Role.ToString();
+        set => Role = (EGroupRole) Enum.Parse(typeof(EGroupRole), value);
+    }
+    
     
     public List<ScoreEntry> ScoreEntries { get; set; } = [];
     
