@@ -6,31 +6,31 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Account
+@using Blazorise
+@using Color = Blazorise.Color
 
 @inject UserManager<MpmUser> UserManager
 @inject IEmailSender<MpmUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
+
+
 <PageTitle>Register confirmation</PageTitle>
 
-<h1>Register confirmation</h1>
+<div class="AdministrationMiddleBox">
+    <h1>Register confirmation</h1>
+    <div class="AdministrationBox">
+        <div class="BoxContent soft-bg">
+            <StatusMessage Message="@m_StatusMessage"/>
+            <div>Please check your email to confirm you account</div>
+            <div>After that click the button below to switch to the login page</div>
+            <a href="/account/login">Login</a>
+        </div>
+    </div>
+</div>
 
-<StatusMessage Message="@m_StatusMessage"/>
 
-@if (m_EmailConfirmationLink is not null)
-{
-    <p>
-        @{ 
-            // TODO: implement actual email sending
-        }
-        Normally this would be emailed: <a href="@m_EmailConfirmationLink">Click here to confirm your account</a>
-    </p>
-}
-else
-{
-    <p>Please check your email to confirm your account.</p>
-}
 
 @code {
     private string? m_EmailConfirmationLink;
@@ -64,6 +64,13 @@ else
         //         NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
         //         new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
         // }
+    }
+    private string sr { get; set; }
+
+    private async Task RedirectToLogin()
+    {
+        sr = "a feafqwefw";
+        NavigationManager.NavigateTo("Account/Login");
     }
 
 }

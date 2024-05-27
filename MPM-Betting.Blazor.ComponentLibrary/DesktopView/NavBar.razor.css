@@ -35,13 +35,13 @@
     font-size: 32px;
     font-style: italic;
     font-weight: bold;
-    font-decoration: none;
+    text-decoration: none;
     cursor: default;
     color: #0BBCC7; /*TODO*/
 }
 
 .NavBarLogoText:hover {
-    text-decoration: none;
+    text-decoration: underline;
     cursor: pointer;
 }
 
