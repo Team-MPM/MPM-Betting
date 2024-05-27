@@ -2,21 +2,30 @@
 @using MPM_Betting.Services.Data
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
 @using Blazorise
+@using Microsoft.AspNetCore.Authorization
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Domains
 @attribute [StreamRendering]
 @rendermode InteractiveServer
 @inject UserDomain UserDomain
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
 
 <div class="row GroupsContainer">
-    <div class="col-11 GroupsMainBox">
+    <div class="col-11 GroupsMainBox" onclick="@SwitchToGroups">
         <h2 class="pt-3 fw-bold">Your Groups</h2>
         <div class="line"></div>
         
         @if(GroupsList == null)
         {
-            <div> Loading... (I think)</div>
+            <div> Loading...</div>
+        }
+        else if (GroupsList.Count == 0)
+        {
+            <div class="NoGroupsLayout">
+                <div class="fs-5"> You are not in any groups yet. </div>
+            </div>
         }
         else
         {
@@ -48,25 +57,33 @@
 </div>
 
 @code {
-    [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
-    MpmUser? m_UserInstance;
+    [CascadingParameter] private SyncContextWithPayload<MpmUser>? UserTask { get; set; }
+    MpmUser? User;
     public List<MpmGroup> GroupsList { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        if (User is null) return;
-        await User.SyncEvent.Task;
-        if (User.Payload is not null)
-            m_UserInstance = User.Payload;
+        if (UserTask is null)
+            return;
         
-        if (m_UserInstance is null) return;
-        UserDomain.SetUser(m_UserInstance);
+        await UserTask.SyncEvent.Task;
+        
+        if (UserTask.Payload is not null)
+            User = UserTask.Payload;    
+        
+        if (User is null) return;
+        UserDomain.SetUser(User);
         var groupResult = await UserDomain.GetGroups();
         if (groupResult.IsSuccess)
         {
             GroupsList = groupResult.Value;
             StateHasChanged();
         }
+    }
+    
+    private void SwitchToGroups()
+    {
+        NavigationManager.NavigateTo("/groups");
     }
 
     public class TestGroups

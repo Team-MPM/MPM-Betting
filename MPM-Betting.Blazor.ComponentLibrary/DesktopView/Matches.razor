@@ -1,11 +1,17 @@
 ﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using Blazorise
 @using LanguageExt.ClassInstances.Const
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Mvc.ApiExplorer
+@using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Data
 @inject FootballApi Api
+@inject NavigationManager NavigationManager
 @attribute [StreamRendering]
+@attribute [Authorize]
+
 
 @if (SelectedTeams != null)
 {
@@ -35,17 +41,24 @@
                 <Field>
                     <FieldLabel>Amount of credits to bet:</FieldLabel>
                     <Validation UsePattern>
-                        <TextEdit Pattern="^[1-9][0-9]*$" Placeholder="Enter Credits">
-                            <Feedback>
-                                <ValidationError>The Input needs to be a number bigger than 0</ValidationError>
-                            </Feedback>
+                        <TextEdit Text="@BetAmount" TextChanged="@OnTextChanges" Pattern="^[1-9][0-9]*$" Placeholder="Enter Credits">
+                            
                         </TextEdit>
                     </Validation>
                 </Field>
+                @if (ModalErrorMessage != null)
+                {
+                    <Divider/>
+                <Field>
+                    <div class="ModalError ErrorMessage">
+                        <div>@ModalErrorMessage</div>
+                    </div>
+                </Field>
+                }
             </ModalBody>
             <ModalFooter Background="Background.Dark">
                 <Button Color="Blazorise.Color.Secondary" Clicked="@HideModal">Close</Button>
-                <Button Color="Blazorise.Color.Primary" Clicked="@HideModal">PlaceBet</Button>
+                <Button Color="Blazorise.Color.Primary" Clicked="@PlaceBet">Place Bet</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>
@@ -148,6 +161,9 @@ else
 
  
 @code {
+    [CascadingParameter] private SyncContextWithPayload<MpmUser>? UserTask { get; set; }
+    MpmUser? User;
+    
     [Parameter] public List<FootballApi.League> Leagues { get; set; }
     public List<FootballApi.League>? TopLeagues { get; set; }
 
@@ -161,6 +177,13 @@ else
         TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).ToList();
         await FillMatches();
         ChosenTeam = BetType.None;
+        if (UserTask is null)
+            return;
+        
+        await UserTask.SyncEvent.Task;
+        
+        if (UserTask.Payload is not null)
+            User = UserTask.Payload;    
     }
 
     private async Task FillMatches()
@@ -202,6 +225,10 @@ else
 
     public void EnterSelectedTeamsAndQuotes(FootballApi.Team hometeam, FootballApi.Team awayteam, BetEntries entry, BetType type = BetType.None)
     {
+        if (User is null)
+        {
+            NavigationManager.NavigateTo("/account/login");
+        }
         SelectedTeams = new Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries>(new Tuple<FootballApi.Team, FootballApi.Team>(hometeam, awayteam), entry);
         ChosenTeam = type;
         ShowModal();
@@ -233,9 +260,15 @@ else
             StateHasChanged();
         }
     }
-
-
     public void SetChosenTeam(BetType type) => ChosenTeam = type;
+    
+    public string BetAmount { get; set; }
+
+    Task OnTextChanges(string value)
+    {
+        BetAmount = value;
+        return Task.CompletedTask;
+    }
 
     // MODAL
     private Modal modalRef;
@@ -249,6 +282,45 @@ else
     {
         return modalRef.Hide();
     }
+
+    private async Task PlaceBet()
+    {
+        int amount;
+        try
+        {
+            amount = int.Parse(BetAmount);
+        }
+        catch (Exception e)
+        {
+            ModalErrorMessage = "Please enter a valid number!";
+            return;
+        }
+        
+        if (ChosenTeam == BetType.None)
+        {
+            ModalErrorMessage = "Please select a team to bet on";
+            return;
+        }
+
+        if (amount < 1)
+        {
+            ModalErrorMessage = "Amount must be greater than 0";
+            return;
+        }
+
+        if (User.Points < amount)
+        {
+            ModalErrorMessage = "You do not have enough credits!";
+            return;
+        } 
+
+        ModalErrorMessage = null;
+        HideModal();
+
+        //TODO AddBet
+    }
+    
+    private string ModalErrorMessage { get; set; }
 
     public enum BetType
     {

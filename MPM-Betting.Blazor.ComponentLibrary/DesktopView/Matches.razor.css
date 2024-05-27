@@ -1,4 +1,9 @@
-﻿.MatchesDate {
+﻿.ErrorMessage {
+    color: red;
+    font-weight: bold;
+}
+
+.MatchesDate {
     display: flex;
     justify-content: center;
     width: 100%;

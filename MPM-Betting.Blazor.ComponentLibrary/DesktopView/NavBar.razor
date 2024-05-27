@@ -59,6 +59,13 @@
         }
         else
         {
+            <div class="NavBarPoints">
+                @{
+                    var x = ConvertToLog10(m_UserInstance.Points);
+                    <div>@x</div>
+                }
+                <img src="./Images/Logo_cropped.png" height="50px"/>
+            </div>
             <Dropdown>
                 <DropdownToggle Color="Color.Dark" Border="null">
                     <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
@@ -110,6 +117,41 @@
         
         // m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_UserInstance?.ProfilePictureUrl : m_ImageUrl;
         m_ImageUrl = "./Images/default-profile-picture.png";
+    }
+
+    private string ConvertToLog10(int number)
+    {
+        if (number == 0)
+            return "0";
+        int mag = (int)(Math.Floor(Math.Log10(number))/3);
+        double divisor = Math.Pow(10, mag*3);
+
+        double shortNumber = number / divisor;
+
+        string suffix;
+        switch(mag)
+        {
+            case 0:
+                suffix = string.Empty;
+                break;
+            case 1:
+                suffix = "k";
+                break;
+            case 2:
+                suffix = "m";
+                break;
+            case 3:
+                suffix = "b";
+                break;
+            case 4:
+                suffix = "t";
+                break;
+            default:
+                suffix = "a fuck ton";
+                break;
+                
+        }
+        return shortNumber.ToString("N1") + ' ' + suffix;
     }
 
 }

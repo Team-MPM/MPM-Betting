@@ -81,3 +81,23 @@
     border-radius: 50%;
     margin: 0 10px;
 }
+
+/*Credits*/
+
+.NavBarPoints {
+    display: flex;
+    align-self: center;
+    /*margin-left: -5%;*/
+    margin-right: 50px;
+    align-items: center;
+    
+}
+
+.NavBarPoints > div {
+    margin: 0 10px;
+    font-size: 19px;
+}
+
+.NavBarPoints > img {
+    height: 25px;
+}
