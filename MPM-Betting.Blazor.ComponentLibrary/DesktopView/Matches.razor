@@ -73,7 +73,7 @@ else
             </ModalHeader>
             <ModalBody Background="Background.Dark" Class="ModalSettings">
                 <Field>
-                    <FieldLabel>Either try again or click the quote again</FieldLabel>
+                    <FieldLabel>Either try again or refresh the page</FieldLabel>
                 </Field>
             </ModalBody>
             <ModalFooter Background="Background.Dark">
@@ -84,7 +84,7 @@ else
 }
 
 <div class="MatchesDate">
-    <MatchesDatePicker/>
+    <MatchesDatePicker MatchesPage="this"/>
 </div>
 
 <Divider/>
@@ -103,7 +103,7 @@ else
             {
                 <div class="MatchLeagueEntry">
                 <div class="MatchLeagueEntryName">@league.Name</div>
-                @if (GameEntries.ContainsKey(league.Id))
+                @if (GameEntries.ContainsKey(league.Id) && GameEntries[league.Id].Count > 0)
                 {
                     <div class="LeagueMatches">
                     @foreach (var match in GameEntries[league.Id])
@@ -116,6 +116,7 @@ else
                                     <span>@match.Score.HomeScore</span>
                                     <span>:</span>
                                     <span>@match.Score.AwayScore</span>
+                                    <div>@match.StartTime</div>
                                 </div>
                                 <div class="MatchAwayTeam">@match.Score.AwayTeam.Name</div>
                                 <img class="Match_HomeLogo" src="./Images/logo_Cropped.png"/>
@@ -168,14 +169,27 @@ else
     public List<FootballApi.League>? TopLeagues { get; set; }
 
     public Dictionary<int, List<FootballApi.GameEntry>>? GameEntries { get; set; }
+    public Dictionary<int, List<FootballApi.GameEntry>>? AllGameEntries { get; set; }
     public List<Tuple<FootballApi.GameEntry, BetEntries>> GameBetEntries { get; set; }
+    private DateTime selectedDate;
+
+    public DateTime SelectedDate
+    {
+        get => selectedDate;
+        set
+        {
+            selectedDate = value;
+            StateHasChanged();
+            RefreshMatches();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
 
-        int[] ids = { 47, 42, 73, 78, 55, 54, 47, 37, 22, 32, 120 };
+        int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 };
         TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).ToList();
-        await FillMatches();
+        await RequestFillMatches();
         ChosenTeam = BetType.None;
         if (UserTask is null)
             return;
@@ -186,14 +200,28 @@ else
             User = UserTask.Payload;    
     }
 
-    private async Task FillMatches()
+    private async Task RequestFillMatches()
     {
-        GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
+        AllGameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
         foreach (var league in TopLeagues)
         {
             var result = await Api.GetGameEntries(league.Id, null);
+
             if (result.IsSuccess)
-                GameEntries.Add(league.Id, result.Value.Take(5).ToList());
+            {
+                AllGameEntries.Add(league.Id, result.Value);
+            }
+               
+        }
+        RefreshMatches();
+    }
+
+    private void RefreshMatches()
+    {
+        GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
+        foreach (var league in AllGameEntries)
+        {
+            GameEntries.Add(league.Key, league.Value.Where(s => DateOnly.FromDateTime(s.StartTime) == DateOnly.FromDateTime(SelectedDate)).ToList());
         }
 
         GameBetEntries = new List<Tuple<FootballApi.GameEntry, BetEntries>>();
