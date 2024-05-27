@@ -74,7 +74,7 @@ h1:focus {
 
     .side-nav {
         width: 72px;
-        background: #1b1b1b;
+        background: #1a1a1a;
         border-right: 1px solid #333;
         height: calc(100vh - 100px);
         overflow-y: auto;
@@ -127,7 +127,7 @@ h1:focus {
     
     .side-nav {
         width: 250px;
-        background: #1b1b1b;
+        background: #1c1c1c;
         border-right: 1px solid #333;
         height: calc(100vh - 100px);
         overflow-y: auto;
@@ -178,11 +178,38 @@ h1:focus {
     }
 }
 
+.group-page::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+
+.group-page {
+    background-color: #222;
+    min-width: 0;
+    flex: 1;
+    overflow-y: scroll;  
+    height: calc(100vh - 100px);
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+    
+    .settings-box {
+        background-color: #333;
+        border-radius: 0.8rem;
+    }
+}
+
 
 /* Utils */
 
+.underline {
+    text-decoration: underline;
+}
+
 .flex {
     display: flex;
+}
+
+.grow {
+    flex-grow: 1;
 }
 
 .flex-column {
@@ -191,6 +218,10 @@ h1:focus {
 
 .flex-row {
     flex-direction: row;
+}
+
+.flex-row-reverse {
+    flex-direction: row-reverse;
 }
 
 .flex-wrap {

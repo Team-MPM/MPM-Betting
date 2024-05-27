@@ -115,8 +115,8 @@
             return;
         }
         
-        // m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_UserInstance?.ProfilePictureUrl : m_ImageUrl;
-        m_ImageUrl = "./Images/default-profile-picture.png";
+        m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_ImageUrl : m_UserInstance?.ProfilePictureUrl!;
+        //m_ImageUrl = "./Images/default-profile-picture.png";
     }
 
     private string ConvertToLog10(int number)

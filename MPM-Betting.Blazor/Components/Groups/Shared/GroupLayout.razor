@@ -27,7 +27,7 @@
                 {
                     var groupId = group.Id;
                     var groupUrl = $"/groups/{groupId}";
-                    <button class="mb-4" @onclick="() => NavigationManager.NavigateTo(groupUrl)">
+                    <button class="mt-4" @onclick="() => NavigationManager.NavigateTo(groupUrl)">
                         <div>
                             <img src="@(group.ProfilePictureUrl ?? "images/coin.png")" alt="group logo"/>
                         </div>
@@ -35,14 +35,14 @@
                     </button>
                 }
 
-                <button class="mb-4" @onclick="ShowNewGroupModal">
+                <button class="mt-4" @onclick="ShowNewGroupModal">
                     <div>
                         <img src="Images/plus-icon-design-png.webp" alt="group logo"/>
                     </div>
                     <div class="bar"></div>
                 </button>
             </div>
-            <div class="flex flex-row">
+            <div class="flex flex-row grow">
                 @Body
             </div>
         </div>
