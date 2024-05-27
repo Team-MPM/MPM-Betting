@@ -34,7 +34,13 @@
                 </Field>
                 <Field>
                     <FieldLabel>Amount of credits to bet:</FieldLabel>
-                    <TextEdit Placeholder="Enter Credits" />
+                    <Validation UsePattern>
+                        <TextEdit Pattern="^[1-9][0-9]*$" Placeholder="Enter Credits">
+                            <Feedback>
+                                <ValidationError>The Input needs to be a number bigger than 0</ValidationError>
+                            </Feedback>
+                        </TextEdit>
+                    </Validation>
                 </Field>
             </ModalBody>
             <ModalFooter Background="Background.Dark">
@@ -199,6 +205,7 @@ else
         SelectedTeams = new Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries>(new Tuple<FootballApi.Team, FootballApi.Team>(hometeam, awayteam), entry);
         ChosenTeam = type;
         ShowModal();
+        StateHasChanged();
     }
 
     public record struct BetEntries(double HomeWinPayOut, double DrawPayOut, double AwayWinPayOut);
