@@ -110,7 +110,7 @@ else
                     {
                         <div class="MatchEntry">
                             <div class="MatchInfo">
-                                <img class="Match_HomeLogo" src="./Images/logo_Cropped.png"/>
+                                <img class="Match_HomeLogo" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(match.Score.HomeTeam.Id).png"/>
                                 <div class="MatchHomeTeam">@match.Score.HomeTeam.Name</div>
                                 <div class="MatchScore">
                                     <span>@match.Score.HomeScore</span>
@@ -119,7 +119,7 @@ else
                                     <div>@match.StartTime</div>
                                 </div>
                                 <div class="MatchAwayTeam">@match.Score.AwayTeam.Name</div>
-                                <img class="Match_HomeLogo" src="./Images/logo_Cropped.png"/>
+                                <img class="Match_HomeLogo" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(match.Score.AwayTeam.Id).png"/>
                             </div>
                             <div class="MatchInfoDivider"></div>
                             <div class="BetsInfo">
@@ -187,8 +187,10 @@ else
     protected override async Task OnInitializedAsync()
     {
 
-        int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 };
-        TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).ToList();
+
+        // int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 }; // Old Ligues
+        int[] ids = { 47,54,87,53,55,61,57 };
+        TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).OrderBy(s => s.Id).ToList();
         await RequestFillMatches();
         ChosenTeam = BetType.None;
         if (UserTask is null)
