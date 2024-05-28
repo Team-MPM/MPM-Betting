@@ -14,7 +14,8 @@ public class GameDataUpdateScheduler(
     ILogger<GameDataUpdateScheduler> logger, 
     IServiceProvider serviceProvider,
     FootballApi footballApi,
-    IBackgroundTaskQueue gameDataUpdateQueue) 
+    IBackgroundTaskQueue gameDataUpdateQueue,
+    IDbContextFactory<MpmDbContext> dbContextFactory) 
     : BackgroundService
 {
     public ConcurrentDictionary<int, int> FootballLeagues { get; set; } = new();
@@ -23,7 +24,6 @@ public class GameDataUpdateScheduler(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Timed Hosted Service running");
-        
 
         // When the timer should have no due-time, then do the work once now.
         await DoWork();
@@ -34,6 +34,7 @@ public class GameDataUpdateScheduler(
         {
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
+                Console.WriteLine("Tick");
                 await DoWork();
             }
         }
@@ -60,8 +61,7 @@ public class GameDataUpdateScheduler(
             
             await gameDataUpdateQueue.QueueBackgroundWorkItemAsync(async cancellationToken =>
             {
-                var scope = serviceProvider.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<MpmDbContext>();
+                var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
                 
                 var result = await footballApi.GetGameDetails(entry.Key);
                 if (result.IsFaulted)
@@ -80,9 +80,11 @@ public class GameDataUpdateScheduler(
                 else
                 {
                     var league = result.Value.GameEntry.League;
-                    var leagueEntity = await db.BuiltinSeasons.GroupBy(s => s.ReferenceId)
-                        .Select(g => g.MaxBy(s => s.Start))
-                        .FirstOrDefaultAsync(s => s!.ReferenceId == league.Id, cancellationToken: cancellationToken);
+                    var leaguesById = await db.BuiltinSeasons
+                        .Where(s => s.ReferenceId == league.Id)
+                        .ToListAsync(cancellationToken);
+
+                    var leagueEntity = leaguesById.MaxBy(s => s.Start);
                     
                     if (leagueEntity is null)
                         return s_FootballApiException;
@@ -112,6 +114,8 @@ public class GameDataUpdateScheduler(
                             _ => throw new UnreachableException()
                         }
                     }, cancellationToken);
+
+                    await db.SaveChangesAsync(cancellationToken);
                 }
                 
                 return result.Value;

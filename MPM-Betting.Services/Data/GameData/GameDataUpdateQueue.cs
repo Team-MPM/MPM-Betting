@@ -32,7 +32,9 @@ public class GameDataUpdateQueue : IBackgroundTaskQueue
     {
         try
         {
+            Console.WriteLine("hi before read");
             var workItem = await m_Queue.Reader.ReadAsync(cancellationToken);
+            Console.WriteLine("hi after read");
             return workItem;
         }
         catch (Exception e)

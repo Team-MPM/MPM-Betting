@@ -12,8 +12,19 @@ builder.AddMpmCache();
 builder.AddFootballApi();
 
 builder.AddSqlServerDbContext<MpmDbContext>("MPM-Betting", null,
-    optionsBuilder => optionsBuilder.UseSqlServer(sqlBuilder =>
-        sqlBuilder.MigrationsAssembly(typeof(Program).Assembly.GetName().Name)));
+    optionsBuilder =>
+    {
+        optionsBuilder.UseSqlServer(sqlBuilder =>
+        {
+            sqlBuilder.MigrationsAssembly(typeof(Program).Assembly.GetName().Name);
+            sqlBuilder.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+        });
+
+        optionsBuilder.EnableDetailedErrors();
+    });
 
 //builder.Services.AddTransient<UserDomain>();
 
@@ -25,14 +36,6 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<DbInitializer>());
 
 builder.Services.AddHealthChecks()
     .AddCheck<DbInitializerHealthCheck>("DbInitializer", null);
-
-builder.Services.AddSingleton<GameDataUpdater>();
-builder.Services.AddSingleton<GameDataUpdateScheduler>();
-builder.Services.AddSingleton<GameDataQueueWorker>();
-builder.Services.AddSingleton<IBackgroundTaskQueue>(ctx => new GameDataUpdateQueue(100));
-builder.Services.AddHostedService(services => services.GetRequiredService<GameDataUpdater>());
-builder.Services.AddHostedService(services => services.GetRequiredService<GameDataUpdater>());
-builder.Services.AddHostedService(services => services.GetRequiredService<GameDataQueueWorker>());
 
 var app = builder.Build();
 

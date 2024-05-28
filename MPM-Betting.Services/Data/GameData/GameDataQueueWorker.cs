@@ -25,13 +25,13 @@ public class GameDataQueueWorker(
                 var result = await workItem(stoppingToken);
                 if (result.IsFaulted)
                 {
-                    logger.LogError(result.Exception, 
+                    logger.LogError(result.Exception,
                         "Error occurred executing {WorkItem}", nameof(workItem));
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, 
+                logger.LogError(ex,
                     "Error occurred executing {WorkItem}", nameof(workItem));
             }
         }

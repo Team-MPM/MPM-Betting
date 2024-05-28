@@ -2,6 +2,7 @@
 using System.Globalization;
 using LanguageExt.Common;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 
 namespace MPM_Betting.Services.Data;
@@ -26,6 +27,8 @@ public static class Utils
     
     public static DateTime? TryGetDateTime(this JToken jToken, string propertyName, string format, DateTime? defaultValue = default!)
     {
+        if (jToken[propertyName].IsNullOrEmpty()) return defaultValue;
+        
         try
         {
             var val = DateTime.ParseExact(jToken[propertyName]!.Value<string>()!, format, CultureInfo.InvariantCulture);
