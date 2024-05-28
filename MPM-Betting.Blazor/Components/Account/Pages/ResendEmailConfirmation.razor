@@ -13,24 +13,36 @@
 
 <PageTitle>Resend email confirmation</PageTitle>
 
-<h1>Resend email confirmation</h1>
-<h2>Enter your email.</h2>
-<hr/>
-<StatusMessage Message="@m_Message"/>
-<div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com"/>
-                <label for="email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger"/>
+<header>
+    <div class="AdministrationMiddleBox">
+        <div class="StatusBox">
+            
+        </div>
+        <h1>Resend email confirmation</h1>
+        <div class="AdministrationBox">
+            <div class="BoxContent soft-bg">
+                <div>Enter you email to which the confirmation will be sent.</div>
+                <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
+                    <DataAnnotationsValidator/>
+                    @* <ValidationSummary class="text-danger" role="alert"/> *@
+                    <div class="form-floating mb-3 formBox">
+                        <div>Email</div>
+                        @* <label for="email" class="form-label ColorWhite">Email</label> *@
+                        <InputText @bind-Value="Input.Email" class="form-control emailInput DarkBackground ColorWhite" aria-required="true" placeholder="name@example.com"/>
+
+                        <ValidationMessage For="() => Input.Email" class="text-danger"/>
+                    </div>
+                    <div class="SubmitBox">
+                        <button type="submit" class="mb-5 w-50 btn btn-lg btn-primary submitButton">Resend</button>
+                    </div>
+                    <StatusMessage Message="@m_Message"/>
+                </EditForm>
+                <div>Click the button below to go back to the Login Page</div>
+                <a href="/account/login">Back to Login</a>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
-        </EditForm>
+        </div>
     </div>
-</div>
+</header>
 
 @code {
     private string? m_Message;

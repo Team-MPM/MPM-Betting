@@ -142,10 +142,17 @@ else
                                         <img class="Match_HomeLogo" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(match.Score.HomeTeam.Id).png"/>
                                         <div class="MatchHomeTeam">@match.Score.HomeTeam.Name</div>
                                         <div class="MatchScore">
-                                            <span>@match.Score.HomeScore</span>
-                                            <span>:</span>
-                                            <span>@match.Score.AwayScore</span>
-                                            <div>@match.StartTime.ToString("HH:mm")</div>
+                                           @if (CheckIfMatchExpired(match))
+                                           {
+                                               <span>@match.Score.HomeScore</span>
+                                               <span>:</span>
+                                               <span>@match.Score.AwayScore</span>
+                                           }
+                                           else
+                                           {
+                                               <div>@match.StartTime.ToString("HH:mm")</div>
+                                           }
+                                            
                                         </div>
                                         <div class="MatchAwayTeam">@match.Score.AwayTeam.Name</div>
                                         <img class="Match_HomeLogo" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(match.Score.AwayTeam.Id).png"/>

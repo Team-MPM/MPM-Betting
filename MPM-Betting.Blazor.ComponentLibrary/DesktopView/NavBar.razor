@@ -70,7 +70,7 @@
                 <DropdownToggle Color="Color.Dark" Border="null">
                     <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
                 </DropdownToggle>
-                <DropdownMenu>
+                <DropdownMenu Background="Background.Dark" TextColor="TextColor.Light">
                     <DropdownItem><a href="/bets/history" class="NoHoverUnderline">Bet History</a></DropdownItem>
                     <DropdownItem><a href="/groups" class="NoHoverUnderline">Groups</a></DropdownItem>
                     <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem>
@@ -97,12 +97,12 @@
 
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
     MpmUser? m_UserInstance;
-    
+
     private string m_ImageUrl = "./Images/default-profile-picture.png";
 
     const string LoginUrl = "/account/login";
     const string RegisterUrl = "/account/register";
-    
+
     protected override async Task OnInitializedAsync()
     {
         await User.SyncEvent.Task;
@@ -114,7 +114,7 @@
         {
             return;
         }
-        
+
         m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_ImageUrl : m_UserInstance?.ProfilePictureUrl!;
         //m_ImageUrl = "./Images/default-profile-picture.png";
     }
@@ -123,13 +123,13 @@
     {
         if (number == 0)
             return "0";
-        int mag = (int)(Math.Floor(Math.Log10(number))/3);
-        double divisor = Math.Pow(10, mag*3);
+        int mag = (int)(Math.Floor(Math.Log10(number)) / 3);
+        double divisor = Math.Pow(10, mag * 3);
 
         double shortNumber = number / divisor;
 
         string suffix;
-        switch(mag)
+        switch (mag)
         {
             case 0:
                 suffix = string.Empty;
@@ -149,8 +149,9 @@
             default:
                 suffix = "a fuck ton";
                 break;
-                
+
         }
+
         return shortNumber.ToString("N1") + ' ' + suffix;
     }
 
