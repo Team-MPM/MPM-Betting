@@ -34,7 +34,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
     public record struct ScoreEntry(Team HomeTeam, Team AwayTeam, int HomeScore, int AwayScore, GameState State);
 
-    public record struct GameEntry(int Id, ScoreEntry Score, DateTime StartTime, string? Time);
+    public record struct GameEntry(int Id, ScoreEntry Score, DateTime StartTime, string? Time, League League);
 
     public record struct GameDetails(GameEntry GameEntry, GameTimeData TimeData); // TODO: add actual details (goals, cards, subs, passing, possession, etc.)
 
@@ -159,7 +159,12 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         var gameTimes = GameTimeDataFromHalfs(halfs);
         var state = ExtractGameStateFromStatus(gameTimes, cancelled);
 
-        var gameEntry = new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state), matchTimeUtcDate, currentTime);
+        var gameEntry = new GameEntry(
+            matchId, 
+            new ScoreEntry(home, away, homeScore, awayScore, state), 
+            matchTimeUtcDate, 
+            currentTime,
+            league);
         return new GameDetails(gameEntry, gameTimes);
     }
 
@@ -277,6 +282,12 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
         var matches = jObject["matches"]!;
         var allMatches = (JArray)matches["allMatches"]!;
+        
+        var details = jObject["details"]!;
+        var leagueId = details["id"]!.Value<int>();
+        var leagueName = details["name"]!.Value<string>()!;
+        var country = details["country"]!.Value<string>()!;
+        var league = new League(leagueName, country, leagueId);
 
         List<GameEntry> gameEntries = [];
 
@@ -326,8 +337,13 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
             state = cancelled ? GameState.Cancelled : state;
 
-            gameEntries.Add(new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state),
-                utcTime, currentTime));
+            gameEntries.Add(
+                new GameEntry(
+                    matchId, 
+                    new ScoreEntry(home, away, homeScore, awayScore, state),
+                    utcTime, 
+                    currentTime,
+                    league));
         }
 
         //finished

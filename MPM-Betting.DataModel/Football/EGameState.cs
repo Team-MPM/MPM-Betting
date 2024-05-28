@@ -3,6 +3,7 @@
 public enum EGameState
 {
     None = 0,
+    Cancelled,
     Upcoming,
     Live,
     Finished

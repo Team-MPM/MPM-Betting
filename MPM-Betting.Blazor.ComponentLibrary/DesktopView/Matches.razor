@@ -206,22 +206,22 @@ else
         }
     }
 
-    private async Task FillMatchesNoApi()
-    {
-        GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
-        foreach (var league in TopLeagues)
-        {
-            GameEntries.Add(league.Id, new List<FootballApi.GameEntry>()
-            {
-                new FootballApi.GameEntry(1, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "erfgthzewdesfgfrdedfrgfredfrgfrdedfsgrdefsgfredfsrfewsdsfgfrgfdwrfgttrfghn"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(2, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "FC Real Madrid"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(3, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "Spurs Tottenham"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(4, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(5, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-                new FootballApi.GameEntry(6, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-            });
-        }
-    }
+    // private async Task FillMatchesNoApi()
+    // {
+    //     GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
+    //     foreach (var league in TopLeagues)
+    //     {
+    //         GameEntries.Add(league.Id, new List<FootballApi.GameEntry>()
+    //         {
+    //             new FootballApi.GameEntry(1, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "erfgthzewdesfgfrdedfrgfredfrgfrdedfsgrdefsgfredfsrfewsdsfgfrgfdwrfgttrfghn"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+    //             new FootballApi.GameEntry(2, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "FC Real Madrid"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+    //             new FootballApi.GameEntry(3, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "Spurs Tottenham"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+    //             new FootballApi.GameEntry(4, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+    //             new FootballApi.GameEntry(5, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+    //             new FootballApi.GameEntry(6, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
+    //         });
+    //     }
+    // }
 
     public void EnterSelectedTeamsAndQuotes(FootballApi.Team hometeam, FootballApi.Team awayteam, BetEntries entry, BetType type = BetType.None)
     {
