@@ -1,6 +1,7 @@
 ﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using Blazorise
 @using LanguageExt
+@using OneOf.Types
 @using SharpCompress
 @attribute [StreamRendering(true)]
 
@@ -12,11 +13,11 @@
         <div class="DatePicker">
             <Addons>
                 <Addon AddonType="AddonType.Body">
-                    <DatePicker @ref="@datePicker" TValue="DateTime?" @bind-Date="@Value"/>
+                    <DatePicker class="DatePicker" Background="Background.Secondary" TextColor="TextColor.Light" @ref="@datePicker" TextAlignment="TextAlignment.Center" TValue="DateTime?" @bind-Date="@Value"/>
                 </Addon>
                 <Addon AddonType="AddonType.End">
-                    <Button Color="Color.Light" Clicked="@(() => datePicker.ToggleAsync())">
-                        <Icon Name="IconName.CalendarDay"/>
+                    <Button Background="Background.Secondary" Color="Color.Light" Clicked="@(() => datePicker.ToggleAsync())">
+                        <Icon Name="IconName.CalendarCheck" IconStyle="IconStyle.Solid"/>
                     </Button>
                 </Addon>
             </Addons>
