@@ -1,0 +1,3 @@
+# Security Policy
+
+There is none. Sorry...

@@ -1,0 +1,60 @@
+﻿.LandingMainContainer {
+    display: grid;
+    min-height: 80vh;
+    height: fit-content;        
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+}
+
+.MainText {
+    font-size: 50px;
+    font-weight: bolder;
+    color: #fff;
+}
+
+
+.MainText > div:nth-child(2) {
+    margin-bottom: 30px;
+
+}
+
+.MainText > div > span {
+    color: orange;
+}
+
+.LandingButtons{
+    width: 50%;
+    display: flex;
+    justify-content: right;
+    justify-self: center;
+    margin-top: 5%;
+}
+
+.LandingButtons > button {
+    margin-right: 5% ;
+    font-weight: bold;
+    color: #000;
+}
+
+.LandingButtons > button:first-child {
+    background: #0BBCC7;
+}
+
+.LandingButtons > button:last-child {
+    background: orange;
+}
+
+
+
+.LandingPageImage {
+    min-height: 80vh;
+    height: fit-content;
+    align-items: center;
+    align-content: center;
+}
+
+.LandingPageImage > img {
+    width: 100%;
+}
+

@@ -7,9 +7,21 @@
     justify-items: center;
 }
 
+.Leagues:hover {
+    background: rgb(65,65,65);
+}
+
+.Leagues:hover > h2 {
+    transform: scale(1.04);
+}
+
+.Leagues:hover .line {
+    border: 2px solid #0BBCC7;
+    
+}
 
 .line {
     width: 80%;
-    border: 2px solid black;
+    border: 2px solid white;
     margin: 10px 0 10px 0;  
 }

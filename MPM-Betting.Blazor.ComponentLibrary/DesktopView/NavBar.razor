@@ -1,79 +1,157 @@
-﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
-@using Blazorise
-@attribute [StreamRendering(true)]
+﻿@using Blazorise.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.User
+@using Microsoft.AspNetCore.Components.Forms
+@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
-<div class="NavBar col-12">
-    <div class="col-1 logo">
-        <a href="/" class="NoHoverUnderline">
-            <div class="NavBarLogoText">MPM</div></a>
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<div class="NavBar flex flex-row justify-between align-center">
+    <div class="nav-left flex flex-row h-full align-center">
+        <div class="logo">
+            <a href="/" class="NoHoverUnderline">
+                <span class="NavBarLogoText">MPM</span>
+            </a>
+        </div>
+
+        <ul class="nav-list">
+            <li>
+                <a href="/dashboard" class="NoHoverUnderline nav-link @(NavigationManager.Uri.Contains("dashboard") ? "nav-active" : "")">
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="/groups" class="NoHoverUnderline nav-link @(NavigationManager.Uri.Contains("groups") ? "nav-active" : "")">
+                    Groups
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-sport-menu">
+            <Select @bind-SelectedValue="@SportType">
+                <SelectItem Value="@ESportType.None">None</SelectItem>
+                <SelectItem Value="@ESportType.Football">Football</SelectItem>
+                <SelectItem Value="@ESportType.Basketball">Basketball</SelectItem>
+                <SelectItem Value="@ESportType.Tennis">Tennis</SelectItem>
+                <SelectItem Value="@ESportType.Hockey">Hockey</SelectItem>
+                <SelectItem Value="@ESportType.Baseball">Baseball</SelectItem>
+                <SelectItem Value="@ESportType.AmericanFootball">American Football</SelectItem>
+                <SelectItem Value="@ESportType.Formula1">Formula1</SelectItem>
+                <SelectItem Value="@ESportType.Handball">Handball</SelectItem>
+                <SelectItem Value="@ESportType.Volleyball">Volleyball</SelectItem>
+            </Select>
+        </div>
     </div>
-    <div class="col-4 sportarten">
-        <div/>
-        <a href="/" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Home ? "NavBarActive" : "")">
-            <div class="NavBarItem">Home</div>
-        </a>
-        <a href="/dashboard" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Dashboard ? "NavBarActive" : "")">
-            <div class="NavBarItem">Dashboard</div>
-        </a>
 
-        <div></div>
 
-        <div class="NavBarDropDown">
-            <div class="NavBarItem NavBarDropDownSP">@SportArt.ToString()</div>
+    <div class="nav-right flex flex-row mr-4">
+        @if (m_UserInstance is null)
+        {
+            <div>
+                <Button Color="Color.Primary" Clicked="@(() => NavigationManager.NavigateTo(LoginUrl))">Login</Button>
+                <Button Color="Color.Primary" Clicked="@(() => NavigationManager.NavigateTo(RegisterUrl))">Register</Button>
+            </div>
+        }
+        else
+        {
+            <div class="NavBarPoints">
+                @{
+                    var x = ConvertToLog10(m_UserInstance.Points);
+                    <div>@x</div>
+                }
+                <img src="./Images/Logo_cropped.png" height="50px"/>
+            </div>
             <Dropdown>
-                <DropdownToggle>
+                <DropdownToggle Color="Color.Dark" Border="null">
+                    <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
                 </DropdownToggle>
                 <DropdownMenu>
-                    <DropdownItem TextColor="TextColor.Primary">Fußball</DropdownItem>
+                    <DropdownItem><a href="/bets/history" class="NoHoverUnderline">Bet History</a></DropdownItem>
+                    <DropdownItem><a href="/groups" class="NoHoverUnderline">Groups</a></DropdownItem>
+                    <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem>
                     <DropdownDivider/>
-                    <DropdownItem Disabled>Basketball</DropdownItem>
-                    <DropdownDivider/>
-                    <DropdownItem Disabled>Formula 1</DropdownItem>
+                    <DropdownItem><a href="/profile" class="NoHoverUnderline">Profile</a></DropdownItem>
+                    <DropdownItem><a href="/account/manage" class="NoHoverUnderline">Manage</a></DropdownItem>
+                    <DropdownItem>
+                        <form action="Account/Logout" method="post">
+                            <AntiforgeryToken/>
+                            <input type="hidden" name="ReturnUrl" value=""/>
+                            <button type="submit">
+                                <a class="NoHoverUnderline" aria-hidden="true">Logout</a> 
+                            </button>
+                        </form>
+                    </DropdownItem>
                 </DropdownMenu>
-
             </Dropdown>
-        </div>
-        <div/>
-    </div>
-    <div class="col-3">
-
-    </div>
-    <div class="col-1 light_dark">
-
-    </div>
-    <div class="col-1 notifications">
-        <img src="Images/bell_white.png" height="40px"/>
-    </div>
-    <div class="col-1 credits">
-
-        <div>7524</div>
-        <img src="Images/coin.png" height="30px" alt="xxx"/>
-    </div>
-    <div class="col-1 profile-pic">
-        <img src="Images/pfp.jpg" height="50px" alt="xxx"/>
+        }
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public ActiveTab Tab { get; set; }
+    [Parameter] public ESportType SportType { get; set; } = ESportType.None;
+
+    [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
+    MpmUser? m_UserInstance;
     
-    [Parameter]
-    public SelectedSportArt SportArt { get; set; }
+    private string m_ImageUrl = "./Images/default-profile-picture.png";
+
+    const string LoginUrl = "/account/login";
+    const string RegisterUrl = "/account/register";
     
-    
-    public enum ActiveTab
+    protected override async Task OnInitializedAsync()
     {
-        Home,
-        Dashboard,
-        Sportarten
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+        {
+            m_UserInstance = User.Payload;
+        }
+        else
+        {
+            return;
+        }
+        
+        m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_ImageUrl : m_UserInstance?.ProfilePictureUrl!;
+        //m_ImageUrl = "./Images/default-profile-picture.png";
     }
 
-    public enum SelectedSportArt
+    private string ConvertToLog10(int number)
     {
-        Fußball,
-        Basketball,
-        Formula1,
-        None
+        if (number == 0)
+            return "0";
+        int mag = (int)(Math.Floor(Math.Log10(number))/3);
+        double divisor = Math.Pow(10, mag*3);
+
+        double shortNumber = number / divisor;
+
+        string suffix;
+        switch(mag)
+        {
+            case 0:
+                suffix = string.Empty;
+                break;
+            case 1:
+                suffix = "k";
+                break;
+            case 2:
+                suffix = "m";
+                break;
+            case 3:
+                suffix = "b";
+                break;
+            case 4:
+                suffix = "t";
+                break;
+            default:
+                suffix = "a fuck ton";
+                break;
+                
+        }
+        return shortNumber.ToString("N1") + ' ' + suffix;
     }
+
 }

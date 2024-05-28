@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@layout Layout.MainLayout
 @inject NavigationManager NavigationManager
 
 @if (HttpContext is null)
@@ -8,7 +7,14 @@
 }
 else
 {
-    @Body
+    @* TODO Make this more dynamic c: -> <Background Path=""/> *@
+    <div class="Background"></div>
+    
+    <div class="LoginPageMainBox">
+        <div class="LoginPage row">
+            @Body
+        </div>
+    </div>
 }
 
 @code {
@@ -24,5 +30,4 @@ else
             NavigationManager.Refresh(forceReload: true);
         }
     }
-
 }

@@ -1,0 +1,28 @@
+﻿@namespace MPM_Betting.Blazor.ComponentLibrary.Core
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.DataModel.User
+
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<CascadingValue Value="m_Data">
+    @ChildContent
+</CascadingValue>
+
+
+@code {
+    private SyncContextWithPayload<MpmUser> m_Data = new();
+
+    [Parameter] public required RenderFragment ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        m_Data.Payload = await UserManager.GetUserAsync(authState.User);
+        m_Data.SyncEvent.SetResult(true);
+    }
+
+}

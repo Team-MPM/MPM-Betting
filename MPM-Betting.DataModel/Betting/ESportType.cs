@@ -3,5 +3,13 @@
 public enum ESportType
 {
     None = 0,
-    Football
+    Football,
+    Basketball,
+    Formula1,
+    Tennis,
+    Hockey,
+    Volleyball,
+    Handball,
+    Baseball,
+    AmericanFootball
 }

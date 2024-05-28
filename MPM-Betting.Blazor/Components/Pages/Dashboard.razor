@@ -1,40 +1,44 @@
 ﻿@page "/Dashboard"
 @rendermode InteractiveServer
 @attribute [StreamRendering]
+@using Google.Protobuf.WellKnownTypes
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.Services.Data
 @inject FootballApi Api
+@using Blazorise
+@using Blazorise.SpinKit
 @using MPM_Betting.Services
 <PageTitle>Home</PageTitle>
 
-
 <div id="View">
     <div class="container-fluid">
-        <div class="row">
-            <NavBar Tab="NavBar.ActiveTab.Dashboard" SportArt="NavBar.SelectedSportArt.Fußball"/>
-        </div>
-        
         <div class="MainPage">
-            <div class="col-2">
-                <ResultHandler Generator="async () => await Api.GetAllFootballLeagues()">
-                    <SuccessTemplate>
-                        <Leagues LeagueList="@context"/>
-                    </SuccessTemplate>
-                    <ErrorTemplate>
-                        <p>Some custom error handler</p>
-                    </ErrorTemplate>
-                </ResultHandler>
+            <div class="col-3 LeftPart">
+                <div class="row">
+                    <div class="col-11">
+                        <ResultHandler Generator="async () => await Api.GetAllFootballLeagues()">
+                            <SuccessTemplate>
+                                <Leagues LeagueList="@context"/>
+                            </SuccessTemplate>
+                            <ErrorTemplate>
+                                <p>Some custom error handler</p>
+                            </ErrorTemplate>
+                        </ResultHandler>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-11">
+                        <Groups/>
+                    </div>
+                </div>
             </div>    
-            <div class="col-7">
+            <div class="col-8">
                 <ResultHandler Generator="async () => await Api.GetAllFootballLeagues()">
                     <SuccessTemplate>
                         <Matches Leagues="@context"/>
                     </SuccessTemplate>
                 </ResultHandler>
-            </div>
-            <div class="col-3">
-                
             </div>
         </div>
     </div>
@@ -48,6 +52,8 @@
     {
         m_LeaguesList = await Api.GetAllFootballLeagues();
     }
+    
+    
 }
 
 

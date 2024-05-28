@@ -54,6 +54,11 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
                 .HasMany(g => g.Seasons)
                 .WithOne(se => se.Group)
                 .OnDelete(DeleteBehavior.NoAction);
+            
+            builder
+                .HasMany(g => g.UserGroupEntries)
+                .WithOne(uge => uge.Group)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<ScoreEntry>(builder =>
