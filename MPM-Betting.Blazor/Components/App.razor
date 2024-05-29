@@ -42,5 +42,14 @@
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
-    private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/Account") ? null : new InteractiveServerRenderMode(prerender: false);
+    private IComponentRenderMode? RenderModeForPage {
+        get
+        {
+            if (HttpContext.Request.Path.StartsWithSegments("/Account/Manage/Upload-profile-picture")) return new InteractiveServerRenderMode(prerender: false);
+            if (HttpContext.Request.Path.StartsWithSegments("/Account")) return null;
+            return new InteractiveServerRenderMode(prerender: false);
+        }
+
+    }
+
 }
