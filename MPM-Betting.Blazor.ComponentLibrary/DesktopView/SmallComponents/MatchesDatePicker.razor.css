@@ -1,4 +1,5 @@
-﻿.MatchesDateBox {
+﻿
+.MatchesDateBox {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;

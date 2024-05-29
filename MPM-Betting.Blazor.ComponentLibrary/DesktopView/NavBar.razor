@@ -5,6 +5,7 @@
 @using MPM_Betting.DataModel.Betting
 @using MPM_Betting.DataModel.User
 @using Microsoft.AspNetCore.Components.Forms
+@using Blazorise.Icons.FontAwesome
 @namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @inject UserManager<MpmUser> UserManager
@@ -32,20 +33,20 @@
             </li>
         </ul>
 
-        <div class="nav-sport-menu">
-            <Select @bind-SelectedValue="@SportType">
-                <SelectItem Value="@ESportType.None">None</SelectItem>
-                <SelectItem Value="@ESportType.Football">Football</SelectItem>
-                <SelectItem Value="@ESportType.Basketball">Basketball</SelectItem>
-                <SelectItem Value="@ESportType.Tennis">Tennis</SelectItem>
-                <SelectItem Value="@ESportType.Hockey">Hockey</SelectItem>
-                <SelectItem Value="@ESportType.Baseball">Baseball</SelectItem>
-                <SelectItem Value="@ESportType.AmericanFootball">American Football</SelectItem>
-                <SelectItem Value="@ESportType.Formula1">Formula1</SelectItem>
-                <SelectItem Value="@ESportType.Handball">Handball</SelectItem>
-                <SelectItem Value="@ESportType.Volleyball">Volleyball</SelectItem>
-            </Select>
-        </div>
+        @* <div class="nav-sport-menu"> *@
+        @*     <Select @bind-SelectedValue="@SportType"> *@
+        @*         <SelectItem Value="@ESportType.None">None</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Football">Football</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Basketball">Basketball</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Tennis">Tennis</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Hockey">Hockey</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Baseball">Baseball</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.AmericanFootball">American Football</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Formula1">Formula1</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Handball">Handball</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Volleyball">Volleyball</SelectItem> *@
+        @*     </Select> *@
+        @* </div> *@
     </div>
 
 
@@ -67,10 +68,10 @@
                 <img src="./Images/Logo_cropped.png" height="50px"/>
             </div>
             <Dropdown>
-                <DropdownToggle Color="Color.Dark" Border="null">
+                <DropdownToggle Color="Color.Light" Background="Background.Secondary">
                     <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
                 </DropdownToggle>
-                <DropdownMenu Background="Background.Dark" TextColor="TextColor.Light">
+                <DropdownMenu Background="Background.Secondary" TextColor="TextColor.Light">
                     <DropdownItem><a href="/bets/history" class="NoHoverUnderline">Bet History</a></DropdownItem>
                     <DropdownItem><a href="/groups" class="NoHoverUnderline">Groups</a></DropdownItem>
                     <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem>
