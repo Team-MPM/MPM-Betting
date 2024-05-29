@@ -19,6 +19,7 @@ public class GameDataUpdateScheduler(
     : BackgroundService
 {
     public ConcurrentDictionary<int, int> FootballLeagues { get; set; } = new();
+    public ConcurrentDictionary<int, int> FootballGames { get; set; } = new();
 
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,15 +50,15 @@ public class GameDataUpdateScheduler(
     
     private async Task DoWork()
     {
-        foreach (var entry in FootballLeagues)
+        foreach (var entry in FootballGames)
         {
             if (entry.Value <= 0)
             {
-                FootballLeagues.Remove(entry.Key, out var _);
+                FootballGames.Remove(entry.Key, out var _);
                 continue;
             }
             
-            FootballLeagues.TryUpdate(entry.Key, entry.Value - 1, entry.Value);
+            FootballGames.TryUpdate(entry.Key, entry.Value - 1, entry.Value);
             
             await gameDataUpdateQueue.QueueBackgroundWorkItemAsync(async cancellationToken =>
             {

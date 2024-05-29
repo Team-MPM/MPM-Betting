@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +19,7 @@ using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services.Account;
 using MPM_Betting.Services.Data;
+using MPM_Betting.Services.Data.GameData;
 using MPM_Betting.Services.Domains;
 using OpenTelemetry.Trace;
 
@@ -235,6 +237,43 @@ public static class Extensions
                     _ => status500
                 }))
             .WithName("GetGameDetails")
+            .WithOpenApi();
+        
+        app.MapGet("/football/track/league/{leagueId:int}", (
+                int leagueId, 
+                [FromServices] GameDataUpdateScheduler gdus) =>
+            {
+                if (gdus.FootballLeagues.TryGetValue(leagueId, out var x))
+                {
+                    gdus.FootballLeagues.TryUpdate(leagueId, 100, x);
+                    return StatusCodes.Status302Found;
+                }
+                else
+                {
+                    gdus.FootballLeagues.TryAdd(leagueId, 100);
+                    return StatusCodes.Status201Created;
+                }
+            })
+            .WithName("TrackLeague")
+            .WithOpenApi();
+        
+        
+        app.MapGet("/football/track/game/{gameId:int}", (
+                int gameId, 
+                [FromServices] GameDataUpdateScheduler gdus) =>
+            {
+                if (gdus.FootballGames.TryGetValue(gameId, out var x))
+                {
+                    gdus.FootballGames.TryUpdate(gameId, 100, x);
+                    return StatusCodes.Status302Found;
+                }
+                else
+                {
+                    gdus.FootballGames.TryAdd(gameId, 100);
+                    return StatusCodes.Status201Created;
+                }
+            })
+            .WithName("TrackGame")
             .WithOpenApi();
         
         return app;

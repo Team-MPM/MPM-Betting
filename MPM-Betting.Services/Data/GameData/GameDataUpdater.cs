@@ -6,7 +6,7 @@ public class GameDataUpdater(GameDataUpdateScheduler scheduler) : BackgroundServ
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        scheduler.FootballLeagues.TryAdd(4193903, 500);
+        scheduler.FootballGames.TryAdd(4193903, 500);
         return Task.CompletedTask;
     }
 }
