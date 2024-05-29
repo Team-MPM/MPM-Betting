@@ -94,7 +94,6 @@
 </div>
 
 @code {
-    [Parameter] public ESportType SportType { get; set; } = ESportType.None;
 
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
     MpmUser? m_UserInstance;
