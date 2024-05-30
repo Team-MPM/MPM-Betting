@@ -2,30 +2,61 @@
 @using MPM_Betting.DataModel.User
 
 @inject SignInManager<MpmUser> SignInManager
+@inject NavigationManager NavigationManager
 
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
+<ul class="NavBarList">
+    <li  class="@(NavigationManager.Uri.Contains("Manage/Profile") ? "active" : "")">
+        <i class="fa-solid fa-user"></i>
+        <a href="Account/Manage">Profile</a>
     </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
+    <li  class="@(NavigationManager.Uri.Contains("Manage/Email") ? "active" : "")">
+        <i class="fa-solid fa-envelope"></i>
+        <a href="Account/Manage/Email">Email</a>
     </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
+    <li  class="@(NavigationManager.Uri.Contains("Manage/ChangePassword") ? "active" : "")">
+        <i class="fa-solid fa-lock"></i>
+        <a href="Account/Manage/ChangePassword">Password</a>
     </li>
     @if (m_HasExternalLogins)
     {
-        <li class="nav-item">
-            <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
+        <li  class="@(NavigationManager.Uri.Contains("Manage/ExternalLogins") ? "active" : "")">
+            <i class="fa-solid fa-lock"></i>
+            <a href="Account/Manage/ExternalLogins">External Logins</a>
         </li>
     }
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
+    <li class="@(NavigationManager.Uri.Contains("Manage/TwoFactorAuthentication") ? "active" : "")">
+        <i class="fa-solid fa-shield"></i>
+        <a href="Account/Manage/TwoFactorAuthentication">2FA</a>
     </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
+    <li  class="@(NavigationManager.Uri.Contains("Manage/PersonalData") ? "active" : "")">
+        <i class="fa-solid fa-file-pen"></i>
+        <a href="Account/Manage/PersonalData">PersonalData</a>
     </li>
 </ul>
+
+@* <ul class="nav nav-pills flex-column"> *@
+@*     <li class="nav-item"> *@
+@*         <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink> *@
+@*     </li> *@
+@*     <li class="nav-item"> *@
+@*         <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink> *@
+@*     </li> *@
+@*     <li class="nav-item"> *@
+@*         <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink> *@
+@*     </li> *@
+@*     @if (m_HasExternalLogins) *@
+@*     { *@
+@*         <li class="nav-item"> *@
+@*             <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink> *@
+@*         </li> *@
+@*     } *@
+@*     <li class="nav-item"> *@
+@*         <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink> *@
+@*     </li> *@
+@*     <li class="nav-item"> *@
+@*         <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink> *@
+@*     </li> *@
+@* </ul> *@
 
 @code {
     private bool m_HasExternalLogins;

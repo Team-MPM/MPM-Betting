@@ -3,6 +3,14 @@
     color: red;
 }
 
+.ColorWhite {
+    color: white
+}
+
+.DarkBackground {
+    background: rgb(30,30,30);
+}
+
 .Background {
     background: url("../Images/TestBackground.jpg");
     background-size: cover;
@@ -61,6 +69,7 @@
     justify-content: center;
     justify-items: center;
     align-content: center;
+    grid-template-columns: 1fr;
 }
 
 .BoxContent > * {
@@ -73,6 +82,34 @@
     justify-self: center;
 }
 
+.SubmitBox {
+    display: grid;
+    width: 100%;
+    justify-content: center;
+    justify-items: center;
+}
+
+.submitButton {
+    min-width: fit-content;
+    width: 60%;
+    height: fit-content;
+}
+
+.BoxContent > form {
+    display: flex;
+    flex-direction: column;
+    width:60%;
+    min-width: fit-content;
+    justify-content: center;
+    justify-items: center;
+}
+
+.BoxContent input {
+    width: 100%;
+    font-size: 18px;
+}
+
+
 .BoxContent > a {
     background: #5BBCC7;
     padding:10px;
@@ -84,6 +121,10 @@
     background: #0BBCC7;
     color: white;
     text-decoration: none;
+}
+
+.formBox {
+    display: grid;
 }
 
 

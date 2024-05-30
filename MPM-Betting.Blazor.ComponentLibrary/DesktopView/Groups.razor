@@ -17,10 +17,14 @@
         <h2 class="pt-3 fw-bold">Your Groups</h2>
         <div class="line"></div>
         
-        @if(GroupsList == null)
+        @if (User is null)
+        {
+            <div class="fs-5 pt-4"> Log in to see your groups</div>
+        }
+        else if (GroupsList == null)
         {
             <div> Loading...</div>
-        }
+        }   
         else if (GroupsList.Count == 0)
         {
             <div class="NoGroupsLayout">

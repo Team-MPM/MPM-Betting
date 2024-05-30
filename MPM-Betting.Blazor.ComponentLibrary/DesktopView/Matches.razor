@@ -11,11 +11,12 @@
 @inject NavigationManager NavigationManager
 @attribute [StreamRendering]
 @attribute [Authorize]
+@rendermode InteractiveServer
 
 
-@if (SelectedTeams != null)
+@if (SelectedTeams != null && !expiredMatch)
 {
-    <Modal @ref="modalRef" Class="ModalSettings">
+    <Modal @ref="ModalRef" Class="ModalSettings">
         <ModalContent Centered>
             <ModalHeader Background="Background.Dark">
                 <ModalTitle TextColor="TextColor.Default">Enter a new Bet</ModalTitle>
@@ -33,7 +34,7 @@
                         <span>Away Win</span>
                     </div>
                     <div class="ModalBetEntries ModalEntries">
-                        <span class="BetEntry @(ChosenTeam == BetType.HomeWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.HomeWin))">x @SelectedTeams.Item2.HomeWinPayOut</span>
+                        <span class="BetEntry @(ChosenTeam == BetType.HomeWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.HomeWin) )">x @SelectedTeams.Item2.HomeWinPayOut</span>
                         <span class="BetEntry @(ChosenTeam == BetType.Draw ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.Draw))">x @SelectedTeams.Item2.DrawPayOut</span>
                         <span class="BetEntry @(ChosenTeam == BetType.AwayWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.AwayWin))">x @SelectedTeams.Item2.AwayWinPayOut</span>
                     </div>
@@ -63,9 +64,28 @@
         </ModalContent>
     </Modal>
 }
+else if (expiredMatch)
+{
+<Modal @ref="ModalRef" Class="ModalSettings">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Expired Bet</ModalTitle>
+            <CloseButton TextColor="TextColor.Light"/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark" Class="ModalSettings">
+            <Field>
+                <FieldLabel>This Match has already expired and cannot be bet on!</FieldLabel>
+            </Field>
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Blazorise.Color.Primary" Clicked="@HideModal">OK</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+}
 else
 {
-    <Modal @ref="modalRef" Class="ModalSettings">
+    <Modal @ref="ModalRef" Class="ModalSettings">
         <ModalContent Centered>
             <ModalHeader Background="Background.Dark">
                 <ModalTitle>Error Loading</ModalTitle>
@@ -73,7 +93,7 @@ else
             </ModalHeader>
             <ModalBody Background="Background.Dark" Class="ModalSettings">
                 <Field>
-                    <FieldLabel>Either try again or click the quote again</FieldLabel>
+                    <FieldLabel>Either try again or refresh the page</FieldLabel>
                 </Field>
             </ModalBody>
             <ModalFooter Background="Background.Dark">
@@ -84,7 +104,7 @@ else
 }
 
 <div class="MatchesDate">
-    <MatchesDatePicker/>
+    <MatchesDatePicker MatchesPage="this"/>
 </div>
 
 <Divider/>
@@ -93,64 +113,74 @@ else
     <h2>Matches</h2>
     <Divider/>
     <div class="MatchLeagueBoxes">
-        @if (GameEntries == null)
+        <div class="line"></div>
+        <div class="mt-5 mb-5"></div>
+        @if (!Loaded)
         {
-            <div>Loading</div>
+            <div class="LoadingMatches">
+                <div>Loading...</div>
+            </div>
         }
         else
         {
+            @if (GameEntries.Count == 0)
+            {
+                <div class="NoMatchesError">
+                    <div>No Matches have been found on the given date</div>
+                </div>
+            }
             @foreach(var league in TopLeagues)
             {
-                <div class="MatchLeagueEntry">
-                <div class="MatchLeagueEntryName">@league.Name</div>
                 @if (GameEntries.ContainsKey(league.Id))
                 {
-                    <div class="LeagueMatches">
-                    @foreach (var match in GameEntries[league.Id])
-                    {
-                        <div class="MatchEntry">
-                            <div class="MatchInfo">
-                                <img class="Match_HomeLogo" src="./Images/logo_Cropped.png"/>
-                                <div class="MatchHomeTeam">@match.Score.HomeTeam.Name</div>
-                                <div class="MatchScore">
-                                    <span>@match.Score.HomeScore</span>
-                                    <span>:</span>
-                                    <span>@match.Score.AwayScore</span>
+                    <div class="MatchLeagueEntry">
+                        <div class="MatchLeagueEntryName">@league.Name</div>
+                        <div class="LeagueMatches">
+                            @foreach (var match in GameEntries[league.Id])
+                            {
+                                <div class="MatchEntry">
+                                    <div class="MatchInfo">
+                                        <img class="Match_HomeLogo" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(match.Score.HomeTeam.Id).png"/>
+                                        <div class="MatchHomeTeam">@match.Score.HomeTeam.Name</div>
+                                        <div class="MatchScore">
+                                           @if (CheckIfMatchExpired(match))
+                                           {
+                                               <span>@match.Score.HomeScore</span>
+                                               <span>:</span>
+                                               <span>@match.Score.AwayScore</span>
+                                           }
+                                           else
+                                           {
+                                               <div>@match.StartTime.ToString("HH:mm")</div>
+                                           }
+                                            
+                                        </div>
+                                        <div class="MatchAwayTeam">@match.Score.AwayTeam.Name</div>
+                                        <img class="Match_HomeLogo" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(match.Score.AwayTeam.Id).png"/>
+                                    </div>
+                                    <div class="MatchInfoDivider"></div>
+                                    <div class="BetsInfo">
+                                        @foreach (var entry in GameBetEntries.Where(s => s.Item1 == match).Select(s => s.Item2))
+                                        {
+                                            <div class="col-4 ">
+                                                <div>1</div>
+                                                <span class="@(CheckIfMatchExpired(match) ? (match.Score.HomeScore > match.Score.AwayScore ? "rightBet": "wrongBet") : "NotStarted")" onclick="@(() => EnterSelectedTeamsAndQuotes(match, match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.HomeWin))">@entry.HomeWinPayOut</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <div>X</div>
+                                                <span class="@(CheckIfMatchExpired(match) ? (match.Score.HomeScore == match.Score.AwayScore ? "rightBet": "wrongBet") : "NotStarted")" onclick="@(() => EnterSelectedTeamsAndQuotes(match, match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.Draw))">@entry.DrawPayOut</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <div>2</div>
+                                                <span class="@(CheckIfMatchExpired(match) ? (match.Score.HomeScore < match.Score.AwayScore ? "rightBet": "wrongBet") : "NotStarted")"  onclick="@(() => EnterSelectedTeamsAndQuotes(match, match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.AwayWin))">@entry.AwayWinPayOut</span>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
-                                <div class="MatchAwayTeam">@match.Score.AwayTeam.Name</div>
-                                <img class="Match_HomeLogo" src="./Images/logo_Cropped.png"/>
-                            </div>
-                            <div class="MatchInfoDivider"></div>
-                            <div class="BetsInfo">
-                               @foreach (var entry in GameBetEntries.Where(s => s.Item1 == match).Select(s => s.Item2))
-                               {
-                                   <div class="col-4 ">
-                                       <div>1</div>
-                                       <span onclick="@(() => EnterSelectedTeamsAndQuotes(match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.HomeWin))">@entry.HomeWinPayOut</span>
-                                   </div>
-                                   <div class="col-4">
-                                       <div>X</div>
-                                       <span onclick="@(() => EnterSelectedTeamsAndQuotes(match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.Draw))">@entry.DrawPayOut</span>
-                                   </div>
-                                   <div class="col-4">
-                                       <div>2</div>
-                                       <span onclick="@(() => EnterSelectedTeamsAndQuotes(match.Score.HomeTeam, match.Score.AwayTeam, entry, BetType.AwayWin))">@entry.AwayWinPayOut</span>
-                                   </div>
-                               }
-                            </div>
-                        </div>
-                    }
+                            }
                     </div>
+            </div>
                 }
-                else
-                {
-                    <div class="NoMatchesError">
-                        <div class="pt-5"></div>
-                        No Matches Found!
-                        <div class="pb-3"></div>
-                    </div>
-                }
-                </div>
             }
         }
     </div>
@@ -163,19 +193,57 @@ else
 @code {
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? UserTask { get; set; }
     MpmUser? User;
+
+    private bool loaded;
+    private bool expiredMatch;
+
+    private bool ExpiredMatch
+    {
+        get => expiredMatch;
+        set
+        {
+            expiredMatch = value;
+            StateHasChanged();
+        }
+    }
+
+    private bool Loaded
+    {
+        get => loaded;
+        set
+        {
+            loaded = value;
+            StateHasChanged();
+        }
+    }
     
     [Parameter] public List<FootballApi.League> Leagues { get; set; }
     public List<FootballApi.League>? TopLeagues { get; set; }
 
     public Dictionary<int, List<FootballApi.GameEntry>>? GameEntries { get; set; }
+    public Dictionary<int, List<FootballApi.GameEntry>>? AllGameEntries { get; set; }
     public List<Tuple<FootballApi.GameEntry, BetEntries>> GameBetEntries { get; set; }
+    private DateTime selectedDate;
+
+    public DateTime SelectedDate
+    {
+        get => selectedDate;
+        set
+        {
+            selectedDate = value;
+            StateHasChanged();
+            RefreshMatches();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
 
-        int[] ids = { 47, 42, 73, 78, 55, 54, 47, 37, 22, 32, 120 };
-        TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).ToList();
-        await FillMatches();
+
+        // int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 }; // Old Ligues
+        int[] ids = { 47,54,87,53,55,61,57 };
+        TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).OrderBy(s => s.Id).ToList();
+        await RequestFillMatches();
         ChosenTeam = BetType.None;
         if (UserTask is null)
             return;
@@ -186,14 +254,29 @@ else
             User = UserTask.Payload;    
     }
 
-    private async Task FillMatches()
+    private async Task RequestFillMatches()
     {
-        GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
+        AllGameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
         foreach (var league in TopLeagues)
         {
             var result = await Api.GetGameEntries(league.Id, null);
+
             if (result.IsSuccess)
-                GameEntries.Add(league.Id, result.Value.Take(5).ToList());
+            {
+                AllGameEntries.Add(league.Id, result.Value);
+            }
+               
+        }
+        RefreshMatches();
+        Loaded = true;
+    }
+
+    private void RefreshMatches()
+    {
+        GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
+        foreach (var league in AllGameEntries)
+        {
+            GameEntries.Add(league.Key, league.Value.Where(s => DateOnly.FromDateTime(s.StartTime) == DateOnly.FromDateTime(SelectedDate)).ToList());
         }
 
         GameBetEntries = new List<Tuple<FootballApi.GameEntry, BetEntries>>();
@@ -201,38 +284,45 @@ else
         {
             foreach (var game in league.Value)
             {
-                GameBetEntries.Add(new Tuple<FootballApi.GameEntry, BetEntries>(game, new BetEntries(2.26, 1.99, 1.45)));
+                GameBetEntries.Add(new Tuple<FootballApi.GameEntry, BetEntries>(game, new BetEntries(GetRandomQuote(), GetRandomQuote(), GetRandomQuote())));
             }
+        }
+        RemoveEmptyLeagues();
+    }
+
+    private void RemoveEmptyLeagues()
+    {
+        foreach (var entry in GameEntries)
+        {
+            if(entry.Value.Count == 0)
+                GameEntries.Remove(entry.Key);
         }
     }
 
-    // private async Task FillMatchesNoApi()
-    // {
-    //     GameEntries = new Dictionary<int, List<FootballApi.GameEntry>>();
-    //     foreach (var league in TopLeagues)
-    //     {
-    //         GameEntries.Add(league.Id, new List<FootballApi.GameEntry>()
-    //         {
-    //             new FootballApi.GameEntry(1, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "erfgthzewdesfgfrdedfrgfredfrgfrdedfsgrdefsgfredfsrfewsdsfgfrgfdwrfgttrfghn"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-    //             new FootballApi.GameEntry(2, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "FC Real Madrid"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-    //             new FootballApi.GameEntry(3, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "Spurs Tottenham"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-    //             new FootballApi.GameEntry(4, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-    //             new FootballApi.GameEntry(5, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-    //             new FootballApi.GameEntry(6, new FootballApi.ScoreEntry() { HomeScore = 1, AwayScore = 2, HomeTeam = new FootballApi.Team(1, "xxx"), AwayTeam = new FootballApi.Team(2, "yyy") }, DateTime.Now, "15:30"),
-    //         });
-    //     }
-    // }
+    public double GetRandomQuote() => System.Math.Round(new Random().NextDouble() + new Random().Next(1, 4), 2);
+    
+    private bool CheckIfMatchExpired(FootballApi.GameEntry entry) => entry.StartTime.CompareTo(DateTime.Now) != 1;
 
-    public void EnterSelectedTeamsAndQuotes(FootballApi.Team hometeam, FootballApi.Team awayteam, BetEntries entry, BetType type = BetType.None)
+    public async Task EnterSelectedTeamsAndQuotes(FootballApi.GameEntry match, FootballApi.Team hometeam, FootballApi.Team awayteam, BetEntries entry, BetType type = BetType.None)
     {
         if (User is null)
         {
             NavigationManager.NavigateTo("/account/login");
         }
+
+        if (CheckIfMatchExpired(match))
+        {
+            ExpiredMatch = true;
+            await ShowModal();
+            await ShowModal();
+            return;
+        }
+        
         SelectedTeams = new Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries>(new Tuple<FootballApi.Team, FootballApi.Team>(hometeam, awayteam), entry);
         ChosenTeam = type;
-        ShowModal();
-        StateHasChanged();
+        
+        await ShowModal();
+        await ShowModal();
     }
 
     public record struct BetEntries(double HomeWinPayOut, double DrawPayOut, double AwayWinPayOut);
@@ -273,13 +363,24 @@ else
     // MODAL
     private Modal modalRef;
 
+    private Modal ModalRef
+    {
+        get => modalRef;
+        set
+        {
+            modalRef = value;
+            StateHasChanged();
+        }
+    }
+
     private Task ShowModal()
     {
-        return modalRef.Show();
+        return ModalRef.Show();
     }
 
     private Task HideModal()
     {
+        ExpiredMatch = ExpiredMatch ? false : ExpiredMatch;
         return modalRef.Hide();
     }
 

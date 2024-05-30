@@ -49,8 +49,9 @@
     margin: 5px 0 5px 0;
     padding: 5px 0 5px 0;
     align-items: center;
-    border-bottom: 3px solid black;
+    border-bottom: 3px solid white;
     justify-content: center;
+    color: white;
     
     font-weight:  bold;
 }
@@ -109,7 +110,7 @@
 }
 
 .MatchInfoDivider{
-    border-left: 3px solid black
+    border-left: 3px solid gray;
 }
 
 .BetsInfo {
@@ -137,14 +138,9 @@
     padding: 2%;
     border-radius: 10%;
     border: 1px solid black;
-    background: rgba(234, 179, 38, 0.5); 
     font-size: 18px;
 }
 
-.BetsInfo > div > span:hover {
-    cursor: pointer;
-    background: rgba(234, 179, 38, 0.8);
-}
 
 .BetsInfo > span:hover {
     background: gray;
@@ -186,6 +182,77 @@
 
 .ModalActiveBet:hover {
     background: rgba(234, 179, 38, 0.8);
+}
+
+.line {
+    width: 100%;
+    border: 2px solid white;
+    margin: 10px 0 10px 0;
+}
+
+
+.MatchesBox:hover .line {
+    border: 2px solid #0BBCC7;
+}
+
+.MatchesBox:hover h2 {
+    transform: scale(1.06);
+}
+
+.LoadingMatches {
+    display: flex;
+    font-size: 20px;
+    justify-content: center;
+    font-weight: bold;
+}
+
+
+/*.wrongBet::before, .wrongBet::after {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    top: 30%;*/
+/*    left: 50%;*/
+/*    width: 4px;*/
+/*    height: 80%;*/
+/*    background: rgba(0,0,0, 0.5);*/
+/*}*/
+
+/*.wrongBet::before {*/
+/*    transform: rotate(70deg);*/
+/*}*/
+
+/*.wrongBet::after {*/
+/*    transform: rotate(-70deg);*/
+/*}*/
+
+.NotStarted {
+    background: rgba(234, 179, 38, 0.5);
+}
+
+.NotStarted:hover {
+    cursor: pointer;
+    background: rgba(234, 179, 38, 0.8);
+}
+
+.rightBet {
+    background: rgba(0, 255, 0, 0.45);
+    font-weight: bolder ;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 1);
+    font-size: 20px;
+}
+
+.wrongBet {
+    background: rgba(255, 0, 0, 0.3);
+}
+
+.wrongBet:hover {
+    background: rgba(255, 50, 50, 0.5);
+    cursor: default;
+}
+
+.rightBet:hover {
+    background: rgba(0, 255, 50, 0.7);
+    cursor: default;
 }
 
 
