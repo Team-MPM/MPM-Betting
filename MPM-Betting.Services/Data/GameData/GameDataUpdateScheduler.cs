@@ -75,7 +75,8 @@ public class GameDataUpdateScheduler(
 
                 if (entity != null)
                 {
-                    // todo update
+                    entity.GameState = FootballApiGameStateToEGameState(result.Value.GameEntry.Score.State);
+                    entity.StartTime = result.Value.GameEntry.StartTime;
                     await db.SaveChangesAsync(cancellationToken);
                 }
                 else
@@ -97,23 +98,7 @@ public class GameDataUpdateScheduler(
                         SportType = ESportType.Football,
                         ReferenceId = entry.Key,
                         StartTime = result.Value.GameEntry.StartTime,
-                        GameState = result.Value.GameEntry.Score.State switch
-                        {
-                            FootballApi.GameState.Cancelled => EGameState.Cancelled,
-                            FootballApi.GameState.None => EGameState.Upcoming,
-                            FootballApi.GameState.FirstHalf => EGameState.Live,
-                            FootballApi.GameState.HalfTimeBreak => EGameState.Live,
-                            FootballApi.GameState.SecondHalf => EGameState.Live,
-                            FootballApi.GameState.EndedAfterSecondHalf => EGameState.Finished,
-                            FootballApi.GameState.BreakAfterSecondHalf => EGameState.Live,
-                            FootballApi.GameState.FirstOvertime => EGameState.Live,
-                            FootballApi.GameState.OvertimeBreak => EGameState.Live,
-                            FootballApi.GameState.SecondOvertime => EGameState.Live,
-                            FootballApi.GameState.EndedAfterOverTime => EGameState.Finished,
-                            FootballApi.GameState.PenaltyShootout => EGameState.Live,
-                            FootballApi.GameState.EndedAfterPenaltyShootout => EGameState.Finished,
-                            _ => throw new UnreachableException()
-                        }
+                        GameState = FootballApiGameStateToEGameState(result.Value.GameEntry.Score.State)
                     }, cancellationToken);
 
                     await db.SaveChangesAsync(cancellationToken);
@@ -122,5 +107,26 @@ public class GameDataUpdateScheduler(
                 return result.Value;
             });
         }
+    }
+
+    private static EGameState FootballApiGameStateToEGameState(FootballApi.GameState state)
+    {
+        return state switch
+        {
+            FootballApi.GameState.Cancelled => EGameState.Cancelled,
+            FootballApi.GameState.None => EGameState.Upcoming,
+            FootballApi.GameState.FirstHalf => EGameState.Live,
+            FootballApi.GameState.HalfTimeBreak => EGameState.Live,
+            FootballApi.GameState.SecondHalf => EGameState.Live,
+            FootballApi.GameState.EndedAfterSecondHalf => EGameState.Finished,
+            FootballApi.GameState.BreakAfterSecondHalf => EGameState.Live,
+            FootballApi.GameState.FirstOvertime => EGameState.Live,
+            FootballApi.GameState.OvertimeBreak => EGameState.Live,
+            FootballApi.GameState.SecondOvertime => EGameState.Live,
+            FootballApi.GameState.EndedAfterOverTime => EGameState.Finished,
+            FootballApi.GameState.PenaltyShootout => EGameState.Live,
+            FootballApi.GameState.EndedAfterPenaltyShootout => EGameState.Finished,
+            _ => throw new UnreachableException()
+        };
     }
 }

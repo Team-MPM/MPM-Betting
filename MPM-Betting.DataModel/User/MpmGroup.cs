@@ -12,8 +12,9 @@ public class MpmGroup
     public string CreatorId { get; set; }
     public MpmUser Creator { get; set; }
     
-    [StringLength(200)] public string? ProfilePictureUrl { get; set; } 
-    
+    [StringLength(200)] public string? ProfilePictureUrl { get; set; }
+
+    public List<Bet> AllBets { get; set; }
     public List<UserGroupEntry> UserGroupEntries { get; set; } = [];
     
     [Required]

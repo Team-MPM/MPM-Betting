@@ -128,13 +128,32 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
                 seasonResult.Wait(cancellationToken);
                 seasonResult.Result.IfSuc(seasons =>
                 {
-                    foreach (var season in seasons.Select(s => new BuiltinSeason(league.Name, league.Name)
+                    foreach (var season in seasons.Select(s =>
+                             {
+                                 try
+                                 {
+                                     var x = new BuiltinSeason(league.Name, league.Name)
+                                     {
+                                         Sport = ESportType.Football,
+                                         ReferenceId = league.Id,
+                                         Start = new DateTime(int.Parse(s.Split('/')[0]), 1, 1),
+                                         End = new DateTime(int.Parse(s.Split('/')[1]), 1, 1)
+                                     };
+
+                                     return x;
+                                 }
+                                 catch
+                                 {
+                                     logger.LogInformation(
+                                         "SeedBuiltinSeasons encountered {Message} at league {LeagueId}", "Invalid season",
+                                         league.Id);
+                                     return null;
+                                 }
+                             }))
                     {
-                        Sport = ESportType.Football,
-                        ReferenceId = league.Id,
-                        Start = new DateTime(int.Parse(s.Split('/')[0]), 1, 1),
-                        End = new DateTime(int.Parse(s.Split('/')[1]), 1, 1)
-                    })) allSeasons.Add(season);
+                        if (season is not null)
+                            allSeasons.Add(season);
+                    }
                 });
             }
             catch (Exception e)

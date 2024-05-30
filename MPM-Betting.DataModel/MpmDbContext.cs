@@ -59,7 +59,24 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
                 .WithOne(uge => uge.Group)
                 .OnDelete(DeleteBehavior.NoAction);
         });
+        
+        modelBuilder.Entity<Bet>(builder =>
+        {
+            builder
+                .HasOne(b => b.Group)
+                .WithMany(g => g.AllBets)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
 
+        modelBuilder.Entity<CustomSeasonEntry>(builder =>
+        {
+            builder
+                .HasOne(cse => cse.Season)
+                .WithMany(s => s.Entries)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        
         modelBuilder.Entity<ScoreEntry>(builder =>
         {
             builder

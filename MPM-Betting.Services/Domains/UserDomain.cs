@@ -623,19 +623,28 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         if (game.GameState != EGameState.Upcoming) return s_InvalidDateException;
 
 
-        var bet = new ResultBet(m_User, group, game, result);
+        var bet = new ResultBet()
+        {
+            UserId = m_User.Id,
+            GroupId = group.Id,
+            GameId = game.Id,
+            Result = result,
+            QuoteHome = 1,
+            QuoteDraw = 1,
+            QuoteAway = 1
+        };
         await m_DbContext.FootballResultBets.AddAsync(bet);
         await m_DbContext.SaveChangesAsync();
 
         return bet;
     }
 
-    public async Task<MpmResult<Bet>> CreateFootballScoreBet(MpmGroup group, Game game, int HomeScore, int AwayScore)
+    public async Task<MpmResult<Bet>> CreateFootballScoreBet(MpmGroup group, Game game, int homeScore, int awayScore)
     {
         ArgumentNullException.ThrowIfNull(group);
         ArgumentNullException.ThrowIfNull(game);
         if (m_User is null) return s_NoUserException;
-        if (HomeScore < 0 || AwayScore < 0) return s_InvalidBetParameter;
+        if (homeScore < 0 || awayScore < 0) return s_InvalidBetParameter;
 
         var uge = m_DbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
         if (uge is null)
@@ -646,7 +655,14 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         if (game.GameState != EGameState.Upcoming) return s_InvalidDateException;
 
 
-        var bet = new ScoreBet(m_User, group, game, HomeScore, AwayScore);
+        var bet = new ScoreBet()
+        {
+            UserId = m_User.Id,
+            GroupId = group.Id,
+            GameId = game.Id,
+            HomeScore = homeScore,
+            AwayScore = awayScore
+        };
         await m_DbContext.FootballScoreBets.AddAsync(bet);
         await m_DbContext.SaveChangesAsync();
 

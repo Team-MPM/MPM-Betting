@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    [Migration("20240526071820_init")]
+    [Migration("20240530115847_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -57,6 +57,12 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Hit")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Processed")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
@@ -64,6 +70,7 @@ namespace MPM_Betting.DbManager.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -110,7 +117,7 @@ namespace MPM_Betting.DbManager.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BuiltinSeasonId")
+                    b.Property<int>("BuiltinSeasonId")
                         .HasColumnType("int");
 
                     b.Property<int>("GameState")
@@ -618,6 +625,15 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
 
+                    b.Property<int>("QuoteAway")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuoteDraw")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuoteHome")
+                        .HasColumnType("int");
+
                     b.Property<int>("Result")
                         .HasColumnType("int");
 
@@ -678,12 +694,15 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId");
+                        .WithMany("AllBets")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Game");
 
@@ -701,9 +720,9 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.Betting.CustomSeason", "Season")
-                        .WithMany()
+                        .WithMany("Entries")
                         .HasForeignKey("SeasonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Game");
@@ -715,7 +734,9 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.BuiltinSeason", "BuiltinSeason")
                         .WithMany()
-                        .HasForeignKey("BuiltinSeasonId");
+                        .HasForeignKey("BuiltinSeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("BuiltinSeason");
                 });
@@ -916,6 +937,8 @@ namespace MPM_Betting.DbManager.Migrations
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
+                    b.Navigation("AllBets");
+
                     b.Navigation("Seasons");
 
                     b.Navigation("UserGroupEntries");
@@ -929,6 +952,11 @@ namespace MPM_Betting.DbManager.Migrations
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
                 {
                     b.Navigation("ScoreEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.CustomSeason", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

@@ -537,8 +537,9 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         });
     }
 
-    private static MpmResult<List<string>> GetSeasonsForLeagueFromJson(string json)
+    private static MpmResult<List<string>> GetSeasonsForLeagueFromJson(string? json)
     {
+        if (json is null or "null") return new ArgumentNullException(nameof(json));
         var jObject = JObject.Parse(json);
         var allAvailableSeasons = (JArray)jObject["allAvailableSeasons"]!;
         var seasons = allAvailableSeasons.Select(availableSeason => availableSeason.Value<string>()!).ToList();
