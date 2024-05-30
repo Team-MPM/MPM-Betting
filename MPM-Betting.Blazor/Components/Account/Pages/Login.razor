@@ -45,7 +45,7 @@
                             <div class="form-group d-md-flex">
                                 <div class="w-50">
                                     <label class="checkbox-wrap checkbox-primary">
-                                        Remember Me
+                                        <span class="ColorWhite">Remember me</span>
                                         <InputCheckbox @bind-Value="Input.RememberMe">
                                             <span class="checkmark"></span>
                                         </InputCheckbox>
@@ -137,7 +137,7 @@
 
     private sealed class InputModel
     {
-        [Required] [EmailAddress] public string Email { get; set; } = "";
+        [Required] public string Email { get; set; } = "";
 
         [Required]
         [DataType(DataType.Password)]

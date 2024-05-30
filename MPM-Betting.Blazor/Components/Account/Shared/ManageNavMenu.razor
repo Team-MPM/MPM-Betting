@@ -5,32 +5,32 @@
 @inject NavigationManager NavigationManager
 
 <ul class="NavBarList">
-    <li  class="@(NavigationManager.Uri.Contains("Manage/Profile") ? "active" : "")">
+    <li  class="@(NavigationManager.Uri.Contains("manage/profile") ? "active" : "")">
         <i class="fa-solid fa-user"></i>
-        <a href="Account/Manage">Profile</a>
+        <a href="account/manage/profile">Profile</a>
     </li>
-    <li  class="@(NavigationManager.Uri.Contains("Manage/Email") ? "active" : "")">
+    <li  class="@(NavigationManager.Uri.Contains("manage/email") ? "active" : "")">
         <i class="fa-solid fa-envelope"></i>
-        <a href="Account/Manage/Email">Email</a>
+        <a href="account/manage/email">Email</a>
     </li>
-    <li  class="@(NavigationManager.Uri.Contains("Manage/ChangePassword") ? "active" : "")">
+    <li  class="@(NavigationManager.Uri.Contains("manage/changePassword") ? "active" : "")">
         <i class="fa-solid fa-lock"></i>
-        <a href="Account/Manage/ChangePassword">Password</a>
+        <a href="account/manage/changePassword">Password</a>
     </li>
     @if (m_HasExternalLogins)
     {
-        <li  class="@(NavigationManager.Uri.Contains("Manage/ExternalLogins") ? "active" : "")">
-            <i class="fa-solid fa-lock"></i>
-            <a href="Account/Manage/ExternalLogins">External Logins</a>
+        <li  class="@(NavigationManager.Uri.Contains("manage/externalLogins") ? "active" : "")">
+            <i class="fa-solid fa-door-open"></i>
+            <a href="account/manage/externalLogins">External Logins</a>
         </li>
     }
-    <li class="@(NavigationManager.Uri.Contains("Manage/TwoFactorAuthentication") ? "active" : "")">
+    <li class="@(NavigationManager.Uri.Contains("manage/twoFactorAuthentication") ? "active" : "")">
         <i class="fa-solid fa-shield"></i>
-        <a href="Account/Manage/TwoFactorAuthentication">2FA</a>
+        <a href="account/manage/twoFactorAuthentication">2FA</a>
     </li>
-    <li  class="@(NavigationManager.Uri.Contains("Manage/PersonalData") ? "active" : "")">
+    <li  class="@(NavigationManager.Uri.Contains("manage/personalData") ? "active" : "")">
         <i class="fa-solid fa-file-pen"></i>
-        <a href="Account/Manage/PersonalData">PersonalData</a>
+        <a href="account/manage/personalData">PersonalData</a>
     </li>
 </ul>
 

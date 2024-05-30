@@ -1,5 +1,11 @@
-﻿.NavBarList {
+﻿/*GLOBAL STYLES*/
+
+
+label {
+    color: black !important; 
 }
+
+
 
 .NavBarList li {
     display: grid;
@@ -33,4 +39,30 @@
 
 .active a {
     font-weight: bold;
+}
+
+.ProfilePicManage {
+    width: 100%;
+    height: auto;
+}
+
+.align-center-manage {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.ButtonTheme {
+    padding: 10px;
+    border-radius: 10px;
+    background: rgb(11, 48, 196);
+    color: white;
+    font-size: 15px;
+}
+
+.ButtonTheme:hover {
+    background: rgb(38, 75, 218);
+    color: white;
+    text-decoration: none;
+    transform: scale(1.02);
 }
