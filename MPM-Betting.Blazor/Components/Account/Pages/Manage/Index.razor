@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Domains
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @inject UserManager<MpmUser> UserManager
 @inject SignInManager<MpmUser> SignInManager
@@ -15,8 +16,8 @@
 @inject NavigationManager NavigationManager
 
 
-
 <PageTitle>Profile</PageTitle>
+
 
 <h3>Profile</h3>
 <StatusMessage/>
@@ -27,11 +28,18 @@
             <div class="col-md-2">
                 @if (m_User is not null)
                 {
-                    <img class="ProfilePicManage" src="@m_User.ProfilePictureUrl" height="50px"/>
+                    @if (m_User.ProfilePictureUrl is not null)
+                    {
+                        <img class="ProfilePicManage" src="@m_User.ProfilePictureUrl" height="50px"/>
+                    }
+                    else
+                    {
+                        <img class="ProfilePicManage" src="Images/default-profile-picture.png"/>
+                    }
                 }
                 else
                 {
-                    <img class="ProfilePicManage" src="Images/pfp.jpg"/>
+                    <div class="text-danger">Error Loading Image</div>
                 }
             </div>
             <div class="col-md-10 align-center-manage mt-5">
@@ -97,6 +105,11 @@
         
         if(Input.UserName != m_Username)
         {
+            if (await UserManager.FindByNameAsync(Input.UserName) is not null)
+            {
+                RedirectManager.RedirectToCurrentPageWithStatus("Error: Username already exists.", HttpContext);
+                return;
+            }
             var setUsernameResult = await UserManager.SetUserNameAsync(m_User, Input.UserName!);
             if (!setUsernameResult.Succeeded)
             {
@@ -125,6 +138,7 @@
         public string? PhoneNumber { get; set; }
         
         // [RegularExpression("^(?!\\s*$).{3,}$")]
+        
         [Required(AllowEmptyStrings = false, ErrorMessage = "Username cannot be empty")]
         [Display(Name = "Username")]
         [MinLength(3, ErrorMessage = "Username must be at least 3 letters long")]

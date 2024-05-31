@@ -36,22 +36,24 @@
             @foreach(var group in GroupsList)
             {
                 <div class="GroupEntry row">
-                    <img class="col-2" src="./Images/Logo_cropped.png"/>
+                    <div class="col-3">
+                        <img width="100%" src="./Images/Logo_cropped.png" alt="image"/>
+                    </div>
                     <div class="col-7">@group.Name</div>
                     @* TODO Abfrage >:c *@
                     @switch(1)
                     {
                         case 1:
-                            <div class="col-3 gold">1st</div>
+                            <div class="col-2 gold">1st</div>
                             break;
                         case 2:
-                            <div class="col-3 silver">2nd</div>
+                            <div class="col-2 silver">2nd</div>
                             break;
                         case 3:
-                            <div class="col-3 bronze">3rd</div>
+                            <div class="col-2 bronze">3rd</div>
                             break;
                         default:
-                            <div class="col-3">4th</div>
+                            <div class="col-2">4th</div>
                             break;
                     }
                 </div>

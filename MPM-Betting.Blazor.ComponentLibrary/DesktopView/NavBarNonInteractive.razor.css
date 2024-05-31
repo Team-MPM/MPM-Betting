@@ -1,0 +1,104 @@
+﻿/*GLOBAL CLASSES*/
+
+.NoHoverUnderline {
+    text-decoration: none;
+}
+
+.NoHoverUnderline:hover {
+    text-decoration: none;
+}
+
+.NoTransform {
+    transform: none;
+}
+
+/*NORMAL CLASSES*/
+
+.NavBar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 0;
+    background: rgba(50,50,50,1);
+    box-shadow: 0 4px 8px rgba(50, 50, 50, 0.4);
+    border-bottom: 3px solid rgb(30,30,30)  ;
+}
+
+/* LOGO */
+
+.logo {
+    margin: 0 10%;
+}
+
+.NavBarLogoText {
+    font-family: Impact, fantasy;
+    font-size: 32px;
+    font-style: italic;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: default;
+    color: #0BBCC7; /*TODO*/
+}
+
+.NavBarLogoText:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* NAVIGATION */
+
+.nav-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.nav-link {
+    margin: 0 15px;
+    font-size: 20px;
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #fff;
+    align-content: center;
+    text-decoration: none;
+}
+
+.nav-active {
+    font-weight: bold;
+    border-bottom: 3px solid #0BBCC7;
+}
+
+.nav-sport-menu{
+    width: 300px;
+}
+
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 0 10px;
+}
+
+/*Credits*/
+
+.NavBarPoints {
+    display: flex;
+    align-self: center;
+    /*margin-left: -5%;*/
+    margin-right: 50px;
+    align-items: center;
+
+}
+
+.NavBarPoints > div {
+    margin: 0 10px;
+    font-size: 19px;
+}
+
+.NavBarPoints > img {
+    height: 25px;
+}

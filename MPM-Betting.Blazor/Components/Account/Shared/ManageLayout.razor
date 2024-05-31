@@ -1,5 +1,13 @@
 ﻿@inherits LayoutComponentBase
+@inject UserManager<MpmUser> UserManager
+@inject SignInManager<MpmUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject IdentityRedirectManager RedirectManager
 @inject NavigationManager NavigationManager
+@using BlazorApp1.Components.Account
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.DataModel.User
 
 
 @if (HttpContext is null)
@@ -8,7 +16,14 @@
 }
 else
 {
-    <div class="container m-8 mt-12">
+    <div class=" TopNavBarContainer">
+        <div class="row">
+            <div class="col-12">
+                <NavBarNonInteractive/>
+            </div>
+        </div>
+    </div>
+    <div class="container">
         <h1>Account Management</h1>
         <hr/>
         <div class="row">
@@ -29,6 +44,7 @@ else
 @code {
 
     [CascadingParameter] private HttpContext? HttpContext { get; set; }
+    
 
     protected override void OnParametersSet()
     {
@@ -40,5 +56,5 @@ else
             NavigationManager.Refresh(forceReload: true);
         }
     }
-
+    
 }

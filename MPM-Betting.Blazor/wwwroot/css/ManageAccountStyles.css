@@ -1,11 +1,13 @@
 ﻿/*GLOBAL STYLES*/
 
 
+.TopNavBarContainer {
+    margin-bottom: 100px;
+}
+
 label {
     color: black !important; 
 }
-
-
 
 .NavBarList li {
     display: grid;

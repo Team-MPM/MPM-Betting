@@ -16,7 +16,7 @@
 
 <PageTitle>Login</PageTitle>
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center">
+<div class="d-flex align-items-center justify-content-center">
     <div class="container p-5 px-8 mx-24">
         <div class="row justify-content-center">
             <div class="col-md-6 text-center mb-5">
@@ -118,9 +118,9 @@
             User = await UserManager.FindByEmailAsync(Input.Email);
         if (User is null)
         {
-            throw new Exception("here1");
-            Logger.LogInformation("User logged in");
-            RedirectManager.RedirectTo(ReturnUrl);
+            Logger.LogWarning("Error: User not found");
+            m_ErrorMessage = "Error: User and password do not match any result";
+            return;
         }
         var result = await SignInManager.PasswordSignInAsync(User!, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         // var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);

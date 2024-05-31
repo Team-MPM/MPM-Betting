@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @if (HttpContext is null)
 {
@@ -10,6 +11,9 @@ else
     @* TODO Make this more dynamic c: -> <Background Path=""/> *@
     <div class="Background"></div>
     
+    <div class="TopNavBarContainer">
+        <NavBarNonInteractive/>
+    </div>
     <div class="LoginPageMainBox">
         <div class="LoginPage row">
             @Body
