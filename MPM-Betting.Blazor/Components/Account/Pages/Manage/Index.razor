@@ -1,29 +1,66 @@
-﻿@page "/Account/Manage"
+﻿@page "/Account/Manage/Profile"
 
 @using System.ComponentModel.DataAnnotations
+@using System.Diagnostics.CodeAnalysis
 @using BlazorApp1.Components.Account
-@using Microsoft.AspNetCore.Authorization
+@using LanguageExt.ClassInstances
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.DataModel.User
+@using MPM_Betting.Services.Domains
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @inject UserManager<MpmUser> UserManager
 @inject SignInManager<MpmUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
+@inject NavigationManager NavigationManager
+
 
 <PageTitle>Profile</PageTitle>
+
 
 <h3>Profile</h3>
 <StatusMessage/>
 
-<div class="row">
+<div class="row mt-5">
+    <div class="col-md-12 mb-15">
+        <div class="row">
+            <div class="col-md-2">
+                @if (m_User is not null)
+                {
+                    @if (m_User.ProfilePictureUrl is not null)
+                    {
+                        <img class="ProfilePicManage" src="@m_User.ProfilePictureUrl" height="50px"/>
+                    }
+                    else
+                    {
+                        <img class="ProfilePicManage" src="Images/default-profile-picture.png"/>
+                    }
+                }
+                else
+                {
+                    <div class="text-danger">Error Loading Image</div>
+                }
+            </div>
+            <div class="col-md-10 align-center-manage mt-5">
+                <a class="ButtonTheme" href="/account/manage/upload-profile-picture">Change your Profile Picture</a>
+            </div>
+        </div>
+        
+
+        @if (!string.IsNullOrEmpty(m_Message))
+        {
+        <p>@m_Message</p>
+        }
+    </div>
     <div class="col-md-6">
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
+            @* <ValidationSummary class="text-danger" role="alert"/> *@
             <div class="form-floating mb-3">
-                <input type="text" value="@m_Username" class="form-control" placeholder="Please choose your username." disabled/>
+                <InputText @bind-Value="Input.UserName" class="form-control" placeholder="Please choose your username."/>
                 <label for="username" class="form-label">Username</label>
+                <ValidationMessage For="() => Input.UserName" class="text-danger"/>
             </div>
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
@@ -39,6 +76,7 @@
     private MpmUser m_User = default!;
     private string? m_Username;
     private string? m_PhoneNumber;
+    private string? m_Message;
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
@@ -51,10 +89,34 @@
         m_PhoneNumber = await UserManager.GetPhoneNumberAsync(m_User);
 
         Input.PhoneNumber ??= m_PhoneNumber;
+        Input.UserName ??= m_Username;
     }
 
     private async Task OnValidSubmitAsync()
     {
+        //TODO Regex thingy for bad words
+        // if(UserDomain.BadWordRegex().IsMatch(Input.UserName))
+        // {
+        //     throw new Exception();
+        //     return;
+        // }
+        
+        //Username
+        
+        if(Input.UserName != m_Username)
+        {
+            if (await UserManager.FindByNameAsync(Input.UserName) is not null)
+            {
+                RedirectManager.RedirectToCurrentPageWithStatus("Error: Username already exists.", HttpContext);
+                return;
+            }
+            var setUsernameResult = await UserManager.SetUserNameAsync(m_User, Input.UserName!);
+            if (!setUsernameResult.Succeeded)
+            {
+                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set username.", HttpContext);
+            }
+        }
+        
         if (Input.PhoneNumber != m_PhoneNumber)
         {
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(m_User, Input.PhoneNumber);
@@ -70,9 +132,19 @@
 
     private sealed class InputModel
     {
-        [Phone]
+        [RegularExpression("^\\d{10}$", ErrorMessage = "Not a valid PhoneNumber")]
         [Display(Name = "Phone number")]
+        [Required(AllowEmptyStrings = true)]
         public string? PhoneNumber { get; set; }
+        
+        // [RegularExpression("^(?!\\s*$).{3,}$")]
+        
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Username cannot be empty")]
+        [Display(Name = "Username")]
+        [MinLength(3, ErrorMessage = "Username must be at least 3 letters long")]
+        public string? UserName { get; set; }
     }
+    
+    
 
 }

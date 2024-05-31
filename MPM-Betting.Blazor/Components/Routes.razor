@@ -2,8 +2,12 @@
 @using MPM_Betting.Blazor.Components.Account.Shared
 @using Blazorise
 @using MudBlazor
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
-<Router AppAssembly="typeof(Program).Assembly">
+<Router AppAssembly="typeof(Program).Assembly" >
+    <NotFound>
+        <NotFound/>
+    </NotFound>
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
@@ -12,9 +16,7 @@
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1"/>
     </Found>
-    <NotFound>
-        <h1>404 - Not Found</h1>
-    </NotFound>
+
 </Router>
 
 <ModalProvider UseModalStructure Animated Size="ModalSize.Fullscreen" />

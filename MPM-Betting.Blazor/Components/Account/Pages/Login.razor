@@ -8,6 +8,7 @@
 @using MPM_Betting.DataModel.User
 
 @inject SignInManager<MpmUser> SignInManager
+@inject UserManager<MpmUser> UserManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -15,7 +16,7 @@
 
 <PageTitle>Login</PageTitle>
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center">
+<div class="d-flex align-items-center justify-content-center">
     <div class="container p-5 px-8 mx-24">
         <div class="row justify-content-center">
             <div class="col-md-6 text-center mb-5">
@@ -31,7 +32,7 @@
                         <StatusMessage Message="@m_ErrorMessage"/>
                         <DataAnnotationsValidator/>
                         <div class="form-group">
-                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="E-Mail"/>
+                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Username or E-Mail"/>
                             <ValidationMessage For="() => Input.Email" class="ErrorFont"/>
                         </div>
                         <div class="form-group">
@@ -45,7 +46,7 @@
                             <div class="form-group d-md-flex">
                                 <div class="w-50">
                                     <label class="checkbox-wrap checkbox-primary">
-                                        Remember Me
+                                        <span class="ColorWhite">Remember me</span>
                                         <InputCheckbox @bind-Value="Input.RememberMe">
                                             <span class="checkmark"></span>
                                         </InputCheckbox>
@@ -112,7 +113,17 @@
     {
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        MpmUser? User = await UserManager.FindByNameAsync(Input.Email);
+        if (User is null)
+            User = await UserManager.FindByEmailAsync(Input.Email);
+        if (User is null)
+        {
+            Logger.LogWarning("Error: User not found");
+            m_ErrorMessage = "Error: User and password do not match any result";
+            return;
+        }
+        var result = await SignInManager.PasswordSignInAsync(User!, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        // var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in");
@@ -137,7 +148,7 @@
 
     private sealed class InputModel
     {
-        [Required] [EmailAddress] public string Email { get; set; } = "";
+        [Required] public string Email { get; set; } = "";
 
         [Required]
         [DataType(DataType.Password)]

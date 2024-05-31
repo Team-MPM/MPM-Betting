@@ -61,8 +61,6 @@ var app = builder.Build();
 app.UseRouting();
 
 
-
-
 // Auth
 app.UseAuthentication();
 app.UseAuthorization();
@@ -83,5 +81,6 @@ if (!app.Environment.IsDevelopment())
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 
 app.Run();

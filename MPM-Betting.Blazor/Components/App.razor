@@ -46,8 +46,9 @@
     private IComponentRenderMode? RenderModeForPage {
         get
         {
-            if (HttpContext.Request.Path.StartsWithSegments("/Account/Manage/Upload-profile-picture")) return new InteractiveServerRenderMode(prerender: false);
+            if (HttpContext.Request.Path.StartsWithSegments("/Account/Manage/upload-profile-picture")) return new InteractiveServerRenderMode(prerender: false);
             if (HttpContext.Request.Path.StartsWithSegments("/Account")) return null;
+            if (HttpContext.Request.Path.StartsWithSegments("/Account/Manage")) return null;
             return new InteractiveServerRenderMode(prerender: false);
         }
 
