@@ -14,7 +14,7 @@ public class MpmGroup
     
     [StringLength(200)] public string? ProfilePictureUrl { get; set; }
 
-    public List<Bet> AllBets { get; set; }
+    public List<Bet> AllBets { get; set; } = [];
     public List<UserGroupEntry> UserGroupEntries { get; set; } = [];
     
     [Required]
@@ -34,8 +34,5 @@ public class MpmGroup
         Seasons = seasons;
     }
 
-    private MpmGroup() : this(null!, null!, null!, null!)
-    {
-        
-    }
+    private MpmGroup() : this(null!, null!, null!, null!) { }
 }

@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Globalization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
@@ -9,8 +7,6 @@ using MPM_Betting.DataModel.Rewarding;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services;
 using MPM_Betting.Services.Data;
-using MPM_Betting.Services.Domains;
-using StackExchange.Redis;
 
 namespace MPM_Betting.DbManager;
 
@@ -72,7 +68,7 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
         var achievements = new List<MpmResult<Achievement>>
         {
             //await m_UserDomain.CreateAchievement("First Steps", "Place your first bet"),
-            //await m_UserDomain.CreateAchievement("Victory Royale", "Win your first bet"),
+            //await m_UserDomain.CreateAchievement("Victory Royal", "Win your first bet"),
             //await m_UserDomain.CreateAchievement("Womp Womp", "Lose your first bet"),
             //await m_UserDomain.CreateAchievement("Getting Started", "Place 10 Bets"),
             //await m_UserDomain.CreateAchievement("High Roller", "Place 100 Bets")

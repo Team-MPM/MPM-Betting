@@ -1,5 +1,4 @@
 ﻿using MPM_Betting.DataModel.Betting;
-using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.DataModel.Football;
 

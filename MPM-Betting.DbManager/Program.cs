@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DbManager;
 using MPM_Betting.Services;
-using MPM_Betting.Services.Data.GameData;
-using MPM_Betting.Services.Domains;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +33,7 @@ builder.Services.AddSingleton<DbInitializer>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DbInitializer>());
 
 builder.Services.AddHealthChecks()
-    .AddCheck<DbInitializerHealthCheck>("DbInitializer", null);
+    .AddCheck<DbInitializerHealthCheck>("DbInitializer");
 
 var app = builder.Build();
 

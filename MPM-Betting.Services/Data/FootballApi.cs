@@ -1,7 +1,4 @@
 ﻿using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -436,7 +433,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         // },
 
 
-        // half time
+        // half-time
 
         // "liveTime": {
         //     "short": "HT",
@@ -524,7 +521,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     /// Get a list of string representing the available seasons for a league
     /// </summary>
     /// <param name="leagueId">The league id to query the data for</param>
-    /// <returns>Result of string list</returns>
+    /// <returns>Result of a string list</returns>
     public async Task<MpmResult<List<string>>> GetSeasonsForLeague(int leagueId)
     {
         return await cache.Get(TimeSpan.FromSeconds(1), $"league-seasons-{leagueId}", async () =>

@@ -1,17 +1,12 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
 using System.Runtime.CompilerServices;
-using Aspire;
 using Aspire.Microsoft.EntityFrameworkCore.SqlServer;
-using LanguageExt;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,7 +16,6 @@ using MPM_Betting.Services.Account;
 using MPM_Betting.Services.Data;
 using MPM_Betting.Services.Data.GameData;
 using MPM_Betting.Services.Domains;
-using OpenTelemetry.Trace;
 
 namespace MPM_Betting.Services;
 
@@ -48,8 +42,8 @@ public static class Extensions
         builder.Services.AddTransient<UserDomain>();
         return builder;
     }
-    
-    public static void EnsureDbContextNotRegistered<TContext>(this IHostApplicationBuilder builder, [CallerMemberName] string callerMemberName = "") where TContext : DbContext
+
+    private static void EnsureDbContextNotRegistered<TContext>(this IHostApplicationBuilder builder, [CallerMemberName] string callerMemberName = "") where TContext : DbContext
     {
         if (!builder.Environment.IsDevelopment())
         {
@@ -63,8 +57,8 @@ public static class Extensions
             throw new InvalidOperationException($"DbContext<{typeof(TContext).Name}> is already registered. Please ensure 'services.AddDbContext<{typeof(TContext).Name}>()' is not used when calling '{callerMemberName}()' or use the corresponding 'Enrich' method.");
         }
     }
-    
-    public static TSettings GetDbContextSettings<TContext, TSettings>(this IHostApplicationBuilder builder, string defaultConfigSectionName, Action<TSettings, IConfiguration> bindSettings)
+
+    private static TSettings GetDbContextSettings<TContext, TSettings>(this IHostApplicationBuilder builder, string defaultConfigSectionName, Action<TSettings, IConfiguration> bindSettings)
         where TSettings : new()
     {
         TSettings settings = new();
@@ -175,7 +169,7 @@ public static class Extensions
 
     public static WebApplicationBuilder AddMpmMail(this WebApplicationBuilder builder)
     {
-        builder.Services.AddSingleton<SmtpClient>((sp) =>
+        builder.Services.AddSingleton<SmtpClient>(_ =>
         {
             var smtpUri = new Uri(builder.Configuration.GetConnectionString("maildev")!);
             var smtpClient = new SmtpClient(smtpUri.Host, smtpUri.Port);
@@ -189,7 +183,7 @@ public static class Extensions
     {
         // TODO: separate leagues and cups
         var status500 = Results.Problem("An internal server error occurred", statusCode: 500);
-        Func<Exception, IResult> defaultErrorHandler = err => status500;
+        Func<Exception, IResult> defaultErrorHandler = _ => status500;
         
         app.MapGet("/football/leagues", async ([FromServices] FootballApi api) 
                     => (await api.GetAllFootballLeagues()).Match(Results.Ok, defaultErrorHandler))

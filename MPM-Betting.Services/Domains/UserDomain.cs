@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
@@ -9,7 +8,7 @@ using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
 
-//TODO: Add cancelation tokens
+//TODO: Add cancellation tokens
 
 public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory)
 {
@@ -525,11 +524,11 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
 
     public async Task<MpmResult<BuiltinSeason>> GetCurrentBuiltInSeasonById(int id)
     {
-        //Returns most current, doesnt check if season is active
+        //Returns most current, doesn't check if the season is active
 
         var query = m_DbContext.BuiltinSeasons
             .Where(bis => bis.Id == id).OrderBy(bis => bis.Start);
-        var season = query.FirstOrDefault();
+        var season = await query.FirstOrDefaultAsync();
 
         if (season is null)
         {
@@ -577,7 +576,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         return true;
     }
 
-    public async Task<MpmResult<List<Message>>> GetAllMessagesOfgroup(MpmGroup group)
+    public async Task<MpmResult<List<Message>>> GetAllMessagesOfGroup(MpmGroup group)
     {
         if (m_User is null) return s_NoUserException;
 
@@ -598,7 +597,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         if (m_User is null) return s_NoUserException;
         if (BadWordRegex().IsMatch(text)) return s_BadWordException;
 
-        var uge = m_DbContext.UserGroupEntries.FirstOrDefault(uge => uge.Group == group && uge.MpmUser == m_User);
+        var uge = await m_DbContext.UserGroupEntries.FirstOrDefaultAsync(uge => uge.Group == group && uge.MpmUser == m_User);
         if (uge is null)
             return s_AccessDeniedException;
 
@@ -669,9 +668,9 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         return bet;
     }
 
-    public async Task<MpmResult<Achievement>> CreateAchievement(string title, string description)
+    public Achievement CreateAchievement(string title, string description)
     {
-        Achievement achievement = new Achievement(title, description);
+        var achievement = new Achievement(title, description);
         return achievement;
     }
 

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MPM_Betting.DataModel;
@@ -11,8 +10,7 @@ using MPM_Betting.DataModel.Football;
 namespace MPM_Betting.Services.Data.GameData;
 
 public class GameDataUpdateScheduler(
-    ILogger<GameDataUpdateScheduler> logger, 
-    IServiceProvider serviceProvider,
+    ILogger<GameDataUpdateScheduler> logger,
     FootballApi footballApi,
     IBackgroundTaskQueue gameDataUpdateQueue,
     IDbContextFactory<MpmDbContext> dbContextFactory) 
@@ -27,7 +25,7 @@ public class GameDataUpdateScheduler(
         logger.LogInformation("Timed Hosted Service running");
 
         // When the timer should have no due-time, then do the work once now.
-        await DoWork();
+        await ProcessTrackedEntries();
 
         using PeriodicTimer timer = new(TimeSpan.FromSeconds(5));
 
@@ -36,7 +34,7 @@ public class GameDataUpdateScheduler(
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
                 Console.WriteLine("Tick");
-                await DoWork();
+                await ProcessTrackedEntries();
             }
         }
         catch (OperationCanceledException)
@@ -48,7 +46,7 @@ public class GameDataUpdateScheduler(
     public class FootballApiException : Exception;
     private static readonly FootballApiException s_FootballApiException = new();
     
-    private async Task DoWork()
+    private async Task ProcessTrackedEntries()
     {
         foreach (var entry in FootballGames)
         {
@@ -93,7 +91,7 @@ public class GameDataUpdateScheduler(
                         
                     await db.Games.AddAsync(new Game(
                         $"{result.Value.GameEntry.Score.HomeTeam.Name} vs. {result.Value.GameEntry.Score.AwayTeam.Name}", 
-                        leagueEntity!.Id)
+                        leagueEntity.Id)
                     {
                         SportType = ESportType.Football,
                         ReferenceId = entry.Key,
@@ -109,7 +107,7 @@ public class GameDataUpdateScheduler(
         }
     }
 
-    private static EGameState FootballApiGameStateToEGameState(FootballApi.GameState state)
+    public static EGameState FootballApiGameStateToEGameState(FootballApi.GameState state)
     {
         return state switch
         {

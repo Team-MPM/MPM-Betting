@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace MPM_Betting.DataModel.Betting;
+﻿namespace MPM_Betting.DataModel.Betting;
 
 public class CustomSeason(string name, string description) : Season(name, description)
 {
