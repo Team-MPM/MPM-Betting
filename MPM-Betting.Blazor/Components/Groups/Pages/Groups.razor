@@ -431,7 +431,7 @@
             m_UpdateGroupModel.Name = m_Model.Group.Name;
             m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
 
-            var usersResult = await userDomain.GetGroupUsers(m_Model.Group);
+            var usersResult = await userDomain.GetUsersByGroup(m_Model.Group);
             if (usersResult.IsFaulted) NavigationManager.NavigateTo("/error");
             m_Model.Users = usersResult.Value;
         }

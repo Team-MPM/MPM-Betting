@@ -29,6 +29,11 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<FavoriteSeasons>(builder =>
+        {
+           builder.HasKey(fs => new {fs.UserId, fs.SeasonId});
+        });
+        
         modelBuilder.Entity<Bet>(builder =>
         {
             builder.ToTable(nameof(Bets));

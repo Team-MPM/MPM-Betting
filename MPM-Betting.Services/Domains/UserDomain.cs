@@ -48,9 +48,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
     public class AlreadyExistsException : Exception;
 
     private static readonly AlreadyExistsException s_AlreadyExistsException = new();
-
-    [GeneratedRegex("^[a@][s\\$][s\\$]$\n[a@][s\\$][s\\$]h[o0][l1][e3][s\\$]?\nb[a@][s\\$][t\\+][a@]rd \nb[e3][a@][s\\$][t\\+][i1][a@]?[l1]([i1][t\\+]y)?\nb[e3][a@][s\\$][t\\+][i1][l1][i1][t\\+]y\nb[e3][s\\$][t\\+][i1][a@][l1]([i1][t\\+]y)?\nb[i1][t\\+]ch[s\\$]?\nb[i1][t\\+]ch[e3]r[s\\$]?\nb[i1][t\\+]ch[e3][s\\$]\nb[i1][t\\+]ch[i1]ng?\nb[l1][o0]wj[o0]b[s\\$]?\nc[l1][i1][t\\+]\n^(c|k|ck|q)[o0](c|k|ck|q)[s\\$]?$\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[e3]d \n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[e3]r\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[i1]ng\n(c|k|ck|q)[o0](c|k|ck|q)[s\\$]u(c|k|ck|q)[s\\$]\n^cum[s\\$]?$\ncumm??[e3]r\ncumm?[i1]ngcock\n(c|k|ck|q)um[s\\$]h[o0][t\\+]\n(c|k|ck|q)un[i1][l1][i1]ngu[s\\$]\n(c|k|ck|q)un[i1][l1][l1][i1]ngu[s\\$]\n(c|k|ck|q)unn[i1][l1][i1]ngu[s\\$]\n(c|k|ck|q)un[t\\+][s\\$]?\n(c|k|ck|q)un[t\\+][l1][i1](c|k|ck|q)\n(c|k|ck|q)un[t\\+][l1][i1](c|k|ck|q)[e3]r\n(c|k|ck|q)un[t\\+][l1][i1](c|k|ck|q)[i1]ng\ncyb[e3]r(ph|f)u(c|k|ck|q)\nd[a@]mn\nd[i1]ck\nd[i1][l1]d[o0]\nd[i1][l1]d[o0][s\\$]\nd[i1]n(c|k|ck|q)\nd[i1]n(c|k|ck|q)[s\\$]\n[e3]j[a@]cu[l1]\n(ph|f)[a@]g[s\\$]?\n(ph|f)[a@]gg[i1]ng\n(ph|f)[a@]gg?[o0][t\\+][s\\$]?\n(ph|f)[a@]gg[s\\$]\n(ph|f)[e3][l1][l1]?[a@][t\\+][i1][o0]\n(ph|f)u(c|k|ck|q)\n(ph|f)u(c|k|ck|q)[s\\$]?\ng[a@]ngb[a@]ng[s\\$]?\ng[a@]ngb[a@]ng[e3]d\ng[a@]y\nh[o0]m?m[o0]\nh[o0]rny\nj[a@](c|k|ck|q)\\-?[o0](ph|f)(ph|f)?\nj[e3]rk\\-?[o0](ph|f)(ph|f)?\nj[i1][s\\$z][s\\$z]?m?\n[ck][o0]ndum[s\\$]?\nmast(e|ur)b(8|ait|ate)\nn+[i1]+[gq]+[e3]*r+[s\\$]*\n[o0]rg[a@][s\\$][i1]m[s\\$]?\n[o0]rg[a@][s\\$]m[s\\$]?\np[e3]nn?[i1][s\\$]\np[i1][s\\$][s\\$]\np[i1][s\\$][s\\$][o0](ph|f)(ph|f) \np[o0]rn\np[o0]rn[o0][s\\$]?\np[o0]rn[o0]gr[a@]phy\npr[i1]ck[s\\$]?\npu[s\\$][s\\$][i1][e3][s\\$]\npu[s\\$][s\\$]y[s\\$]?\n[s\\$][e3]x\n[s\\$]h[i1][t\\+][s\\$]?\n[s\\$][l1]u[t\\+][s\\$]?\n[s\\$]mu[t\\+][s\\$]?\n[s\\$]punk[s\\$]?\n[t\\+]w[a@][t\\+][s\\$]?",
-        RegexOptions.IgnoreCase)]
+    
     
     private static readonly Func<MpmDbContext, MpmGroup, MpmUser, Task<UserGroupEntry?>> s_GetUserGroupEntryQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup Group, MpmUser user) =>
@@ -201,7 +199,10 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         return true;
     }
     
-    private 
+    private static readonly Func<MpmDbContext, int, Task<MpmGroup?>> s_GetGroupById =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, int id) =>
+            dbContext.Groups
+                .FirstOrDefault(g => g.Id == id));
     
     public async Task<MpmResult<bool>> UpdateGroupName(MpmGroup group, string name)
     {
@@ -218,8 +219,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
-        //TODO: GetGroupByIdQuery
-        var groupEntry = await s_GetGroupById.Invoke();
+        var groupEntry = await s_GetGroupById.Invoke(dbContext,group.Id);
 
         if (groupEntry is null)
             return s_GroupNotFoundException;
@@ -244,8 +244,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         var uge = await s_GetUserGroupEntryQuery.Invoke(dbContext, group, m_User);
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
-        //TODO: GetGroupByIdQuery
-        var groupEntry = dbContext.Groups.FirstOrDefault(g => g.Id == group.Id);
+        var groupEntry = await s_GetGroupById.Invoke(dbContext,group.Id);
 
         if (groupEntry is null)
             return s_GroupNotFoundException;
@@ -369,12 +368,19 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
     private static readonly Func<MpmDbContext, MpmGroup, Season, Task<SeasonEntry>> s_GetSeasonEntriesByGroupAndSeason =
         EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup group, Season season) =>
             dbContext.SeasonEntries.FirstOrDefault(se => se.Season == season && se.Group == group));
+    private static readonly Func<MpmDbContext, int, Task<Season>> s_GetSeasonById =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, int id) =>
+            dbContext.Seasons
+                .FirstOrDefault(s => s.Id == id));
     
-    public async Task<MpmResult<bool>> AddSeasonToGroup(MpmGroup group, Season season)
+    public async Task<MpmResult<bool>> AddSeasonToGroup(MpmGroup group, int seasonId)
     {
         ArgumentNullException.ThrowIfNull(group);
-        ArgumentNullException.ThrowIfNull(season);
         if (m_User is null) return s_NoUserException;
+        
+        var season = await s_GetSeasonById.Invoke(dbContext, seasonId);
+        if(season is null)
+            return s_SeasonNotFoundException;
 
         var existingSeasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(dbContext, group, season);
         if (existingSeasonEntry is not null)
@@ -385,7 +391,11 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        dbContext.SeasonEntries.Add(new SeasonEntry(season.Name, group, season));
+        dbContext.SeasonEntries.Add(new SeasonEntry()
+        {
+            Group = group,
+            Season = season
+        });
         await dbContext.SaveChangesAsync();
         
         return true;
@@ -411,7 +421,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         return true;
     }
     
-    public async Task<MpmResult<CustomSeason>> CreateCustomSeason(MpmGroup group, string name, string description, DateTime startDate, DateTime endDate)
+    public async Task<MpmResult<CustomSeason>> CreateCustomSeason(MpmGroup group, string name, string description, DateTime startDate, DateTime endDate, ESportType sportType)
     {
         ArgumentNullException.ThrowIfNull(group);
         ArgumentNullException.ThrowIfNull(name);
@@ -442,7 +452,11 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         };
         dbContext.CustomSeasons.Add(customSeason);
         
-        var seasonEntry = new SeasonEntry(name, group, customSeason);
+        var seasonEntry = new SeasonEntry()
+        {
+            Group = group,
+            Season = customSeason
+        };
         dbContext.SeasonEntries.Add(seasonEntry);
         
         await dbContext.SaveChangesAsync();
@@ -552,7 +566,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
             return s_SeasonNotFoundException;
         }
         
-        return query;
+        return season;
     }
     
     public async Task<MpmResult<List<Notification>>> GetAllNotificationOfUser()
@@ -659,8 +673,8 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
             QuoteDraw = 1,
             QuoteAway = 1
         };
-        await m_DbContext.FootballResultBets.AddAsync(bet);
-        await m_DbContext.SaveChangesAsync();
+        await dbContext.FootballResultBets.AddAsync(bet);
+        await dbContext.SaveChangesAsync();
 
         return bet;
     }
@@ -684,16 +698,14 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         if (game.GameState != EGameState.Upcoming) return s_InvalidDateException;
 
 
-        var bet = new ScoreBet()
+        var bet = new ScoreBet(HomeScore, AwayScore)
         {
             UserId = m_User.Id,
             GroupId = group.Id,
             GameId = game.Id,
-            HomeScore = homeScore,
-            AwayScore = awayScore
         };
-        await m_DbContext.FootballScoreBets.AddAsync(bet);
-        await m_DbContext.SaveChangesAsync();
+        await dbContext.FootballScoreBets.AddAsync(bet);
+        await dbContext.SaveChangesAsync();
 
         return bet;
     }
@@ -712,7 +724,7 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
     {
         List<BuiltinSeason> seasons = [];
 
-        await foreach (var season in s_GetAllBuiltinSeasonsQuery.Invoke(m_DbContext))
+        await foreach (var season in s_GetAllBuiltinSeasonsQuery.Invoke(dbContext))
         {
             seasons.Add(season);
         }
@@ -766,5 +778,22 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         _uges.OrderBy(uge => uge.Score);
         
         return _uges.FindIndex(uge => uge.MpmUser == m_User)+1;
+    }
+    private static readonly Func<MpmDbContext, MpmUser, int, Task<UserGroupEntry?>>
+        s_GetGroupByIdWithEntryQuery =
+            EF.CompileAsyncQuery((MpmDbContext dbContext, MpmUser user, int id) =>
+                dbContext.UserGroupEntries
+                    .Where(uge => uge.MpmUser == user && uge.Group.Id == id)
+                    .Include(uge => uge.Group)
+                    .FirstOrDefault());
+    public async Task<MpmResult<(MpmGroup group, UserGroupEntry entry)>> GetGroupByIdWithAccess(int id)
+    {
+        if (m_User is null) return s_NoUserException;
+
+        var result = await s_GetGroupByIdWithEntryQuery.Invoke(dbContext, m_User, id);
+
+        if (result is null) return s_GroupNotFoundException;
+
+        return (result.Group, result);
     }
 }

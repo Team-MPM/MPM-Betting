@@ -8,6 +8,10 @@ public class FavoriteSeasons
     public string UserId { get; set; }
     public BuiltinSeason Season { get; set; }
     public int SeasonId { get; set; }
+    
+    private FavoriteSeasons()
+    {
+    }
 
     public FavoriteSeasons(BuiltinSeason s, MpmUser u)
     {
