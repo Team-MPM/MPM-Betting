@@ -16,6 +16,7 @@ public class UserGroupEntry(string userId, MpmGroup group)
     public MpmGroup Group { get; set; } = group;
 
     public int Score { get; set; } = 0;
+    
     public EGroupRole Role { get; set; } = EGroupRole.Visitor;
 
     [NotMapped]
