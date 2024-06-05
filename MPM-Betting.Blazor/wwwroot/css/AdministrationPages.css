@@ -9,6 +9,10 @@
     padding: 10px;
 }
 
+label {
+    color: white;
+}
+
 .ColorWhite {
     color: white
 }

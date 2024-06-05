@@ -5,9 +5,10 @@
     margin-bottom: 100px;
 }
 
-label {
-    color: black !important; 
+.label-dark {
+    color: black !important;
 }
+
 
 .NavBarList li {
     display: grid;

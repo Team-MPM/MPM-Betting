@@ -363,6 +363,9 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("LastPointRewardClaim")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("LastRedeemed")
                         .HasColumnType("datetime2");
 
