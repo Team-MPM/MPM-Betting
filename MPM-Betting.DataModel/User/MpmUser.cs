@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
-using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.Rewarding;
 
 namespace MPM_Betting.DataModel.User;

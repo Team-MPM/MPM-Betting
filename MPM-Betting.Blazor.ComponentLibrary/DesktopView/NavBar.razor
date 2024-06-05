@@ -6,11 +6,69 @@
 @using MPM_Betting.DataModel.User
 @using Microsoft.AspNetCore.Components.Forms
 @using Blazorise.Icons.FontAwesome
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using MPM_Betting.DataModel
+@using MudBlazor
 @namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using Color = Blazorise.Color
 
 @inject UserManager<MpmUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject IDbContextFactory<MpmDbContext> DbContext
+
+@* Modal *@
+
+@if (reedemable)
+{
+    <Modal @ref="ModalRef" Class="ModalSettings" Closing="OnModalClosing">
+        <ModalContent Centered>
+            <ModalHeader Background="Background.Dark">
+                <ModalTitle TextColor="TextColor.Default">Points Redeemed!</ModalTitle>
+                <CloseButton Clicked="HideModal" TextColor="TextColor.White"/>
+            </ModalHeader>
+            <ModalBody Background="Background.Dark" Class="ModalSettings">
+                <Field>
+                    <div class="PointRedeemModalContent">
+                        <i class="fa-solid fa-gift"></i>
+                        <div>
+                            <Label class="fs-5">You have redeemed <span class="fw-bold">@Points</span> Points!</Label>
+                            
+                        </div>
+                    </div> 
+                </Field>
+            </ModalBody>
+            <ModalFooter Background="Background.Dark">
+                <Button Color="Color.Primary" Clicked="@HideModal">OK</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+else
+{
+    <Modal @ref="ModalRef" Class="ModalSettings" Closing="OnModalClosing">
+        <ModalContent Centered>
+            <ModalHeader Background="Background.Dark">
+                <ModalTitle TextColor="TextColor.Default">Error redeeming points</ModalTitle>
+                <CloseButton TextColor="TextColor.White"/>
+            </ModalHeader>
+            <ModalBody Background="Background.Dark" Class="ModalSettings">
+                <Field>
+                    <Label>Sorry, you can only redeem points once every 24 hours.</Label>
+                   @if (m_UserInstance is not null)
+                    {
+                        <Label>You can redeem your points: <span class="fw-bold"> @m_UserInstance.LastRedeemed.Value.AddHours(24).ToString("dd.MM.yyyy, hh:mm")</span></Label>
+                    }
+                    </Field>
+            </ModalBody>
+            <ModalFooter Background="Background.Dark">
+                <Button Color="Blazorise.Color.Primary" Clicked="HideModal">Close</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+
 
 <div class="NavBar flex flex-row justify-between align-center">
     <div class="nav-left flex flex-row h-full align-center">
@@ -51,6 +109,12 @@
 
 
     <div class="nav-right flex flex-row mr-4">
+        @if (m_UserInstance is not null)
+        {
+            <div class="gift_icon mr-10">
+                <i onclick="@ShowModal" class="fa-solid fa-gift @(m_UserInstance is not null ? CheckIfPointsCanBeRedeemed() ? "icon glow" : "" : "")"></i> 
+            </div>
+        }
         @if (m_UserInstance is null)
         {
             <div>
@@ -83,7 +147,7 @@
                             <AntiforgeryToken/>
                             <input type="hidden" name="ReturnUrl" value=""/>
                             <button type="submit">
-                                <a class="NoHoverUnderline" aria-hidden="true">Logout</a> 
+                                <a class="NoHoverUnderline" aria-hidden="true">Logout</a>
                             </button>
                         </form>
                     </DropdownItem>
@@ -97,6 +161,10 @@
 
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
     MpmUser? m_UserInstance;
+    MpmDbContext m_DbContext;
+    private bool cancelClose;
+    private bool reedemable = false;
+    private int Points { get; set; }
 
     private string m_ImageUrl = "./Images/default-profile-picture.png";
 
@@ -116,8 +184,83 @@
         }
 
         m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_ImageUrl : m_UserInstance?.ProfilePictureUrl!;
-        //m_ImageUrl = "./Images/default-profile-picture.png";
+        m_DbContext = await DbContext.CreateDbContextAsync();
     }
+
+    #region Points
+
+    private Modal modalRef;
+
+    private Modal ModalRef
+    {
+        get => modalRef;
+        set
+        {
+            modalRef = value;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ShowModal()
+    {
+        cancelClose = true;
+        reedemable = CheckIfPointsCanBeRedeemed();
+        if (reedemable)
+        {
+            Points = GetRandomAmountOfPoints();
+            m_UserInstance.Points += Points;
+            m_UserInstance.LastRedeemed = DateTime.Now;
+            m_DbContext.Users.Update(m_UserInstance);
+            await m_DbContext.SaveChangesAsync();
+        }
+
+        await ModalRef.Show();
+    }
+
+    private Task HideModal()
+    {
+        cancelClose = false;
+        Points = 0;
+        return modalRef.Hide();
+    }
+    
+    private Task OnModalClosing( ModalClosingEventArgs e )
+    {
+        // just set Cancel to prevent modal from closing
+        e.Cancel = cancelClose 
+                   || e.CloseReason != CloseReason.UserClosing;
+
+        return Task.CompletedTask;
+    }
+
+    private bool CheckIfPointsCanBeRedeemed() => DateTime.Now.AddHours(-24) > m_UserInstance.LastRedeemed;
+    // private bool CheckIfPointsCanBeRedeemed() => DateTime.Now.AddSeconds(-10) > m_UserInstance.LastRedeemed;
+    // // For testing
+
+    private int GetRandomAmountOfPoints()
+    {
+        int[] pointValues = new []{100,200,300,400,500,600,700,800,900,1000, 5000, 10000, 50000};
+        int[] odds = new[] {5,5,5,10,10,10,5,5,5,5,3,2,1};
+        int random = new Random().Next(0, odds.Sum() + 1);
+        int value = 0;
+        foreach (var odd in odds)
+        {
+            value += odd;
+            if (random <= value)
+            {
+                return pointValues[Array.IndexOf(odds, odd)];
+            }
+        }
+
+        return 1000;
+    }
+
+    #endregion
+    
+    
+    
+    
+    
 
     private string ConvertToLog10(int number)
     {

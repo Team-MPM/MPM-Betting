@@ -49,10 +49,16 @@
 .GroupEntry {
     display: flex;
     justify-content: left;
+    align-items: center;
     margin: 1% 0;
     font-size: 18px;
     padding: 2% 0;
     border-radius: 10px;
+}
+
+.GroupEntryImageBox {
+    display: flex;
+    justify-content: center;
 }
 
 .GroupEntry:hover {

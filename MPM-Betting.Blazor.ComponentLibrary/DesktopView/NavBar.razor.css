@@ -102,3 +102,63 @@
 .NavBarPoints > img {
     height: 25px;
 }
+
+.gift_icon {
+    align-content: center;
+}
+
+.gift_icon  i {
+    font-size: 20px;
+}
+
+.PointRedeemModalContent {
+    display: grid;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    padding: 20px;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    grid-template-columns: 1fr;
+}
+
+.PointRedeemModalContent i {
+    font-size: 30px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+/*icon glow*/
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    border: 2px solid transparent;
+    border-image: linear-gradient(45deg, yellow, yellow);
+    border-image-slice: 1;
+    pointer-events: none; /* So that the border doesn't interfere with clicks */
+    z-index: -1; /* Make sure the border is behind the content */
+}
+
+/* Additional styles for the glowing effect */
+.glow {
+    position: relative;
+    animation: glow 1.5s infinite;
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px yellow;
+    }
+    50% {
+        box-shadow: 0 0 20px yellow;
+    }
+    100% {
+        box-shadow: 0 0 5px yellow;
+    }
+}

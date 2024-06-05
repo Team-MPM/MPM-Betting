@@ -59,12 +59,12 @@
             @* <ValidationSummary class="text-danger" role="alert"/> *@
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.UserName" class="form-control" placeholder="Please choose your username."/>
-                <label for="username" class="form-label">Username</label>
+                <label for="username" class="form-label label-dark">Username</label>
                 <ValidationMessage For="() => Input.UserName" class="text-danger"/>
             </div>
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label for="phone-number" class="form-label">Phone number</label>
+                <label for="phone-number" class="form-label label-dark">Phone number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger"/>
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
