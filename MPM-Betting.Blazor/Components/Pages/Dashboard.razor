@@ -19,7 +19,7 @@
                     <div class="col-11">
                         <ResultHandler Generator="async () => await Api.GetAllFootballLeagues()">
                             <SuccessTemplate>
-                                <Leagues LeagueList="@context"/>
+                                <LeaguesList LeagueList="@context"/>
                             </SuccessTemplate>
                             <ErrorTemplate>
                                 <p>Some custom error handler</p>

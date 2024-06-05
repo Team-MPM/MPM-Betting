@@ -1,7 +1,8 @@
 ﻿@using MPM_Betting.Services.Data
 @namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
+@inject NavigationManager NavigationManager
 
-<div class="Box LeagueBox">
+<div class="Box LeagueBox" onclick="@Redirect">
     <img class="LeagueBoxIcon" src="https://images.fotmob.com/image_resources/logo/leaguelogo/dark/@(league.Id).png" height="40px"/>
     <div>@league.Name</div>
     <img class="LeagueBoxStar" src="./Images/star_empty.png" height="40px"/>
@@ -10,4 +11,9 @@
 @code {
     [Parameter]
     public FootballApi.League league { get; set; }
+
+    public void Redirect()
+    {
+        NavigationManager.NavigateTo("/league/" + league.Id);
+    }
 }

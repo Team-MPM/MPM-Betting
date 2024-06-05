@@ -1,0 +1,67 @@
+﻿/*  /leagues  */
+
+.LeaguesSearch {
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    margin: 20px 0 30px 0;
+    padding: 20px 0;
+    border-radius: 10px;
+    /*background: rgba(55,55,64,1);*/
+    background: rgba(60,60,60,1);
+    width: 100%;
+}
+
+.LeaguesSearch > div {
+    display: flex;
+    justify-content: center;
+}
+
+.LeaguesSearch input {
+    background: rgba(55,55,64,1) !important;
+}
+
+.FoundLeaguesField {
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    margin: 20px 0 30px 0;
+    padding: 20px 0;
+    border-radius: 10px;
+    /*background: rgba(55,55,64,1);*/
+    background: rgba(60,60,60,1);
+    width: 100%;
+}
+
+.FoundLeaguesField h3 {
+    display: flex;
+    justify-content: center;
+}
+
+/*  /league/id  */
+
+.LeagueInfoBox {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    padding:2% 0;
+    background: rgba(55,55,64,1);
+    border-radius: 20px;
+    margin-bottom: 50px;
+    margin-top: 20px;
+}
+
+.LeagueTable {
+    background: rgba(60,60,60,1);
+    border-radius: 20px;
+    margin-bottom: 50px;
+}
+
+.TeamImage {
+    margin-right: 10px;
+    height: 30px;
+}
+
+.ShowAllLeaguesButton {
+    background: #0BBCC7;
+}

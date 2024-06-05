@@ -3,6 +3,8 @@
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
 @using Blazorise
 
+@inject NavigationManager NavigationManager
+
 @* TODO Menu öffnen (vllt) (Julian) *@
 
 <div class="Leagues">
@@ -15,6 +17,10 @@
         <LeagueEntry league="@league"/>
     }
     
+    <div>
+        <Button Clicked="Redirect" Color="Color.Primary" Size="Size.Large" Class="w-100 mt-3">Show all leagues</Button>
+    </div>
+    
     <Divider/>
     
 </div>
@@ -26,8 +32,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        int[] ids = { 73, 47, 78, 55, 42, 54 };
+        int[] ids =  {47, 54, 87, 55, 53, 57, 61, 196, 48, 71};
+        // int[] ids = { 73, 47, 78, 55, 42, 54 };
         TopLeagues = LeagueList.Where(s => ids.Contains(s.Id)).ToList();
+    }
+    
+    public void Redirect()
+    {
+        NavigationManager.NavigateTo("/leagues");
     }
 
 
