@@ -742,10 +742,25 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
                return s_AlreadyExistsException;
 
        dbContext.FavoriteSeasons.Add(new FavoriteSeasons(s, m_User));
-       dbContext.SaveChangesAsync();
+       await dbContext.SaveChangesAsync();
 
        return s;
     }
+    
+    public async Task<MpmResult<int>> AddFootballSeasonToFavourites(int id)
+    {
+        if (m_User == null) return s_NoUserException;
+        
+        await foreach (var fs in s_GetFavoriteSeasonsByUser.Invoke(dbContext, m_User))
+            if (fs.Season.ReferenceId == id && fs.Season.Sport == ESportType.Football)
+                return s_AlreadyExistsException;
+        var season = await dbContext.BuiltinSeasons.FirstOrDefaultAsync(s => s.ReferenceId == id);
+        dbContext.FavoriteSeasons.Add(new FavoriteSeasons(season, m_User));
+        await dbContext.SaveChangesAsync();
+
+        return id;
+    }
+    
     private static readonly Func<MpmDbContext, Season, MpmUser, Task<FavoriteSeasons>> s_GetFavoriteSeasonByUserAndSeason =
         EF.CompileAsyncQuery((MpmDbContext dbContext,Season s, MpmUser user) =>
             dbContext.FavoriteSeasons.FirstOrDefault(fs => fs.Season == s && fs.User == user));

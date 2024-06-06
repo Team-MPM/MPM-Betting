@@ -103,7 +103,7 @@
 
     public void OnTextUpdate()
     {
-        FoundLeagues = AllLeagues.OrderByDescending(s => s.Id).
+        FoundLeagues = AllLeagues.OrderBy(s => s.Id).
             Where(l => l.Name.ToLower().Contains(LeagueText.ToLower()) 
                        && l.Country.ToLower().Contains(CountryText.ToLower())).
             ToList();

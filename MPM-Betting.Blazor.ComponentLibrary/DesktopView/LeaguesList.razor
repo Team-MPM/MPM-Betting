@@ -2,8 +2,10 @@
 @using MPM_Betting.Services.Data
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
 @using Blazorise
+@using MPM_Betting.Services.Domains
 
 @inject NavigationManager NavigationManager
+@inject UserDomain UserDomain
 
 @* TODO Menu öffnen (vllt) (Julian) *@
 
@@ -41,6 +43,7 @@
     {
         NavigationManager.NavigateTo("/leagues");
     }
+    
 
 
 }
