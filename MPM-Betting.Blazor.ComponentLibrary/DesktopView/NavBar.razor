@@ -32,10 +32,18 @@
                 <Field>
                     <div class="PointRedeemModalContent">
                         <i class="fa-solid fa-gift"></i>
-                        <div>
-                            <Label class="fs-5">You have redeemed <span class="fw-bold">@Points</span> Points!</Label>
-                            
-                        </div>
+                        @if (IsFirstLogin)
+                        {
+                            <Label class="fs-6">As a newcomer you have received extra Points! </Label>
+                            <Label class="fs-6">You have redeemed your Bonus worth <span class="fw-bolder">@Points</span> Points!</Label>
+                            <Label class="fs-6">Good luck on your bets!</Label>
+                        }
+                        else
+                        {
+                            <div>
+                                <Label class="fs-5">You have redeemed <span class="fw-bold">@Points</span> Points!</Label>
+                            </div>
+                        }
                     </div> 
                 </Field>
             </ModalBody>
@@ -51,14 +59,14 @@ else
         <ModalContent Centered>
             <ModalHeader Background="Background.Dark">
                 <ModalTitle TextColor="TextColor.Default">Error redeeming points</ModalTitle>
-                <CloseButton TextColor="TextColor.White"/>
+                <CloseButton TextColor="TextColor.White" Clicked="HideModal"/>
             </ModalHeader>
             <ModalBody Background="Background.Dark" Class="ModalSettings">
                 <Field>
                     <Label>Sorry, you can only redeem points once every 24 hours.</Label>
                    @if (m_UserInstance is not null)
                     {
-                        <Label>You can redeem your points: <span class="fw-bold"> @m_UserInstance.LastRedeemed.Value.AddHours(24).ToString("dd.MM.yyyy, hh:mm")</span></Label>
+                        <Label>You can redeem your points: <span class="fw-bold"> @m_UserInstance.LastRedeemed.AddHours(24).ToString("dd.MM.yyyy, hh:mm")</span></Label>
                     }
                     </Field>
             </ModalBody>
@@ -165,6 +173,7 @@ else
     private bool cancelClose;
     private bool reedemable = false;
     private int Points { get; set; }
+    private bool IsFirstLogin = false;
 
     private string m_ImageUrl = "./Images/default-profile-picture.png";
 
@@ -207,7 +216,14 @@ else
         reedemable = CheckIfPointsCanBeRedeemed();
         if (reedemable)
         {
-            Points = GetRandomAmountOfPoints();
+            if (m_UserInstance.LastRedeemed == DateTime.MinValue) 
+            {
+                IsFirstLogin = true;
+                Points = 50000;
+            }
+            else
+                Points = GetRandomAmountOfPoints();
+           
             m_UserInstance.Points += Points;
             m_UserInstance.LastRedeemed = DateTime.Now;
             m_DbContext.Users.Update(m_UserInstance);
@@ -220,6 +236,7 @@ else
     private Task HideModal()
     {
         cancelClose = false;
+        IsFirstLogin = false;
         Points = 0;
         return modalRef.Hide();
     }
@@ -234,7 +251,7 @@ else
     }
 
     private bool CheckIfPointsCanBeRedeemed() => DateTime.Now.AddHours(-24) > m_UserInstance.LastRedeemed;
-    // private bool CheckIfPointsCanBeRedeemed() => DateTime.Now.AddSeconds(-10) > m_UserInstance.LastRedeemed;
+    // private bool CheckIfPointsCanBeRedeemed() => DateTime.Now.AddSeconds(-1) > m_UserInstance.LastRedeemed;
     // // For testing
 
     private int GetRandomAmountOfPoints()
@@ -243,12 +260,12 @@ else
         int[] odds = new[] {5,5,5,10,10,10,5,5,5,5,3,2,1};
         int random = new Random().Next(0, odds.Sum() + 1);
         int value = 0;
-        foreach (var odd in odds)
+        for (int i = 0; i < odds.Length; i++)
         {
-            value += odd;
+            value += odds[i];
             if (random <= value)
             {
-                return pointValues[Array.IndexOf(odds, odd)];
+                return pointValues[i];
             }
         }
 

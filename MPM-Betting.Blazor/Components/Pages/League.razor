@@ -1,0 +1,177 @@
+﻿@page "/league/{Id:int?}"
+@using LanguageExt
+@inject FootballApi Api
+@using MPM_Betting.Services
+@using MPM_Betting.Services.Data
+@using Blazor.ComponentLibrary.DesktopView
+@using Blazorise.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using MPM_Betting.Blazor.Components.Account.Shared
+@using MPM_Betting.DataModel.User
+@using MPM_Betting.Services.Domains
+@using MudBlazor
+
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserDomain UserDomain
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<div class="row">
+    <NavBar/>
+</div>
+
+@if (LeagueEntry is null || LeagueTable.Table.IsNullOrEmpty())
+{
+    <div class="">League not found!</div>
+}
+else
+{
+    <div class="container">
+        <div class="row LeagueInfoBox">
+            <div class="col-1"></div>
+            <div class="col-2">
+                <img class="LeagueBoxIcon" src="https://images.fotmob.com/image_resources/logo/leaguelogo/dark/@(Id).png" height="100px"/>
+            </div>
+            <div class="col-7">
+                <h1>@LeagueEntry?.Name</h1>
+            </div>
+            <div class="col-2">
+                @if (isFavourite)   
+                {
+                    <img onclick="@(() =>RemoveLeagueToFavourites())" class="LeagueBoxStar" src="./Images/star_full.webp" height="40px"/>
+                }
+                else
+                {
+                    <img onclick="@(() =>AddLeagueToFavourites())" class="LeagueBoxStar" src="./Images/star_empty.png" height="40px"/>
+                }
+            </div>
+        </div>
+        <div class="row LeagueTable">
+            <MudSimpleTable Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Style="overflow-x: auto;">
+                <thead>
+                <tr>
+                    @foreach (var h in headings)
+                    {
+                        <th>@h</th>
+                    }
+                </tr>
+                </thead>
+                <tbody>
+                    @foreach (var team in LeagueTable.Table)
+                    {
+                        <tr>
+                            <td>@team.Rank</td>
+                            <td><img class="TeamImage" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(team.Team.Id).png"/> @team.Team.Name</td>
+                            <td>@team.Won</td>
+                            <td>@team.Drawn</td>
+                            <td>@team.Lost</td>
+                            <td>@(team.GoalsFor - team.GoalsAgainst)</td>
+                            <td>@team.Points</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        </div>
+    </div>
+}
+
+@code {
+    // USER
+    
+    
+    //table 
+    private bool dense = false;
+    private bool hover = true;
+    private bool striped = false;
+    private bool bordered = false;
+    
+    string[] headings = { "#", "Team", "W", "D", "L", "+/-" ,"Points" };
+    
+    [Parameter] public int Id { get; set; } = default!;
+    
+    private FootballApi.League? LeagueEntry { get; set; }
+    private FootballApi.LeagueTable LeagueTable { get; set; }
+    
+    private bool isFavourite { get; set; }
+    
+    [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
+    MpmUser? m_UserInstance;
+
+    protected async override Task OnInitializedAsync()
+    {
+        // user
+        
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+        {
+            m_UserInstance = User.Payload;
+            UserDomain.SetUser(m_UserInstance);
+            CheckIfFavourite();
+        }
+        
+        
+        var response = await Api.GetAllFootballLeagues();
+        if(response.IsSuccess)
+        {
+            LeagueEntry = response.Value.First(l => l.Id == Id);
+        }
+
+        if (LeagueEntry is not null)
+        {
+            var result = await Api.GetLeagueTable(LeagueEntry.Value.Id,null );
+            if (result.IsSuccess)
+            {
+                LeagueTable = result.Value!;
+            }
+        }
+    }
+
+    private void CheckIfFavourite()
+    {
+        var ints = UserDomain.GetFavouriteLeaguesForUser();
+        isFavourite = ints.Contains(Id);
+    }
+    
+    protected async override Task OnParametersSetAsync()
+    {
+        var response = Api.GetAllFootballLeagues();
+        if(response.Result.IsSuccess)
+        {
+            LeagueEntry = response.Result.Value.First(l => l.Id == Id);
+        }
+    }
+    
+    private void RedirectToLogin()
+    {
+        NavigationManager.NavigateTo("/account/login");
+    }
+    
+    private async Task AddLeagueToFavourites()
+    {
+        if (m_UserInstance is null)
+        {
+            RedirectToLogin();
+            return;
+        }
+        await UserDomain.AddLeagueToFavourites(Id);
+        CheckIfFavourite();
+    }
+    
+    private async Task RemoveLeagueToFavourites()
+    {
+        if (m_UserInstance is null)
+        {
+            RedirectToLogin();
+            return;
+        }
+        await UserDomain.RemoveLeagueFromFavourites(Id);
+        CheckIfFavourite();
+    }
+
+}

@@ -3,12 +3,19 @@
 @using LanguageExt.ClassInstances.Const
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Mvc.ApiExplorer
+@using Microsoft.EntityFrameworkCore
 @using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel
 @using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.Football
 @using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Data
+@using MPM_Betting.Services.Domains
 @inject FootballApi Api
 @inject NavigationManager NavigationManager
+@* @inject IDbContextFactory<MpmDbContext> dbContextFactory *@
+@inject UserDomain UserDomain
+
 @attribute [StreamRendering]
 @attribute [Authorize]
 @rendermode InteractiveServer
@@ -193,6 +200,7 @@ else
 @code {
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? UserTask { get; set; }
     MpmUser? User;
+    MpmDbContext dbContext;
 
     private bool loaded;
     private bool expiredMatch;
@@ -219,6 +227,7 @@ else
     
     [Parameter] public List<FootballApi.League> Leagues { get; set; }
     public List<FootballApi.League>? TopLeagues { get; set; }
+    public List<FootballApi.League>? FavouriteLeagues { get; set; }
 
     public Dictionary<int, List<FootballApi.GameEntry>>? GameEntries { get; set; }
     public Dictionary<int, List<FootballApi.GameEntry>>? AllGameEntries { get; set; }
@@ -232,26 +241,34 @@ else
         {
             selectedDate = value;
             StateHasChanged();
-            RefreshMatches();
+            if(AllGameEntries is not null)
+                RefreshMatches();
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
-
-
-        // int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 }; // Old Ligues
-        int[] ids = { 47,54,87,53,55,61,57 };
+        // int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 }; // Old Leagues
+        int[] ids =  {47, 54, 87, 55, 53, 57, 61, 196, 48, 71};
+        // int[] ids = { 47,54,87,53,55,61,57 };
         TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).OrderBy(s => s.Id).ToList();
-        await RequestFillMatches();
         ChosenTeam = BetType.None;
         if (UserTask is null)
             return;
         
         await UserTask.SyncEvent.Task;
-        
+
         if (UserTask.Payload is not null)
-            User = UserTask.Payload;    
+        {
+            User = UserTask.Payload;
+            UserDomain.SetUser(User);
+            var ints = UserDomain.GetFavouriteLeaguesForUser();
+            FavouriteLeagues = Leagues.Where(s => ints.Contains(s.Id)).ToList();
+            TopLeagues = TopLeagues.Union(FavouriteLeagues).ToList();
+            TopLeagues = TopLeagues.OrderByDescending(s => FavouriteLeagues.Contains(s)).ToList();
+        }
+        
+        await RequestFillMatches();
     }
 
     private async Task RequestFillMatches()
@@ -310,13 +327,13 @@ else
             NavigationManager.NavigateTo("/account/login");
         }
 
-        if (CheckIfMatchExpired(match))
-        {
-            ExpiredMatch = true;
-            await ShowModal();
-            await ShowModal();
-            return;
-        }
+        // if (CheckIfMatchExpired(match)) //TODO remember to enabled this later
+        // {
+        //     ExpiredMatch = true;
+        //     await ShowModal();
+        //     await ShowModal();
+        //     return;
+        // }
         
         SelectedTeams = new Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries>(new Tuple<FootballApi.Team, FootballApi.Team>(hometeam, awayteam), entry);
         ChosenTeam = type;
@@ -380,7 +397,8 @@ else
 
     private Task HideModal()
     {
-        ExpiredMatch = ExpiredMatch ? false : ExpiredMatch;
+        // ExpiredMatch = ExpiredMatch ? false : ExpiredMatch; this is an atrifact, leave it here c:
+        ExpiredMatch = false;
         return modalRef.Hide();
     }
 
@@ -417,7 +435,9 @@ else
 
         ModalErrorMessage = null;
         HideModal();
-
+        
+            
+        
         //TODO AddBet
     }
     

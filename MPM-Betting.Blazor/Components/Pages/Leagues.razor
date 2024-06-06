@@ -1,0 +1,116 @@
+﻿@page "/Leagues"
+@using MPM_Betting.Services.Data
+@using OneOf.Types
+
+@inject FootballApi Api
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+
+
+<div class="row">
+    <NavBar/>
+</div>
+
+<div class="container">
+    <div class="row LeaguesSearch">
+        <div class="col-12">
+            <h2>Search for a league</h2>
+        </div>
+        <div class="col-7">
+            <MudTextField Immediate="true" @bind-Value="@LeagueText" HelperText="Enter the name of a league" Label="League" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" />
+        </div>
+        <div class="col-5">
+            <MudTextField Immediate="true" @bind-Value="@CountryText" HelperText="Enter the country the league is in" Label="Country" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" />
+        </div>
+    </div>
+    
+    <div class="row FoundLeaguesField">
+        @if (FoundLeagues is not null)
+        {
+            @if (FoundLeagues.Count < 25)
+            {
+                <div class="col-12">
+                    <MudSimpleTable Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Style="overflow-x: auto;">
+                        <tbody>
+                        @foreach (var league in FoundLeagues)
+                        {
+                        <tr onclick="@(() => Redirect(league.Id))">
+                            @* <td>@team.Rank</td> *@
+                            <td><img class="TeamImage" src="https://images.fotmob.com/image_resources/logo/leaguelogo/dark/@(league.Id).png"/> @league.Name</td>
+                        </tr>
+                        }
+                        </tbody>
+                    </MudSimpleTable>
+                </div>
+            }
+            else
+            {
+                <div class="col-12">
+                    <h3>Too many results, try being a bit more specific</h3>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    //Table 
+    
+    private bool dense = false;
+    private bool hover = true;
+    private bool striped = false;
+    private bool bordered = false;
+    
+    
+    
+    string leagueText = "";
+    string countryText = "";
+    
+    public List<FootballApi.League> AllLeagues { get; set; }
+    public List<FootballApi.League> FoundLeagues { get; set; }
+
+    string LeagueText
+    {
+        get => leagueText;
+        set
+        {
+            leagueText = value;
+            OnTextUpdate();
+        }
+    }
+    string CountryText
+    {
+        get => countryText;
+        set
+        {
+            countryText = value;
+            OnTextUpdate();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Api.GetAllFootballLeagues();
+        if (result.IsSuccess)
+        {
+            AllLeagues = result.Value;
+        }
+        OnTextUpdate();
+    }
+
+    public void OnTextUpdate()
+    {
+        FoundLeagues = AllLeagues.OrderBy(s => s.Id).
+            Where(l => l.Name.ToLower().Contains(LeagueText.ToLower()) 
+                       && l.Country.ToLower().Contains(CountryText.ToLower())).
+            ToList();
+    }
+    
+    public void Redirect(int id)
+    {
+        NavigationManager.NavigateTo("/league/" + id);
+    }
+}

@@ -8,6 +8,7 @@ using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.Football;
 using MPM_Betting.DataModel.Rewarding;
 using MPM_Betting.DataModel.User;
+using MPM_Betting.Services.Data;
 
 namespace MPM_Betting.Services.Domains;
 
@@ -731,7 +732,32 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
 
         return seasons;
     }
+
+    public async Task AddLeagueToFavourites(int Id)
+    {
+        if (m_User is null)
+            throw s_NoUserException;
+        
+        dbContext.UserFavouriteSeasons.Add(new UserHasFouvoriteSeasons() {UserId = m_User.Id, LeaueeId = Id});
+        await dbContext.SaveChangesAsync();
+    }
     
+    public async Task RemoveLeagueFromFavourites(int Id)
+    {
+        if (m_User is null)
+            throw s_NoUserException;
+        
+        if(dbContext.UserFavouriteSeasons.FirstOrDefault(s => s.User == m_User && s.LeaueeId == Id) is null)
+            throw s_SeasonNotFoundException;
+
+        dbContext.UserFavouriteSeasons.Remove(
+            dbContext.UserFavouriteSeasons.First(s => s.User == m_User && s.LeaueeId == Id));
+        await dbContext.SaveChangesAsync();
+    }
+
+    public List<int> GetFavouriteLeaguesForUser() => dbContext.UserFavouriteSeasons.Where(s => s.User == m_User).Select(s => s.LeaueeId).ToList();
+
+
     public async Task<MpmResult<BuiltinSeason>> AddSeasonToFavorites(BuiltinSeason s)
     {
         ArgumentNullException.ThrowIfNull(s);

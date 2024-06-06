@@ -4,6 +4,7 @@ using MPM_Betting.DataModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    partial class MpmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240606081629_favSeason")]
+    partial class favSeason
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -508,7 +511,7 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<int>("LeaueeId")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "LeaueeId");
+                    b.HasKey("UserId");
 
                     b.ToTable("UserFavouriteSeasons");
                 });
