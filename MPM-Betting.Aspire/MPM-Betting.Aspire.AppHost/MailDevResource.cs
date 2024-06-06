@@ -4,8 +4,8 @@
 
 public class MailDevResource(string name) : ContainerResource(name), IResourceWithConnectionString
 {
-    private EndpointReference? _smtpReference;
-    private EndpointReference SmtpEndpoint => _smtpReference ??= new EndpointReference(this, "smtp");
+    private EndpointReference? m_SmtpReference;
+    private EndpointReference SmtpEndpoint => m_SmtpReference ??= new EndpointReference(this, "smtp");
     
     public ReferenceExpression ConnectionStringExpression => ReferenceExpression.Create(
         $"smtp://{SmtpEndpoint.Property(EndpointProperty.Host)}:{SmtpEndpoint.Property(EndpointProperty.Port)}"

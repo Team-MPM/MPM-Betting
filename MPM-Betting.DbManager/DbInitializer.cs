@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Globalization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
@@ -9,8 +7,6 @@ using MPM_Betting.DataModel.Rewarding;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services;
 using MPM_Betting.Services.Data;
-using MPM_Betting.Services.Domains;
-using StackExchange.Redis;
 
 namespace MPM_Betting.DbManager;
 
@@ -26,12 +22,12 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
     private readonly ActivitySource m_ActivitySource = new(ActivitySourceName);
 
     //private UserDomain m_UserDomain = null!;
-    private MpmDbContext m_DbContext = null!;
+    private MpmDbContext dbContext = null!;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
-        m_DbContext = scope.ServiceProvider.GetRequiredService<MpmDbContext>();
+        dbContext = scope.ServiceProvider.GetRequiredService<MpmDbContext>();
         //m_UserDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
         
         await InitializeDatabaseAsync(cancellationToken);
@@ -43,8 +39,8 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
 
         var sw = Stopwatch.StartNew();
 
-        var strategy = m_DbContext.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(m_DbContext.Database.MigrateAsync, cancellationToken);
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(dbContext.Database.MigrateAsync, cancellationToken);
 
         await SeedAsync(cancellationToken);
 
@@ -64,7 +60,8 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
             //await SeedTestGroups();
         }
 
-        await m_DbContext.SaveChangesAsync(cancellationToken);
+        //await SeedAchievments(dbContext);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task SeedAchievements()
@@ -72,7 +69,7 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
         var achievements = new List<MpmResult<Achievement>>
         {
             //await m_UserDomain.CreateAchievement("First Steps", "Place your first bet"),
-            //await m_UserDomain.CreateAchievement("Victory Royale", "Win your first bet"),
+            //await m_UserDomain.CreateAchievement("Victory Royal", "Win your first bet"),
             //await m_UserDomain.CreateAchievement("Womp Womp", "Lose your first bet"),
             //await m_UserDomain.CreateAchievement("Getting Started", "Place 10 Bets"),
             //await m_UserDomain.CreateAchievement("High Roller", "Place 100 Bets")
@@ -82,7 +79,7 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
     }
     private async Task SeedTestGroups()
     {
-        if(m_DbContext.Groups.Count() < 200)
+        if(dbContext.Groups.Count() < 200)
            return; 
 
         var testGroups = new List<MpmResult<MpmGroup>>();
@@ -111,7 +108,7 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
 
     private async Task SeedBuiltinSeasons(CancellationToken cancellationToken)
     {
-        if (m_DbContext.BuiltinSeasons.Count() > 2000)
+        if (dbContext.BuiltinSeasons.Count() > 2000)
             return;
         
         var result = await footballApi.GetAllFootballLeagues();
@@ -128,13 +125,32 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
                 seasonResult.Wait(cancellationToken);
                 seasonResult.Result.IfSuc(seasons =>
                 {
-                    foreach (var season in seasons.Select(s => new BuiltinSeason(league.Name, league.Name)
+                    foreach (var season in seasons.Select(s =>
+                             {
+                                 try
+                                 {
+                                     var x = new BuiltinSeason(league.Name, league.Name)
+                                     {
+                                         Sport = ESportType.Football,
+                                         ReferenceId = league.Id,
+                                         Start = new DateTime(int.Parse(s.Split('/')[0]), 1, 1),
+                                         End = new DateTime(int.Parse(s.Split('/')[1]), 1, 1)
+                                     };
+
+                                     return x;
+                                 }
+                                 catch
+                                 {
+                                     logger.LogInformation(
+                                         "SeedBuiltinSeasons encountered {Message} at league {LeagueId}", "Invalid season",
+                                         league.Id);
+                                     return null;
+                                 }
+                             }))
                     {
-                        Sport = ESportType.Football,
-                        ReferenceId = league.Id,
-                        Start = new DateTime(int.Parse(s.Split('/')[0]), 1, 1),
-                        End = new DateTime(int.Parse(s.Split('/')[1]), 1, 1)
-                    })) allSeasons.Add(season);
+                        if (season is not null)
+                            allSeasons.Add(season);
+                    }
                 });
             }
             catch (Exception e)
@@ -143,6 +159,6 @@ internal class DbInitializer(IWebHostEnvironment env, IServiceProvider servicePr
             }
         });
 
-        await m_DbContext.BuiltinSeasons.AddRangeAsync(allSeasons, cancellationToken);
+        await dbContext.BuiltinSeasons.AddRangeAsync(allSeasons, cancellationToken);
     }
 }

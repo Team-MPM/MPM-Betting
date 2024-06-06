@@ -21,6 +21,7 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<AchievementEntry> AchievementEntries { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<FavoriteSeasons> FavoriteSeasons { get; set; }
     
     public DbSet<Bet> Bets { get; set; } = null!;
     public DbSet<Football.ResultBet> FootballResultBets { get; set; } = null!;
@@ -28,6 +29,11 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<FavoriteSeasons>(builder =>
+        {
+           builder.HasKey(fs => new {fs.UserId, fs.SeasonId});
+        });
+        
         modelBuilder.Entity<Bet>(builder =>
         {
             builder.ToTable(nameof(Bets));
@@ -59,7 +65,24 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
                 .WithOne(uge => uge.Group)
                 .OnDelete(DeleteBehavior.NoAction);
         });
+        
+        modelBuilder.Entity<Bet>(builder =>
+        {
+            builder
+                .HasOne(b => b.Group)
+                .WithMany(g => g.AllBets)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
 
+        modelBuilder.Entity<CustomSeasonEntry>(builder =>
+        {
+            builder
+                .HasOne(cse => cse.Season)
+                .WithMany(s => s.Entries)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        
         modelBuilder.Entity<ScoreEntry>(builder =>
         {
             builder

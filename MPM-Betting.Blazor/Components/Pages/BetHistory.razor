@@ -1,0 +1,28 @@
+﻿@page "/BetHistory"
+@using Blazorise.Extensions
+@using Microsoft.AspNetCore.Authorization
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.User
+@attribute [Authorize]
+
+<h3>BetHistory</h3>
+
+
+
+@code {
+    [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
+    MpmUser? m_UserInstance;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+        {
+            m_UserInstance = User.Payload;
+        }
+        else
+        {
+            return;
+        }
+    }
+}
