@@ -2,10 +2,17 @@
 @using MPM_Betting.Services.Data
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
 @using Blazorise
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Domains
 
 @inject NavigationManager NavigationManager
 @inject UserDomain UserDomain
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 
 @* TODO Menu öffnen (vllt) (Julian) *@
 
@@ -13,10 +20,16 @@
     <h2 class="pt-3 fw-bold">Top Leagues</h2>
 
     <div class="line"></div>
-
+    @if (m_UserInstance is not null)
+    {
+        @foreach (var league in FavouriteLists.Count() > 10 ? FavouriteLists.OrderBy(s => s.Id).Take(10) : FavouriteLists)
+        {
+            <LeagueEntry league="@league" List="@this"/>
+        }
+    }
     @foreach (var league in TopLeagues)
     {
-        <LeagueEntry league="@league"/>
+        <LeagueEntry league="@league" List="@this"/>
     }
     
     <div>
@@ -31,18 +44,43 @@
     [Parameter]
     public List<FootballApi.League>? LeagueList { get; set; }
     public List<FootballApi.League>? TopLeagues { get; set; }
+    public List<FootballApi.League>? FavouriteLists { get; set; }
+    
+    [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
+    MpmUser? m_UserInstance;
 
     protected override async Task OnInitializedAsync()
     {
         int[] ids =  {47, 54, 87, 55, 53, 57, 61, 196, 48, 71};
         // int[] ids = { 73, 47, 78, 55, 42, 54 };
         TopLeagues = LeagueList.Where(s => ids.Contains(s.Id)).ToList();
+        
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+        {
+            m_UserInstance = User.Payload;
+            UserDomain.SetUser(m_UserInstance);
+            FavouriteLists = UpdateFavouriteLeagues();
+            TopLeagues = TopLeagues.Where(s => !FavouriteLists.Contains(s)).ToList();
+            if (TopLeagues.Count() + FavouriteLists.Count() > 10)
+            {
+                TopLeagues = TopLeagues.Take(10 - FavouriteLists.Count()).ToList();
+            }
+        }
+        
     }
     
     public void Redirect()
     {
         NavigationManager.NavigateTo("/leagues");
     }
+    
+    public List<FootballApi.League> UpdateFavouriteLeagues()
+    {
+        var intList = UserDomain.GetFavouriteLeaguesForUser();
+        return LeagueList.Where(s => intList.Contains(s.Id)).ToList();
+    }
+
     
 
 

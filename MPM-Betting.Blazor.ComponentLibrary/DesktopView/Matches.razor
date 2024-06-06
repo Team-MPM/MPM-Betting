@@ -227,6 +227,7 @@ else
     
     [Parameter] public List<FootballApi.League> Leagues { get; set; }
     public List<FootballApi.League>? TopLeagues { get; set; }
+    public List<FootballApi.League>? FavouriteLeagues { get; set; }
 
     public Dictionary<int, List<FootballApi.GameEntry>>? GameEntries { get; set; }
     public Dictionary<int, List<FootballApi.GameEntry>>? AllGameEntries { get; set; }
@@ -240,26 +241,34 @@ else
         {
             selectedDate = value;
             StateHasChanged();
-            RefreshMatches();
+            if(AllGameEntries is not null)
+                RefreshMatches();
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
-        // dbContext = await dbContextFactory.CreateDbContextAsync();
         // int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 }; // Old Leagues
         int[] ids =  {47, 54, 87, 55, 53, 57, 61, 196, 48, 71};
         // int[] ids = { 47,54,87,53,55,61,57 };
         TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).OrderBy(s => s.Id).ToList();
-        await RequestFillMatches();
         ChosenTeam = BetType.None;
         if (UserTask is null)
             return;
         
         await UserTask.SyncEvent.Task;
-        
+
         if (UserTask.Payload is not null)
-            User = UserTask.Payload;    
+        {
+            User = UserTask.Payload;
+            UserDomain.SetUser(User);
+            var ints = UserDomain.GetFavouriteLeaguesForUser();
+            FavouriteLeagues = Leagues.Where(s => ints.Contains(s.Id)).ToList();
+            TopLeagues = TopLeagues.Union(FavouriteLeagues).ToList();
+            TopLeagues = TopLeagues.OrderByDescending(s => FavouriteLeagues.Contains(s)).ToList();
+        }
+        
+        await RequestFillMatches();
     }
 
     private async Task RequestFillMatches()

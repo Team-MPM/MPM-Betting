@@ -1,14 +1,10 @@
 ﻿@page "/Dashboard"
 @rendermode InteractiveServer
 @attribute [StreamRendering]
-@using Google.Protobuf.WellKnownTypes
-@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.Services.Data
 @inject FootballApi Api
-@using Blazorise
-@using Blazorise.SpinKit
-@using MPM_Betting.Services
+
 <PageTitle>Home</PageTitle>
 
 <div id="View">
@@ -45,12 +41,9 @@
 </div>
 
 @code {
-
-    private MpmResult<List<FootballApi.League>>? m_LeaguesList;
-
     protected override async Task OnInitializedAsync()
     {
-        m_LeaguesList = await Api.GetAllFootballLeagues();
+        
     }
     
     
