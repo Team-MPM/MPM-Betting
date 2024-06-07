@@ -683,6 +683,36 @@ public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory
         EF.CompileAsyncQuery((MpmDbContext dbContext, Game game, MpmUser user) =>
             dbContext.FootballScoreBets
                 .FirstOrDefault(b => b.Game == game && b.User == user));
+
+    public async Task<MpmResult<ScoreBet>> AddBet(FootballApi.GameEntry game, int points, int homeScore, int awayScore, double quote)
+    {
+        if(m_User is null) return s_NoUserException;
+        if(homeScore < 0 || awayScore < 0) return s_InvalidBetParameter;
+        Bet? result = dbContext.FootballScoreBets.FirstOrDefault(s => s.UserId == m_User.Id &&  s.MatchId == game.Id);
+        if(result is not null) return s_AlreadyExistsException;
+        
+        ScoreBet bet = new ScoreBet(homeScore, awayScore)
+        {
+            UserId = m_User.Id,
+            MatchId = game.Id,
+            Points = points,
+            Quote = quote
+        };
+        
+        dbContext.Bets.Add(bet);
+        m_User.Points -= points;
+        dbContext.Users.Update(m_User);
+        await dbContext.SaveChangesAsync();
+        
+        return bet;
+    }
+
+    public async Task<MpmResult<Bet>> AddGroupBet()
+    {
+        //TODO
+        return default;
+    }
+    
     public async Task<MpmResult<Bet>> CreateFootballScoreBet(MpmGroup group, Game game, int HomeScore, int AwayScore)
     {
         ArgumentNullException.ThrowIfNull(group);

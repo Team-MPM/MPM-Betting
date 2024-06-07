@@ -120,6 +120,11 @@ else
         if(response.IsSuccess)
         {
             LeagueEntry = response.Value.First(l => l.Id == Id);
+            if (LeagueEntry is null)
+            {
+                NavigationManager.NavigateTo("/account/error");
+                return;
+            }
         }
 
         if (LeagueEntry is not null)

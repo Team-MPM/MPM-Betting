@@ -48,7 +48,7 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<bool>("Completed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("GameId")
+                    b.Property<int?>("GameId")
                         .HasColumnType("int");
 
                     b.Property<int?>("GroupId")
@@ -675,6 +675,15 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<int>("HomeScore")
                         .HasColumnType("int");
 
+                    b.Property<int>("MatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Quote")
+                        .HasColumnType("float");
+
                     b.ToTable("FootballScoreBets", (string)null);
                 });
 
@@ -714,9 +723,7 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.Game", "Game")
                         .WithMany("Bets")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GameId");
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
                         .WithMany("AllBets")

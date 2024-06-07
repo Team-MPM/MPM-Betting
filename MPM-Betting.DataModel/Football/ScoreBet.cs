@@ -6,6 +6,12 @@ public class ScoreBet: Bet
 {
     public int HomeScore { get; set; }
     public int AwayScore { get; set; }
+    
+    public int Points { get; set; }
+    
+    public int MatchId { get; set; }
+    
+    public double Quote { get; set; }
 
     public ScoreBet(int homeScore, int awayScore)
     {
