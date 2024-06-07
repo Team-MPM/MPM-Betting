@@ -21,42 +21,31 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<AchievementEntry> AchievementEntries { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-    public DbSet<FavoriteSeasons> FavoriteSeasons { get; set; }
-    public DbSet<UserHasFouvoriteSeasons> UserFavouriteSeasons { get; set; }
+    public DbSet<FavouriteFootballLeague> UserFavouriteSeasons { get; set; }
     
     public DbSet<Bet> Bets { get; set; } = null!;
-    public DbSet<Football.ResultBet> FootballResultBets { get; set; } = null!;
-    public DbSet<Football.ScoreBet> FootballScoreBets { get; set; } = null!;
-    
+    public DbSet<Football.GameBet> FootballResultBets { get; set; } = null!;
+  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<FavoriteSeasons>(builder =>
+        modelBuilder.Entity<FavouriteFootballLeague>(builder =>
         {
-           builder.HasKey(fs => new {fs.UserId, fs.SeasonId});
+            builder.HasKey(s => new { s.UserId, LeaueeId = s.LeagueId });
+            builder
+                .HasOne<MpmUser>(s => s.User)
+                .WithMany(u => u.FavouriteFootballLeagues)
+                .HasForeignKey(s => s.UserId);
         });
 
-        modelBuilder.Entity<UserHasFouvoriteSeasons>()
-            .HasKey(s =>  new { s.UserId, s.LeaueeId });
-
-        modelBuilder.Entity<UserHasFouvoriteSeasons>()
-            .HasOne<MpmUser>(s => s.User)
-            .WithMany()
-            .HasForeignKey(s => s.UserId);
-        
+       
         modelBuilder.Entity<Bet>(builder =>
         {
             builder.ToTable(nameof(Bets));
         });
         
-        modelBuilder.Entity<Football.ResultBet>(builder =>
+        modelBuilder.Entity<Football.GameBet>(builder =>
         {
             builder.ToTable(nameof(FootballResultBets));
-            builder.HasBaseType<Bet>();
-        });
-        
-        modelBuilder.Entity<Football.ScoreBet>(builder =>
-        {
-            builder.ToTable(nameof(FootballScoreBets));
             builder.HasBaseType<Bet>();
         });
         

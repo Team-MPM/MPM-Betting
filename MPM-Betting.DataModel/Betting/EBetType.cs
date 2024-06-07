@@ -3,6 +3,5 @@
 public enum EBetType
 {
     None = 0,
-    FootballResult,
-    FootballScore,
+    FootballGame,
 }

@@ -29,7 +29,7 @@ public partial class UserDomain
     {
         if (m_User is null) return s_NoUserException;
         
-        await foreach(var notification in GetUnreadNotifications.Invoke(m_DbContext,m_User))
+        await foreach(var notification in s_GetUnreadNotifications.Invoke(m_DbContext,m_User))
         {
             notification.IsRead = true;
         }

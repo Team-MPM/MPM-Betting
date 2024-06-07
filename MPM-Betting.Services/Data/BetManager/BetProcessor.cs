@@ -74,7 +74,7 @@ public class BetProcessor(
             var home = gameData.GameEntry.Score.HomeScore;
             var away = gameData.GameEntry.Score.AwayScore;
 
-            var quote = 0;
+            var quote = bet.Quote;
                 
             if (home == away)
             {
@@ -83,7 +83,6 @@ public class BetProcessor(
                 {
                     bet.Hit = true;
                     bet.Completed = true;
-                    quote = bet.QuoteDraw;
                 }
             }
             else if (home < away)
@@ -93,7 +92,6 @@ public class BetProcessor(
                 {
                     bet.Hit = true;
                     bet.Completed = true;
-                    quote = bet.QuoteAway;
                 }
             }
             else
@@ -103,7 +101,6 @@ public class BetProcessor(
                 {
                     bet.Hit = true;
                     bet.Completed = true;
-                    quote = bet.QuoteHome;
                 }
             }
 
@@ -121,12 +118,12 @@ public class BetProcessor(
                     return;
                 }
                     
-                uge.Score += 1 + 7 * quote; // TODO quotes
+                uge.Score += (int)(bet.Points * quote);
             }
             else
             {
                 // Global bet
-                bet.User.Points += 1 + 7 * quote; // TODO quotes
+                bet.User.Points += (int)(bet.Points * quote);
             }
                 
             bet.Processed = true;
