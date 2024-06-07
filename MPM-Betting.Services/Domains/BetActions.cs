@@ -45,5 +45,42 @@ public partial class UserDomain
         return bets;
     }
     
+    public async Task<MpmResult<List<Bet>>> GetAllFootballGameBets()
+    {
+        var allBets = new List<Bet>();
+        await foreach (var bet in s_GetAllFootballGameBetsQuery(m_DbContext))
+            allBets.Add(bet);
+        
+        return allBets;
+    }
+
+    public async Task<MpmResult<List<Bet>>> GetAllBetsFootballGameForUser()
+    {
+        if (m_User is null)
+            throw s_NoUserException;
+        
+        var bets = new List<Bet>();
+        await foreach (var bet in s_GetAllFootballGameBetsForUserQuery(m_DbContext, m_User))
+            bets.Add(bet);
+        
+        return bets;
+    }
     
+    public async Task<MpmResult<List<Bet>>> GetAllFootballGameBetsForGroup(int groupId)
+    {
+        var bets = new List<Bet>();
+        await foreach (var bet in s_GetAllFootballGameBetsForGroupQuery(m_DbContext, groupId))
+            bets.Add(bet);
+        
+        return bets;
+    }
+    
+    public async Task<MpmResult<List<Bet>>> GetAllFootballGameBetsForGame(int gameId)
+    {
+        var bets = new List<Bet>();
+        await foreach (var bet in s_GetAllFootballGameBetsForGameQuery(m_DbContext, gameId))
+            bets.Add(bet);
+        
+        return bets;
+    }
 }

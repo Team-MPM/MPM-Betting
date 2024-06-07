@@ -122,8 +122,25 @@ public partial class UserDomain
             dbContext.Bets
                 .Where(b => b.GameId == gameId));
     
-    private static readonly Func<MpmDbContext,IAsyncEnumerable<Bet>> s_GetAllBetsQuery =
+    private static readonly Func<MpmDbContext,IAsyncEnumerable<Bet>> s_GetAllFootballGameBetsQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext) => dbContext.Bets);
     
+    private static readonly Func<MpmDbContext,MpmUser,IAsyncEnumerable<Bet>> s_GetAllFootballGameBetsForUserQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, MpmUser user) =>
+            dbContext.Bets
+                .Where(b => b.User == user));
+    
+    private static readonly Func<MpmDbContext,int,IAsyncEnumerable<Bet>> s_GetAllFootballGameBetsForGroupQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, int groupId) =>
+            dbContext.Bets
+                .Where(b => b.GroupId == groupId));
+    
+    private static readonly Func<MpmDbContext,int,IAsyncEnumerable<Bet>> s_GetAllFootballGameBetsForGameQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, int gameId) =>
+            dbContext.Bets
+                .Where(b => b.GameId == gameId));
+    
+    private static readonly Func<MpmDbContext,IAsyncEnumerable<Bet>> s_GetAllBetsQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext) => dbContext.Bets);
     
 }
