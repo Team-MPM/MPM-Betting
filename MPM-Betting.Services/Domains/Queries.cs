@@ -136,22 +136,29 @@ public partial class UserDomain
     
     
     private static readonly Func<MpmDbContext,IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsQuery =
-        EF.CompileAsyncQuery((MpmDbContext dbContext) => dbContext.FootballResultBets);
+        EF.CompileAsyncQuery((MpmDbContext dbContext) => dbContext.FootballGameBets);
     
     private static readonly Func<MpmDbContext,MpmUser,IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsForUserQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext, MpmUser user) =>
-            dbContext.FootballResultBets
+            dbContext.FootballGameBets
                 .Where(b => b.User == user));
     
     private static readonly Func<MpmDbContext,int,IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsForGroupQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext, int groupId) =>
-            dbContext.FootballResultBets
+            dbContext.FootballGameBets
                 .Where(b => b.GroupId == groupId));
     
     private static readonly Func<MpmDbContext,int,IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsForGameQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext, int gameId) =>
-            dbContext.FootballResultBets
+            dbContext.FootballGameBets
                 .Where(b => b.GameId == gameId));
     
+    
+    
+    
+    private static readonly Func<MpmDbContext, int, string, MpmGroup?, Task<bool>> s_UserHasFootballGameBetQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, int referenceId, string userId, MpmGroup? group) =>
+            dbContext.FootballGameBets
+                .Any(b => b.Game.ReferenceId == referenceId && b.Group == group && b.UserId == userId));
     
 }

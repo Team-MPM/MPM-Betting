@@ -40,7 +40,7 @@ public class BetProcessor(
     {
         var db = await dbContextFactory.CreateDbContextAsync();
         
-        var resultBets = await db.FootballResultBets
+        var resultBets = await db.FootballGameBets
             .Where(b => b.Processed == false && b.Game.GameState == EGameState.Finished)
             .Include(bet => bet.Game)
             .Include(bet => bet.Group)

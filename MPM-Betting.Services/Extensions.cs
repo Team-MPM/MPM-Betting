@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MPM_Betting.DataModel;
+using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services.Account;
 using MPM_Betting.Services.Data;
@@ -252,20 +253,21 @@ public static class Extensions
             .WithOpenApi();
         
         
-        app.MapGet("/football/track/game/{gameId:int}", (
+        app.MapGet("/football/track/game/{gameId:int}", async (
                 int gameId, 
-                [FromServices] GameDataUpdateScheduler gdus) =>
+                [FromServices] GameDataUpdateScheduler gdus,
+                [FromServices] IDbContextFactory<MpmDbContext> dbContextFactory) =>
             {
+                var context = await dbContextFactory.CreateDbContextAsync();
+                var game = await context.Games.FirstAsync(g => g.ReferenceId == gameId);
                 if (gdus.FootballGames.TryGetValue(gameId, out var x))
                 {
                     gdus.FootballGames.TryUpdate(gameId, 100, x);
-                    return StatusCodes.Status302Found;
+                    return game is null ? StatusCodes.Status102Processing : StatusCodes.Status302Found;
                 }
-                else
-                {
-                    gdus.FootballGames.TryAdd(gameId, 100);
-                    return StatusCodes.Status201Created;
-                }
+
+                gdus.FootballGames.TryAdd(gameId, 100);
+                return StatusCodes.Status201Created;
             })
             .WithName("TrackGame")
             .WithOpenApi();

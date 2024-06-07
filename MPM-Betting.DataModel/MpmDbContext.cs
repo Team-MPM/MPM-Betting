@@ -24,7 +24,7 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<FavouriteFootballLeague> UserFavouriteSeasons { get; set; }
     
     public DbSet<Bet> Bets { get; set; } = null!;
-    public DbSet<Football.GameBet> FootballResultBets { get; set; } = null!;
+    public DbSet<Football.GameBet> FootballGameBets { get; set; } = null!;
   
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,7 +45,7 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
         
         modelBuilder.Entity<Football.GameBet>(builder =>
         {
-            builder.ToTable(nameof(FootballResultBets));
+            builder.ToTable(nameof(FootballGameBets));
             builder.HasBaseType<Bet>();
         });
         
