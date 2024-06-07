@@ -567,13 +567,13 @@ else
         }
 
 
-      var result = await UserDomain.AddBet(SelectedMatch, int.Parse(BetAmount), homeScore, awayScore, quote);
+      // var result = await UserDomain.Add(SelectedMatch, int.Parse(BetAmount), homeScore, awayScore, quote);
 
-      if (result.IsFaulted)
-      {
-          ModalErrorMessage = "You have already Bet on this Match!";
-          return;
-      }
+      // if (result.IsFaulted)
+      // {
+      //     ModalErrorMessage = "You have already Bet on this Match!";
+      //     return;
+      // }
         
         //TODO AddBet
         SelectedTeams = null;

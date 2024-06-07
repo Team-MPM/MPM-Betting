@@ -11,7 +11,7 @@ public class MpmUser : IdentityUser
     public List<UserGroupEntry> UserGroupEntries { get; set; } = [];
     
     public int Points { get; set; } = 0;
-    public DateTime LastRedeemed { get; set; } = DateTime.Now;
+    public DateTime LastRedeemed { get; set; } = DateTime.MinValue;
     
     public List<Achievement> Achievments { get; set; } = [];
     

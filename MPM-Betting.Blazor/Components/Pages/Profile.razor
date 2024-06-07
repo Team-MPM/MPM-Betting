@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.Football
 @using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Domains
 @rendermode InteractiveServer
@@ -19,7 +20,14 @@
         <div class="row ProfileDataRow">
             <div class="col-1"></div>
             <div class="col-2">
-                <img src="@User.ProfilePictureUrl" alt="ProfilePicture"/>
+               @if (User.ProfilePictureUrl is not null)
+               {
+                   <img src="@User.ProfilePictureUrl" alt="ProfilePicture"/>
+               }
+               else
+               {
+                   <img src="/Images/default-profile-picture.png" alt="ProfilePicture"/>
+               }
             </div>
             <div class="col-6">
                 <div class="ProfileUserName">@User.UserName</div>
@@ -127,7 +135,7 @@
     private bool bordered = false;
     string[] headings = { "#", "SetPoints", "Quote", "Result" };
     
-    public List<Bet> Bets { get; set; }
+    public List<GameBet> Bets { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,34 +149,45 @@
             User = UserTask.Payload;
             UserDomain.SetUser(User);
         }
-        else
+
+        if (User is null)
         {
             RedirectToLogin();
             return;
         }
 
+        await GetAllBets();
         await CalcRightWrongBets();
+        await CalcRightWrongScoreBets();
     }
 
     private async Task CalcRightWrongBets()
     {
-        // TODO
+        RightWrongBets[0] = Bets.Count(s => s.Hit);
+        RightWrongBets[1] = Bets.Count(s => !s.Hit);
     }
     
     private async Task CalcRightWrongScoreBets()
     {
-        // TODO
+        //TODO fix this c:
+        RightWrongScoreBets[0] = Bets.Count(s => s.Hit);
+        RightWrongScoreBets[1] = Bets.Count(s => !s.Hit);
     }
 
     private async Task GetAllBets()
     {
         //TODO
-        Bets = new List<Bet>() { };
+        // var result = await UserDomain.GetAllBetsForUser();
+        var result = await UserDomain.GetAllBetsFootballGameForUser();
+        if (result.IsSuccess)
+        {
+            Bets = result.Value;
+        }
     }
 
     private void RedirectToLogin()
     {
-        NavigationManager.NavigateTo("/account/login");
+        NavigationManager.NavigateTo("/account/login", true);
     }
 
 }   
