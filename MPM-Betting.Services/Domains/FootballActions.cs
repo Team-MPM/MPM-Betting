@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.Football;
 using MPM_Betting.DataModel.User;
@@ -42,11 +43,9 @@ public partial class UserDomain
         if (await s_UserHasFootballGameBetQuery(m_DbContext, referenceId, m_User.Id, group))
             return s_AlreadyExistsException;
 
-        var httpclient = new HttpClient();
-        httpclient.BaseAddress = new Uri("https://api");
         for (var i = 0; i < 50; i++)
         {
-            var response = await httpclient.GetAsync($"football/track/game/{referenceId}");
+            var response = await httpclient.GetAsync($"/football/track/game/{referenceId}");
             switch (response.StatusCode)
             {
                 case HttpStatusCode.Created:
@@ -56,18 +55,22 @@ public partial class UserDomain
                 case HttpStatusCode.Found:
                     break;
                 default:
+                    logger.LogError("Failed to track game with reference id {ReferenceId}, code: {HttpStatusCode}", referenceId, response.StatusCode);
                     return s_InvalidBetParameter;
             }
             
             break;
         }
         
-        var game = await m_DbContext.Games.FirstAsync(g => g.ReferenceId == referenceId);
+        var game = await m_DbContext.Games.FirstOrDefaultAsync(g => g.ReferenceId == referenceId);
 
         if (game is null)
+        {
+            logger.LogWarning("Game with reference id {ReferenceId} not found", referenceId);
             return s_InvalidBetParameter;
+        }
 
-        await m_DbContext.FootballGameBets.AddAsync(new GameBet()
+        var bet = new GameBet()
         {
             UserId = m_User.Id,
             GameId = game.Id,
@@ -77,8 +80,11 @@ public partial class UserDomain
             AwayScore = awayScore,
             Type = EBetType.FootballGame,
             Points = points,
-        });
+        };
         
-        return new MpmResult<GameBet>();
+        await m_DbContext.FootballGameBets.AddAsync(bet);
+        await m_DbContext.SaveChangesAsync();
+        
+        return bet;
     }
 }

@@ -567,22 +567,25 @@ else
         }
 
 
-      // var result = await UserDomain.Add(SelectedMatch, int.Parse(BetAmount), homeScore, awayScore, quote);
+        var result = await UserDomain.PlaceGameBet(quote, homeScore, awayScore, SelectedMatch.Id, int.Parse(BetAmount));
 
-      // if (result.IsFaulted)
-      // {
-      //     ModalErrorMessage = "You have already Bet on this Match!";
-      //     return;
-      // }
-        
+        if (result.IsFaulted)
+        {
+            if (result.Exception is UserDomain.AlreadyExistsException)
+                ModalErrorMessage = "You have already Bet on this Match!";
+            else if (result.Exception is UserDomain.InvalidBetParameter)
+                ModalErrorMessage = "Invalid bet parameters!";
+            else
+                ModalErrorMessage = $"Some error: {result.Exception.Message}";
+            return;
+        }
+
         //TODO AddBet
         SelectedTeams = null;
         SelectedMatch = default;
         ModalErrorMessage = "";
         NavigationManager.Refresh();
         await HideModal();
-        
-        
     }
     
     private string ModalErrorMessage { get; set; }

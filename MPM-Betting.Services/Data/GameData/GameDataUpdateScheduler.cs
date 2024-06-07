@@ -109,6 +109,8 @@ public class GameDataUpdateScheduler(
 
     public static EGameState FootballApiGameStateToEGameState(FootballApi.GameState state)
     {
+        // TODO: Fix api!
+        return EGameState.Finished;
         return state switch
         {
             FootballApi.GameState.Cancelled => EGameState.Cancelled,

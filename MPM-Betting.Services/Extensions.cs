@@ -40,7 +40,7 @@ public static class Extensions
 
     public static IHostApplicationBuilder AddDomainLayer(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddTransient<UserDomain>();
+        builder.Services.AddHttpClient<UserDomain>(client => client.BaseAddress = new("http://api"));
         return builder;
     }
 
@@ -104,8 +104,8 @@ public static class Extensions
 
         builder.Services.AddDataProtection()
             .SetApplicationName("Mpm-Betting");
-
-        builder.Services.AddTransient<UserDomain>();
+        
+        builder.Services.AddHttpClient<UserDomain>(client => client.BaseAddress = new("http://api"));
         
         return builder;
 
@@ -259,15 +259,16 @@ public static class Extensions
                 [FromServices] IDbContextFactory<MpmDbContext> dbContextFactory) =>
             {
                 var context = await dbContextFactory.CreateDbContextAsync();
-                var game = await context.Games.FirstAsync(g => g.ReferenceId == gameId);
+                var game = await context.Games.FirstOrDefaultAsync(g => g.ReferenceId == gameId);
                 if (gdus.FootballGames.TryGetValue(gameId, out var x))
                 {
                     gdus.FootballGames.TryUpdate(gameId, 100, x);
-                    return game is null ? StatusCodes.Status102Processing : StatusCodes.Status302Found;
+                    return game is null ? Results.StatusCode(StatusCodes.Status102Processing) : Results.StatusCode(StatusCodes.Status302Found);
                 }
 
                 gdus.FootballGames.TryAdd(gameId, 100);
-                return StatusCodes.Status201Created;
+                return Results.StatusCode(StatusCodes.Status201Created);
+                //return StatusCodes.Status201Created;
             })
             .WithName("TrackGame")
             .WithOpenApi();

@@ -48,7 +48,7 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<bool>("Completed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("GameId")
+                    b.Property<int?>("GameId")
                         .HasColumnType("int");
 
                     b.Property<int?>("GroupId")
@@ -644,7 +644,13 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<double>("Quote")
                         .HasColumnType("float");
 
-                    b.ToTable("FootballResultBets", (string)null);
+                    b.Property<bool>("ResultHit")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ScoreHit")
+                        .HasColumnType("bit");
+
+                    b.ToTable("FootballGameBets", (string)null);
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.Betting.BuiltinSeason", b =>
@@ -683,9 +689,7 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.Game", "Game")
                         .WithMany("Bets")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GameId");
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
                         .WithMany("AllBets")
