@@ -29,7 +29,9 @@
     {
     <tr>
         <td>@i</td>
-        <td>@HomeTeam vs @AwayTeam</td>
+        <td>@gameDetails[i].Value.GameEntry.Score.HomeTeam.Name vs @gameDetails[i].Value.GameEntry.Score.AwayTeam.Name </td>
+        <td>@gameDetails[i].Value.GameEntry.Score.HomeScore - @gameDetails[i].Value.GameEntry.Score.AwayScore</td>
+        <td>@bets[i].Score</td>
         @if (bets[i].Hit == true)
         {
         <td>Hit</td>
@@ -44,33 +46,24 @@
     </tbody>
 </MudSimpleTable>
 
-
 @code {
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
     MpmUser? m_UserInstance;
     private List<Bet> bets;
     private MpmResult<List<Bet>> betsResult;
     string exceptionMessage = "";
-    string AwayTeam;
-    string HomeTeam;
-    
-   
+   List<MpmResult<FootballApi.GameDetails>> gameDetails = new List<MpmResult<FootballApi.GameDetails>>();
     
     private bool dense = false;
     private bool hover = true;     
     private bool striped = false;
     private bool bordered = false;
     
-    string[] headings = { "#","Match", "Outcome", "StartTime"};
-    
-    
+    string[] headings = { "#", "Match", "Score", "Stake", "Outcome", "StartTime"};
     
     protected override async Task OnInitializedAsync()
     {
-        
-        //table 
-        
-        
+        bets = new List<Bet>();
         await User.SyncEvent.Task;
         if (User.Payload is not null)
         {
@@ -80,54 +73,52 @@
         {
             return;
         }
-        bets = new List<Bet>();
+        
         userDomain.SetUser(m_UserInstance);
-        List<SeasonEntry> seasonEntries = new List<SeasonEntry>();
-
-        Season ts = new Season("Testseason", "...");
-        MpmGroup tg = new MpmGroup(m_UserInstance, "testgroup_bethistory", "...", seasonEntries);
-        
-        
-        for (int i = 0; i < 10; i++)
-        {
-            Bet bet = new Bet();
-            bet.UserId = m_UserInstance.Id;
-            bet.Game = new Game($"Testgame {i}",76);
-            bet.Hit = false;
-            
-            seasonEntries.Add(new SeasonEntry
-            {
-                GroupId = 1,
-                Group = tg,
-                SeasonId = 1,
-                Season = ts
-                
-            });
-            
-            bet.Completed = true;
-            bet.Group = new MpmGroup(m_UserInstance, "testgroup_bethistory", "...", seasonEntries);
-            bet.GroupId = 1;
-            
-            MpmResult<FootballApi.GameDetails> gd = await footballApi.GetGameDetails(4193451);
-        
-             AwayTeam = gd.Value.GameEntry.Score.AwayTeam.Name;
-             HomeTeam = gd.Value.GameEntry.Score.HomeTeam.Name;
-            
-            bets.Add(bet);
-            
-        }
-        
         betsResult = await userDomain.GetAllCompletedBets();
+    /* Testing data 
+    List<SeasonEntry> seasonEntries = new List<SeasonEntry>();
+
+    Season ts = new Season("Testseason", "...");
+    MpmGroup tg = new MpmGroup(m_UserInstance, "testgroup_bethistory", "...", seasonEntries);
+ 
+ 
+    Bet bet = new Bet();
+     bet.UserId = m_UserInstance.Id;
+     bet.Game = new Game($"Testgame {i}",76);
+     bet.Hit = false;
+     
+     seasonEntries.Add(new SeasonEntry
+     {
+         GroupId = 1,
+         Group = tg,
+         SeasonId = 1,
+         Season = ts
+         
+     });
+     
+     bet.Completed = true;
+     bet.Group = new MpmGroup(m_UserInstance, "testgroup_bethistory", "...", seasonEntries);
+     bet.GroupId = 1;
+     
+          
+     AwayTeam = gd.Value.GameEntry.Score.AwayTeam.Name;
+     HomeTeam = gd.Value.GameEntry.Score.HomeTeam.Name;
+     AwayScore = gd.Value.GameEntry.Score.AwayScore;
+     HomeScore = gd.Value.GameEntry.Score.HomeScore;
+      
+     
+     bets.Add(bet);
+     
+ }*/
+    
+        
         
         foreach (var bet in betsResult.Value)
         {
             bets.Add(bet);
+            gameDetails.Add(await footballApi.GetGameDetails(bet.GameId));
         }
-        
-        
-       
-        
-        //bets = await userDomain.GetAllCompletedBets();
         
     }
 }
