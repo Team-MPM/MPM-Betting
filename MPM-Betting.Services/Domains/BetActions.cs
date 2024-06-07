@@ -1,6 +1,5 @@
 ﻿using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.Football;
-using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
 
@@ -45,39 +44,39 @@ public partial class UserDomain
         return bets;
     }
     
-    public async Task<MpmResult<List<Bet>>> GetAllFootballGameBets()
+    public async Task<MpmResult<List<GameBet>>> GetAllFootballGameBets()
     {
-        var allBets = new List<Bet>();
+        var allBets = new List<GameBet>();
         await foreach (var bet in s_GetAllFootballGameBetsQuery(m_DbContext))
             allBets.Add(bet);
         
         return allBets;
     }
 
-    public async Task<MpmResult<List<Bet>>> GetAllBetsFootballGameForUser()
+    public async Task<MpmResult<List<GameBet>>> GetAllBetsFootballGameForUser()
     {
         if (m_User is null)
             throw s_NoUserException;
         
-        var bets = new List<Bet>();
+        var bets = new List<GameBet>();
         await foreach (var bet in s_GetAllFootballGameBetsForUserQuery(m_DbContext, m_User))
             bets.Add(bet);
         
         return bets;
     }
     
-    public async Task<MpmResult<List<Bet>>> GetAllFootballGameBetsForGroup(int groupId)
+    public async Task<MpmResult<List<GameBet>>> GetAllFootballGameBetsForGroup(int groupId)
     {
-        var bets = new List<Bet>();
+        var bets = new List<GameBet>();
         await foreach (var bet in s_GetAllFootballGameBetsForGroupQuery(m_DbContext, groupId))
             bets.Add(bet);
         
         return bets;
     }
     
-    public async Task<MpmResult<List<Bet>>> GetAllFootballGameBetsForGame(int gameId)
+    public async Task<MpmResult<List<GameBet>>> GetAllFootballGameBetsForGame(int gameId)
     {
-        var bets = new List<Bet>();
+        var bets = new List<GameBet>();
         await foreach (var bet in s_GetAllFootballGameBetsForGameQuery(m_DbContext, gameId))
             bets.Add(bet);
         

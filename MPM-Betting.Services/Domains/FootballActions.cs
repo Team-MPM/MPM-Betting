@@ -28,6 +28,9 @@ public partial class UserDomain
     }
 
     public List<int> GetFavouriteLeaguesForUser() => m_DbContext.UserFavouriteSeasons.Where(s => s.User == m_User).Select(s => s.LeagueId).ToList();
-    
-    //public async Task<MpmResult<GameBet> PlaceGameBet()
+
+    public async Task<MpmResult<GameBet>> PlaceGameBet()
+    {
+        return new MpmResult<GameBet>();
+    }
 }
