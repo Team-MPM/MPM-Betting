@@ -107,26 +107,21 @@ public class GameDataUpdateScheduler(
         }
     }
 
-    public static EGameState FootballApiGameStateToEGameState(FootballApi.GameState state)
+    public static EGameState FootballApiGameStateToEGameState(FootballApi.GameState state) => state switch
     {
-        // TODO: Fix api!
-        return EGameState.Finished;
-        return state switch
-        {
-            FootballApi.GameState.Cancelled => EGameState.Cancelled,
-            FootballApi.GameState.None => EGameState.Upcoming,
-            FootballApi.GameState.FirstHalf => EGameState.Live,
-            FootballApi.GameState.HalfTimeBreak => EGameState.Live,
-            FootballApi.GameState.SecondHalf => EGameState.Live,
-            FootballApi.GameState.EndedAfterSecondHalf => EGameState.Finished,
-            FootballApi.GameState.BreakAfterSecondHalf => EGameState.Live,
-            FootballApi.GameState.FirstOvertime => EGameState.Live,
-            FootballApi.GameState.OvertimeBreak => EGameState.Live,
-            FootballApi.GameState.SecondOvertime => EGameState.Live,
-            FootballApi.GameState.EndedAfterOverTime => EGameState.Finished,
-            FootballApi.GameState.PenaltyShootout => EGameState.Live,
-            FootballApi.GameState.EndedAfterPenaltyShootout => EGameState.Finished,
-            _ => throw new UnreachableException()
-        };
-    }
+        FootballApi.GameState.Cancelled => EGameState.Cancelled,
+        FootballApi.GameState.None => EGameState.Upcoming,
+        FootballApi.GameState.FirstHalf => EGameState.Live,
+        FootballApi.GameState.HalfTimeBreak => EGameState.Live,
+        FootballApi.GameState.SecondHalf => EGameState.Live,
+        FootballApi.GameState.EndedAfterSecondHalf => EGameState.Finished,
+        FootballApi.GameState.BreakAfterSecondHalf => EGameState.Live,
+        FootballApi.GameState.FirstOvertime => EGameState.Live,
+        FootballApi.GameState.OvertimeBreak => EGameState.Live,
+        FootballApi.GameState.SecondOvertime => EGameState.Live,
+        FootballApi.GameState.EndedAfterOverTime => EGameState.Finished,
+        FootballApi.GameState.PenaltyShootout => EGameState.Live,
+        FootballApi.GameState.EndedAfterPenaltyShootout => EGameState.Finished,
+        _ => throw new UnreachableException()
+    };
 }

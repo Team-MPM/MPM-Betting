@@ -154,7 +154,13 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         var halfs = status["halfs"]!;
 
         var gameTimes = GameTimeDataFromHalfs(halfs);
-        var state = ExtractGameStateFromStatus(gameTimes, cancelled);
+        // TODO: idk, maybe fix?
+        //var state = ExtractGameStateFromStatus(gameTimes, cancelled);
+        var state = GameState.None;
+        if (started)
+            state = GameState.FirstHalf;
+        if (finished)
+            state = GameState.EndedAfterSecondHalf;
 
         var gameEntry = new GameEntry(
             matchId, 
