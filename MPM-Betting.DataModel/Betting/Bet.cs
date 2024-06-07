@@ -16,7 +16,7 @@ public class Bet()
 
     public bool Completed { get; set; }
     
-    public int Score { get; set; }
+    public int Points { get; set; }
 
     public int? GameId { get; set; }
     public Game? Game { get; set; }
@@ -25,4 +25,9 @@ public class Bet()
 
     public bool Processed { get; set; } = false;
     public bool Hit { get; set; } = false;
+
+    public Bet(EBetType type) : this()
+    {
+        Type = type;
+    }
 }
