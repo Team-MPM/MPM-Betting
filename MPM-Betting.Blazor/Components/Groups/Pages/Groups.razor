@@ -412,7 +412,7 @@
             var userDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
             userDomain.SetUser(m_UserInstance);
 
-            m_GroupResult = await userDomain.GetGroupByIdWithAccess(GroupId.Value);
+            m_GroupResult = await userDomain.GetGroupByIdWithEntry(GroupId.Value);
             if (m_GroupResult.IsFaulted) NavigationManager.NavigateTo("/error");
 
             m_Model.Group = m_GroupResult.Value.group;
