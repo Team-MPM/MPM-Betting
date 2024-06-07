@@ -163,6 +163,12 @@
     font-weight: bold;
 }
 
+.ModalScoreEntry > div {
+    display: flex;
+    justify-content: center;
+}
+
+
 
 .BetEntry {
     background: rgba(70,70,70,0.8);

@@ -11,6 +11,7 @@
 @using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Data
 @using MPM_Betting.Services.Domains
+@using MudBlazor
 @inject FootballApi Api
 @inject NavigationManager NavigationManager
 @* @inject IDbContextFactory<MpmDbContext> dbContextFactory *@
@@ -45,6 +46,36 @@
                         <span class="BetEntry @(ChosenTeam == BetType.Draw ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.Draw))">x @SelectedTeams.Item2.DrawPayOut</span>
                         <span class="BetEntry @(ChosenTeam == BetType.AwayWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.AwayWin))">x @SelectedTeams.Item2.AwayWinPayOut</span>
                     </div>
+                </Field>
+                <Field>
+                    <FieldLabel>Score Predition</FieldLabel>
+                    <div class="mb-5">Getting this right double your win!</div>
+                    
+                    <Validation UsePattern>
+                        <div class="row ModalScoreEntryNames">
+                            <div class="col-1"></div>
+                            <div class="col-6">
+                                <div>@SelectedTeams.Item1.Item1.Name</div>
+                            </div>
+                            <div class="col-4">
+                                <div>@SelectedTeams.Item1.Item2.Name</div>
+                            </div>
+                            <div class="col-1"></div>
+                        </div>
+                        <div class="row ModalScoreEntry">
+                            <div class="col-1"></div>
+                            <div class="col-4">
+                                <TextEdit Text="@scoreBets.HomeScore" TextChanged="@OnHomeScoreChanges" Pattern="^[1-9][0-9]*$" Placeholder="HomeTeam"></TextEdit>
+                            </div>
+                            <div class="col-2">
+                                <div>:</div>
+                            </div>
+                            <div class="col-4">
+                                <TextEdit Text="@scoreBets.AwayScore" TextChanged="@OnAwayScoreChanges" Pattern="^[1-9][0-9]*$" Placeholder="AwayTeam"></TextEdit>
+                            </div>
+                            <div class="col-1"></div>
+                        </div>
+                    </Validation>
                 </Field>
                 <Field>
                     <FieldLabel>Amount of credits to bet:</FieldLabel>
@@ -198,6 +229,7 @@ else
 
  
 @code {
+    [Parameter] public List<FootballApi.League> Leagues { get; set; }
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? UserTask { get; set; }
     MpmUser? User;
     MpmDbContext dbContext;
@@ -225,7 +257,7 @@ else
         }
     }
     
-    [Parameter] public List<FootballApi.League> Leagues { get; set; }
+    private ScoreBets scoreBets { get; set; }
     public List<FootballApi.League>? TopLeagues { get; set; }
     public List<FootballApi.League>? FavouriteLeagues { get; set; }
 
@@ -233,6 +265,7 @@ else
     public Dictionary<int, List<FootballApi.GameEntry>>? AllGameEntries { get; set; }
     public List<Tuple<FootballApi.GameEntry, BetEntries>> GameBetEntries { get; set; }
     private DateTime selectedDate;
+    private FootballApi.GameEntry selectedMatch;
 
     public DateTime SelectedDate
     {
@@ -245,12 +278,45 @@ else
                 RefreshMatches();
         }
     }
+    
+    public FootballApi.GameEntry SelectedMatch
+    {
+        get => selectedMatch;
+        set
+        {
+            selectedMatch = value;
+            StateHasChanged();
+        }
+    }
+
+    #region PopOver
+
+    public bool _isOpen;
+
+    public void ToggleOpen()
+    {
+        if (_isOpen)
+            _isOpen = false;
+        else
+            _isOpen = true;
+    }
+
+    #endregion
+
+    #region Classes
+
+    private class ScoreBets
+    {
+        public string HomeScore { get; set; }
+        public string AwayScore { get; set; }
+    }
+
+    #endregion
 
     protected override async Task OnInitializedAsync()
     {
-        // int[] ids = { 47, 42, 73, 78, 55, 54, 37, 22, 32, 120 }; // Old Leagues
+        scoreBets = new ScoreBets();
         int[] ids =  {47, 54, 87, 55, 53, 57, 61, 196, 48, 71};
-        // int[] ids = { 47,54,87,53,55,61,57 };
         TopLeagues = Leagues.Where(s => ids.Contains(s.Id)).OrderBy(s => s.Id).ToList();
         ChosenTeam = BetType.None;
         if (UserTask is null)
@@ -315,6 +381,7 @@ else
                 GameEntries.Remove(entry.Key);
         }
     }
+    
 
     public double GetRandomQuote() => System.Math.Round(new Random().NextDouble() + new Random().Next(1, 4), 2);
     
@@ -336,6 +403,7 @@ else
         // }
         
         SelectedTeams = new Tuple<Tuple<FootballApi.Team, FootballApi.Team>, BetEntries>(new Tuple<FootballApi.Team, FootballApi.Team>(hometeam, awayteam), entry);
+        SelectedMatch = match;
         ChosenTeam = type;
         
         await ShowModal();
@@ -376,6 +444,18 @@ else
         BetAmount = value;
         return Task.CompletedTask;
     }
+    
+    Task OnHomeScoreChanges(string value)
+    {
+        scoreBets.HomeScore = value;
+        return Task.CompletedTask;
+    }
+    
+    Task OnAwayScoreChanges(string value)
+    {
+        scoreBets.AwayScore = value;
+        return Task.CompletedTask;
+    }
 
     // MODAL
     private Modal modalRef;
@@ -392,6 +472,8 @@ else
 
     private Task ShowModal()
     {
+        scoreBets = new ScoreBets();
+        ModalErrorMessage = "";
         return ModalRef.Show();
     }
 
@@ -405,13 +487,16 @@ else
     private async Task PlaceBet()
     {
         int amount;
+        int homeScore, awayScore;
         try
         {
             amount = int.Parse(BetAmount);
+            homeScore = int.Parse(scoreBets.HomeScore);
+            awayScore = int.Parse(scoreBets.AwayScore);
         }
         catch (Exception e)
         {
-            ModalErrorMessage = "Please enter a valid number!";
+            ModalErrorMessage = "Please enter valid numbers!";
             return;
         }
         
@@ -431,14 +516,73 @@ else
         {
             ModalErrorMessage = "You do not have enough credits!";
             return;
-        } 
-
-        ModalErrorMessage = null;
-        HideModal();
+        }
         
-            
+        if(homeScore < 0 || awayScore < 0)
+        {
+            ModalErrorMessage = "Please enter valid scores!";
+            return;
+        }
+        
+        switch(chosenTeam)
+        {
+            case BetType.HomeWin:
+                if(homeScore < awayScore)
+                {
+                    ModalErrorMessage = "Your scores do not match with the selected team!";
+                    return;
+                }
+                break;
+            case BetType.Draw:
+                if(homeScore != awayScore)
+                {
+                    ModalErrorMessage = "Your scores do not match with the selected team!";
+                    return;
+                }
+                break;
+            case BetType.AwayWin:
+                if(homeScore > awayScore)
+                {
+                    ModalErrorMessage = "Your scores do not match with the selected team!";
+                    return;
+                }
+                break;
+        }
+
+        double quote;
+        switch (chosenTeam)
+        {
+            case BetType.HomeWin:
+                quote = SelectedTeams.Item2.HomeWinPayOut;
+                break;
+            case BetType.Draw:
+                quote = SelectedTeams.Item2.DrawPayOut;
+                break;
+            case BetType.AwayWin:
+                quote = SelectedTeams.Item2.AwayWinPayOut;
+                break;
+            default:
+                quote = 1;
+                break;
+        }
+
+
+      // var result = await UserDomain.Add(SelectedMatch, int.Parse(BetAmount), homeScore, awayScore, quote);
+
+      // if (result.IsFaulted)
+      // {
+      //     ModalErrorMessage = "You have already Bet on this Match!";
+      //     return;
+      // }
         
         //TODO AddBet
+        SelectedTeams = null;
+        SelectedMatch = default;
+        ModalErrorMessage = "";
+        NavigationManager.Refresh();
+        await HideModal();
+        
+        
     }
     
     private string ModalErrorMessage { get; set; }

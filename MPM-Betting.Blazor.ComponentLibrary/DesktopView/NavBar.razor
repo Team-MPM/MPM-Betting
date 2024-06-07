@@ -18,6 +18,7 @@
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<MpmDbContext> DbContext
 
+
 @* Modal *@
 
 @if (reedemable)
@@ -144,12 +145,12 @@ else
                     <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
                 </DropdownToggle>
                 <DropdownMenu Background="Background.Secondary" TextColor="TextColor.Light">
-                    <DropdownItem><a href="/BetHistory" class="NoHoverUnderline">Bet History</a></DropdownItem>
-                    <DropdownItem><a href="/groups" class="NoHoverUnderline">Groups</a></DropdownItem>
-                    <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/BetHistory", true))"><a  class="NoHoverUnderline">Bet History</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/groups", true))"><a  class="NoHoverUnderline">Groups</a></DropdownItem>
+                    @* <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem> *@
                     <DropdownDivider/>
-                    <DropdownItem><a href="/profile" class="NoHoverUnderline">Profile</a></DropdownItem>
-                    <DropdownItem><a href="/account/manage/profile" class="NoHoverUnderline">Manage</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/profile", true))"><a  class="NoHoverUnderline">Profile</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/account/manage/profile", true))"><a  class="NoHoverUnderline">Manage</a></DropdownItem>
                     <DropdownItem>
                         <form action="Account/Logout" method="post">
                             <AntiforgeryToken/>

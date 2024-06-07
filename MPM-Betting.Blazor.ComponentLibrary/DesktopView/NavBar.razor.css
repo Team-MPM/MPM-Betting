@@ -162,3 +162,8 @@
         box-shadow: 0 0 5px yellow;
     }
 }
+
+.LogoutDropdown {
+    padding: 0;
+}
+

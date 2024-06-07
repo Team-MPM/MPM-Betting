@@ -30,7 +30,14 @@
     <div class="row FoundLeaguesField">
         @if (FoundLeagues is not null)
         {
-            @if (FoundLeagues.Count < 25)
+            @if (!FoundLeagues.Any())
+            {
+                <div class="col-12">
+                    <h3>No Leagues found!</h3>
+                    <h3>Change the query and try again</h3>
+                </div>
+            }
+            else if (FoundLeagues.Count < 25)
             {
                 <div class="col-12">
                     <MudSimpleTable Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Style="overflow-x: auto;">
@@ -46,6 +53,7 @@
                     </MudSimpleTable>
                 </div>
             }
+            
             else
             {
                 <div class="col-12">
