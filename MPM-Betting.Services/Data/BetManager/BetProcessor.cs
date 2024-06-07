@@ -40,14 +40,14 @@ public class BetProcessor(
     {
         var db = await dbContextFactory.CreateDbContextAsync();
         
-        var resultBets = await db.FootballResultBets
+        var footballGameBets = await db.FootballGameBets
             .Where(b => b.Processed == false && b.Game.GameState == EGameState.Finished)
             .Include(bet => bet.Game)
             .Include(bet => bet.Group)
             .Include(bet => bet.User)
             .ToListAsync();
 
-        foreach (var bet in resultBets)
+        foreach (var bet in footballGameBets)
         {
             var gameId = bet.Game.ReferenceId;
             var gameDataResult = await footballApi.GetGameDetails(gameId);

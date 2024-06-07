@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MPM_Betting.DataModel;
+using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.User;
 using MPM_Betting.Services.Account;
 using MPM_Betting.Services.Data;
@@ -39,7 +40,7 @@ public static class Extensions
 
     public static IHostApplicationBuilder AddDomainLayer(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddTransient<UserDomain>();
+        builder.Services.AddHttpClient<UserDomain>(client => client.BaseAddress = new("http://api"));
         return builder;
     }
 
@@ -103,8 +104,8 @@ public static class Extensions
 
         builder.Services.AddDataProtection()
             .SetApplicationName("Mpm-Betting");
-
-        builder.Services.AddTransient<UserDomain>();
+        
+        builder.Services.AddHttpClient<UserDomain>(client => client.BaseAddress = new("http://api"));
         
         return builder;
 
@@ -252,20 +253,22 @@ public static class Extensions
             .WithOpenApi();
         
         
-        app.MapGet("/football/track/game/{gameId:int}", (
+        app.MapGet("/football/track/game/{gameId:int}", async (
                 int gameId, 
-                [FromServices] GameDataUpdateScheduler gdus) =>
+                [FromServices] GameDataUpdateScheduler gdus,
+                [FromServices] IDbContextFactory<MpmDbContext> dbContextFactory) =>
             {
+                var context = await dbContextFactory.CreateDbContextAsync();
+                var game = await context.Games.FirstOrDefaultAsync(g => g.ReferenceId == gameId);
                 if (gdus.FootballGames.TryGetValue(gameId, out var x))
                 {
                     gdus.FootballGames.TryUpdate(gameId, 100, x);
-                    return StatusCodes.Status302Found;
+                    return game is null ? Results.StatusCode(StatusCodes.Status102Processing) : Results.StatusCode(StatusCodes.Status302Found);
                 }
-                else
-                {
-                    gdus.FootballGames.TryAdd(gameId, 100);
-                    return StatusCodes.Status201Created;
-                }
+
+                gdus.FootballGames.TryAdd(gameId, 100);
+                return Results.StatusCode(StatusCodes.Status201Created);
+                //return StatusCodes.Status201Created;
             })
             .WithName("TrackGame")
             .WithOpenApi();

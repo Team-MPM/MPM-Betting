@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MPM_Betting.DataModel;
 using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.Football;
@@ -16,7 +17,7 @@ namespace MPM_Betting.Services.Domains;
 /// <exception cref="Exception">All Errors returned can be looked up in Domains/Errors.cs</exception>
 /// </summary>
 /// <param name="dbContextFactory">Injected via DI</param>
-public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory)
+public partial class UserDomain(IDbContextFactory<MpmDbContext> dbContextFactory, HttpClient httpclient, ILogger<UserDomain> logger)
 {
     private readonly MpmDbContext m_DbContext = dbContextFactory.CreateDbContext();
 

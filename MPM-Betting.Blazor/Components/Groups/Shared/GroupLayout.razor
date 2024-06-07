@@ -23,7 +23,14 @@
     <Authorized>
         <div class="flex flex-row groups">
             <div class="flex flex-column h-full text-primary side-nav">
-                @foreach(var group in m_Groups)
+                <button @onclick="@(() => NavigationManager.NavigateTo("/groups"))">
+                    <div>
+                        <img src="Images/discover.png" alt="group logo"/>
+                    </div>
+                    <div class="bar"></div>
+                </button>
+                
+                @foreach (var group in m_Groups)
                 {
                     var groupId = group.Id;
                     var groupUrl = $"/groups/{groupId}";

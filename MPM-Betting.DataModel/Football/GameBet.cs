@@ -7,6 +7,9 @@ public class GameBet() : Bet(EBetType.FootballGame)
     public int HomeScore { get; set; }
     public int AwayScore { get; set; }
 
+    public bool ResultHit { get; set; }
+    public bool ScoreHit { get; set; }
+
     public EResult Result =>
         HomeScore > AwayScore
             ? EResult.Win
