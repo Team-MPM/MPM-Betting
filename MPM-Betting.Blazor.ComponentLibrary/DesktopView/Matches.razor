@@ -65,13 +65,13 @@
                         <div class="row ModalScoreEntry">
                             <div class="col-1"></div>
                             <div class="col-4">
-                                <TextEdit Text="@scoreBets.HomeScore" TextChanged="@OnHomeScoreChanges" Pattern="^[1-9][0-9]*$" Placeholder="HomeTeam"></TextEdit>
+                                <TextEdit Text="@scoreBets.HomeScore" TextChanged="@OnHomeScoreChanges" Pattern="^[0-9]\d*$" Placeholder="HomeTeam"></TextEdit>
                             </div>
                             <div class="col-2">
                                 <div>:</div>
                             </div>
                             <div class="col-4">
-                                <TextEdit Text="@scoreBets.AwayScore" TextChanged="@OnAwayScoreChanges" Pattern="^[1-9][0-9]*$" Placeholder="AwayTeam"></TextEdit>
+                                <TextEdit Text="@scoreBets.AwayScore" TextChanged="@OnAwayScoreChanges" Pattern="^[0-9]\d*$" Placeholder="AwayTeam"></TextEdit>
                             </div>
                             <div class="col-1"></div>
                         </div>
