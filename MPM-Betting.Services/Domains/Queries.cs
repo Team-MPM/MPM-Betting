@@ -124,4 +124,11 @@ public partial class UserDomain
     private static readonly Func<MpmDbContext, IAsyncEnumerable<BuiltinSeason>> s_GetAllBuiltinSeasonsQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext) =>
             dbContext.BuiltinSeasons);
+    
+    private static readonly Func<MpmDbContext, MpmUser, IAsyncEnumerable<ResultBet>> s_GetAllCompletedBets = 
+        EF.CompileAsyncQuery((MpmDbContext dbContext, MpmUser user) =>
+            dbContext.FootballResultBets
+                .Where(b => b.User == user && b.Completed)
+                .Include(b => b.Game)
+                .Include(b => b.User));
 }
