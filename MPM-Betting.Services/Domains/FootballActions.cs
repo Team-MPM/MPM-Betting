@@ -1,4 +1,5 @@
-﻿using MPM_Betting.DataModel.User;
+﻿using MPM_Betting.DataModel.Football;
+using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
 
@@ -27,4 +28,6 @@ public partial class UserDomain
     }
 
     public List<int> GetFavouriteLeaguesForUser() => m_DbContext.UserFavouriteSeasons.Where(s => s.User == m_User).Select(s => s.LeagueId).ToList();
+    
+    //public async Task<MpmResult<GameBet> PlaceGameBet()
 }
