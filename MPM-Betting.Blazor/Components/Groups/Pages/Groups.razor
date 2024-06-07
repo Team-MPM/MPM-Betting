@@ -8,6 +8,7 @@
 @using Margin = Blazorise.Margin
 @using Size = MudBlazor.Size
 @using Blazorise
+@using LanguageExt
 @using MPM_Betting.DataModel.Betting
 @using Width = Blazorise.Width
 
@@ -17,8 +18,8 @@
 @inject NavigationManager NavigationManager
 @inject IServiceProvider ServiceProvider
 
-<div class="group-view">
-    @if (m_Model.Group is not null && m_Model.Entry is not null)
+<div class="group-view grow">
+    @if (GroupId != null && m_Model.Group is not null && m_Model.Entry is not null)
     {
         var groupUrl = $"/groups/{m_Model.Group.Id}";
         <div class="side-nav">
@@ -136,137 +137,181 @@
             <div>
             </div>
         </div>
+
+        <div class="px-4 py-2 group-page">
+            @switch (Page)
+            {
+                case "overview":
+                    <p>overview</p>
+                    break;
+                case "ranking":
+                    <p>ranking</p>
+                    break;
+                case "users":
+                    <p>users</p>
+                    break;
+                case "chat":
+                    <p>chat</p>
+                    break;
+                case "settings":
+                    @if (m_Model.Entry?.Role is EGroupRole.Admin or EGroupRole.Owner)
+                    {
+                        <div class="mx-4 mt-2">
+                            <h3 class="alert-heading">Group Settings</h3>
+                        </div>
+
+                        <div class="px-4 pt-1 pb-5 m-4 settings-box">
+                            <div class="mx-2 my-4">
+                                <h4>General</h4>
+                            </div>
+                            <div class="flex flex-row grow justify-between">
+                                <Field Class="mx-2 w-50">
+                                    <FieldLabel>Name</FieldLabel>
+                                    <TextEdit @bind-Text="m_UpdateGroupModel.Name"/>
+                                </Field>
+                                <Field Class="mx-2 w-50">
+                                    <FieldLabel>Description</FieldLabel>
+                                    <TextEdit @bind-Text="m_UpdateGroupModel.Description"/>
+                                </Field>
+                            </div>
+                            <div class="flex flex-row">
+                                <Button TextColor="TextColor.Light" Background="Background.Primary" @onclick="@(async () => await UpdateGroup())" Class="mx-2">Update</Button>
+                                <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                            </div>
+                        </div>
+
+                        <div class="px-4 pt-1 pb-1 m-4 settings-box">
+                            <div class="mx-2 my-4">
+                                <h4>Users</h4>
+                            </div>
+
+                            <div class="flex flex-row grow justify-between">
+                                <MudDataGrid Items="@m_Model.Uges" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
+                                             Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
+                                    <Columns>
+                                        <PropertyColumn Property="entry => entry.MpmUser.UserName" Editable="false"/>
+                                        <PropertyColumn Property="entry => entry.Score" Editable="false"/>
+                                        <PropertyColumn Property="entry => entry.Role">
+                                            <EditTemplate>
+                                                <MudSelect T="string" Margin="@MudBlazor.Margin.Dense" @bind-Value="context.Item.RoleAsString" Required RequiredError="Role can not be empty">
+                                                    @foreach (var role in Enum.GetValues<EGroupRole>())
+                                                    {
+                                                        // TODO: WHYHHYHYHHY NOT WORK I ZUCK AUS, ICH KANN NICHT MEHR, ICH WILL NICHT MEHR, OLAV HILF MIR
+                                                        <MudSelectItem Value="role.ToString()">@role.ToString()</MudSelectItem>
+                                                    }
+                                                </MudSelect>
+                                            </EditTemplate>
+                                        </PropertyColumn>
+                                        <TemplateColumn Editable="false">
+                                            <CellTemplate>
+                                                <MudStack Row>
+                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
+                                                </MudStack>
+                                            </CellTemplate>
+                                        </TemplateColumn>
+                                    </Columns>
+                                </MudDataGrid>
+                            </div>
+
+                            <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                        </div>
+
+
+                        <div class="px-4 pt-1 pb-1 m-4 settings-box">
+                            <div class="mx-2 my-4">
+                                <h4>Leagues</h4>
+                            </div>
+
+                            <div class="flex flex-row grow justify-between my-2">
+                                <MudDataGrid Items="@m_Model.ActiveSeasons!.Values.SelectMany(x => x)" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
+                                             Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
+                                    <Columns>
+                                        <PropertyColumn Property="entry => entry.Name" Editable="false"/>
+                                        <PropertyColumn Property="entry => entry.Start" Editable="false"/>
+                                        <PropertyColumn Property="entry => entry.End" Editable="false"/>
+                                        <PropertyColumn Property="x => x.Sport.ToString()" Grouping GroupBy="@(e => e.Sport)"/>
+                                        <TemplateColumn Editable="false">
+                                            <CellTemplate>
+                                                <MudStack Row>
+                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
+                                                    @if (context.Item is CustomSeason)
+                                                    {
+                                                        <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Size="Size.Small">Edit</MudButton>
+                                                    }
+                                                </MudStack>
+                                            </CellTemplate>
+                                        </TemplateColumn>
+                                    </Columns>
+                                </MudDataGrid>
+                            </div>
+
+                            <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <h3>Access Denied</h3>
+                    }
+
+                    break;
+                case "league":
+                    <p>league</p>
+                    break;
+                default:
+                    <p>not found</p>
+                    break;
+            }
+        </div>
     }
     else
     {
-        <h2>General group info</h2>
+        <div class="flex flex-column mx-8 mt-2 grow">
+            <h1 class="">Group Home</h1>
+            <div class="flex flex-row mt-4 grow">
+                <div class="flex flex-column mr-8">
+                    <h2 class="pb-2">Top Groups</h2>
+                    <MudTable Items="@m_Model.GroupEntries" Class="grow">
+                        <HeaderContent>
+                            <MudTh>Group</MudTh>
+                            <MudTh>Members</MudTh>
+                            <MudTh>Rank</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Group.Name</MudTd>
+                            <MudTd>@context.Members</MudTd>
+                            <MudTd>@(context.Rank + 1)</MudTd>
+                        </RowTemplate>
+                        <PagerContent>
+                            <MudTablePager/>
+                        </PagerContent>
+                    </MudTable>
+                </div>
+                <div class="flex ">
+                    <div class="flex flex-column mr-8">
+                        <h2 class="pb-2">Bet Stats</h2>
+                        <MudPaper Class="pa-4">
+                            <MudChart ChartType="ChartType.Pie" InputData="@( [123, 234])" InputLabels="@( ["Hit", "Loss"])" Width="320px" Height="320px"/>
+                        </MudPaper>
+                    </div>
+                    <div class="flex flex-column">
+                        <h2 class="pb-2">Bet Graph</h2>
+                        <MudPaper Class="pl-4">
+                            @{
+                                var options = new ChartOptions
+                                {
+                                    YAxisFormat = "0",
+                                    InterpolationOption = InterpolationOption.NaturalSpline
+                                };
+                                <MudChart ChartType="ChartType.Line" ChartSeries="@( [new ChartSeries() { Name = "FootballBets", Data = new double[] { 15, 5, 17, 8, 10 } }, new ChartSeries() { Name = "FootballBets", Data = new double[] { 4, 0, 2, 9, 25 } }, new ChartSeries() { Name = "FootballBets", Data = new double[] { 9, 6, 6, 8, 18 } }])" XAxisLabels="@(["Q1", "Q2", "Q3", "Q4"])" Width="100%" Height="350" ChartOptions="options"></MudChart>
+                            }
+                        </MudPaper>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
-<div class="px-4 py-2 group-page">
-    @switch (Page)
-    {
-        case "overview":
-            <p>overview</p>
-            break;
-        case "ranking":
-            <p>ranking</p>
-            break;
-        case "users":
-            <p>users</p>
-            break;
-        case "chat":
-            <p>chat</p>
-            break;
-        case "settings":
-            @if (m_Model.Entry?.Role is EGroupRole.Admin or EGroupRole.Owner)
-            {
-                <div class="mx-4 mt-2">
-                    <h3 class="alert-heading">Group Settings</h3>
-                </div>
-
-                <div class="px-4 pt-1 pb-5 m-4 settings-box">
-                    <div class="mx-2 my-4">
-                        <h4>General</h4>
-                    </div>
-                    <div class="flex flex-row grow justify-between">
-                        <Field Class="mx-2 w-50">
-                            <FieldLabel>Name</FieldLabel>
-                            <TextEdit @bind-Text="m_UpdateGroupModel.Name"/>
-                        </Field>
-                        <Field Class="mx-2 w-50">
-                            <FieldLabel>Description</FieldLabel>
-                            <TextEdit @bind-Text="m_UpdateGroupModel.Description"/>
-                        </Field>
-                    </div>
-                    <div class="flex flex-row">
-                        <Button TextColor="TextColor.Light" Background="Background.Primary" @onclick="@(async () => await UpdateGroup())" Class="mx-2">Update</Button>
-                        <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
-                    </div>
-                </div>
-
-                <div class="px-4 pt-1 pb-1 m-4 settings-box">
-                    <div class="mx-2 my-4">
-                        <h4>Users</h4>
-                    </div>
-                    
-                    <div class="flex flex-row grow justify-between">
-                        <MudDataGrid Items="@m_Model.Users" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
-                                     Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
-                            <Columns>
-                                <PropertyColumn Property="entry => entry.MpmUser.UserName" Editable="false" />
-                                <PropertyColumn Property="entry => entry.Score" Editable="false" />
-                                <PropertyColumn Property="entry => entry.Role">
-                                    <EditTemplate>
-                                        <MudSelect T="string" Margin="@MudBlazor.Margin.Dense" @bind-Value="context.Item.RoleAsString" Required RequiredError="Role can not be empty">
-                                            @foreach (var role in Enum.GetValues<EGroupRole>())
-                                            {
-                                                // TODO: WHYHHYHYHHY NOT WORK I ZUCK AUS, ICH KANN NICHT MEHR, ICH WILL NICHT MEHR, OLAV HILF MIR
-                                                <MudSelectItem Value="role.ToString()">@role.ToString()</MudSelectItem>
-                                            }
-                                        </MudSelect>
-                                    </EditTemplate>
-                                </PropertyColumn>
-                                <TemplateColumn Editable="false">
-                                    <CellTemplate>
-                                        <MudStack Row>
-                                            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
-                                        </MudStack>
-                                    </CellTemplate>
-                                </TemplateColumn>
-                            </Columns>
-                        </MudDataGrid>
-                    </div>
-                    
-                    <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
-                </div>
-                
-                
-                <div class="px-4 pt-1 pb-1 m-4 settings-box">
-                    <div class="mx-2 my-4">
-                        <h4>Leagues</h4>
-                    </div>
-
-                    <div class="flex flex-row grow justify-between my-2">
-                        <MudDataGrid Items="@m_Model.ActiveSeasons!.Values.SelectMany(x => x)" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
-                                     Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
-                            <Columns>
-                                <PropertyColumn Property="entry => entry.Name" Editable="false"/>
-                                <PropertyColumn Property="entry => entry.Start" Editable="false"/>
-                                <PropertyColumn Property="entry => entry.End" Editable="false"/>
-                                <PropertyColumn Property="x => x.Sport.ToString()" Grouping GroupBy="@(e => e.Sport)" />
-                                <TemplateColumn Editable="false">
-                                    <CellTemplate>
-                                        <MudStack Row>
-                                            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
-                                            @if (context.Item is CustomSeason)
-                                            {
-                                                <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Size="Size.Small">Edit</MudButton>
-                                            }
-                                        </MudStack>
-                                     </CellTemplate>
-                                 </TemplateColumn>
-                             </Columns>
-                         </MudDataGrid>
-                    </div>
-                    
-                    <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
-                </div>
-            }
-            else
-            {
-                <h3>Access Denied</h3>
-            }
-
-            break;
-        case "league":
-            <p>league</p>
-            break;
-        default:
-            <p>not found</p>
-            break;
-    }
-</div>
 
 <Blazorise.Modal @bind-Visible="m_NewSeasonModel.Visible">
     <ModalContent Centered>
@@ -337,8 +382,8 @@
     private int m_OldId = -1;
     [Parameter] public int? GroupId { get; set; } = default!;
     [Parameter] public string? Page { get; set; } = "overview";
-    
-    
+
+
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
     MpmUser? m_UserInstance;
     MpmResult<(MpmGroup group, UserGroupEntry entry)> m_GroupResult;
@@ -355,7 +400,15 @@
         public List<SeasonEntry>? SeasonEntries { get; set; }
         public List<BuiltinSeason>? BuiltinSeasons { get; set; }
         public MpmUser? User { get; set; }
-        public List<UserGroupEntry>? Users { get; set; } = [];
+        public List<UserGroupEntry> Uges { get; set; } = [];
+        public List<GroupEntry> GroupEntries { get; set; } = [];
+
+        public class GroupEntry
+        {
+            public MpmGroup Group { get; set; }
+            public int Members { get; set; }
+            public int Rank { get; set; }
+        }
     }
 
     private class NewSeasonModel
@@ -395,6 +448,24 @@
 
         m_Model.User = User.Payload;
         m_Model.BuiltinSeasons = await UserDomain.GetAllBuiltinSeasons();
+
+        var allGroupsResult = await UserDomain.GetGroups();
+        if (allGroupsResult.IsFaulted) NavigationManager.NavigateTo("/error");
+
+        var groupEntries = allGroupsResult.Value.Select(g => new Model.GroupEntry { Group = g }).ToList();
+        foreach (var groupEntry in groupEntries)
+        {
+            var members = await UserDomain.GetUsersByGroup(groupEntry.Group);
+            var rank = await UserDomain.GetUserPosition(groupEntry.Group);
+
+            if (members.IsFaulted || rank.IsFaulted)
+                NavigationManager.NavigateTo("/error");
+
+            groupEntry.Members = members.Value.Count();
+            groupEntry.Rank = rank.Value;
+        }
+
+        m_Model.GroupEntries = groupEntries;
     }
 
     protected override async Task OnParametersSetAsync()
@@ -433,7 +504,7 @@
 
             var usersResult = await userDomain.GetUsersByGroup(m_Model.Group);
             if (usersResult.IsFaulted) NavigationManager.NavigateTo("/error");
-            m_Model.Users = usersResult.Value;
+            m_Model.Uges = usersResult.Value;
         }
 
 
@@ -533,7 +604,7 @@
                 return;
             }
         }
-        
+
         if (m_Model.Group.Description != m_UpdateGroupModel.Description)
         {
             var result = await UserDomain.UpdateGroupDescription(m_Model.Group, m_UpdateGroupModel.Description);
@@ -549,4 +620,5 @@
         m_UpdateGroupModel.Name = m_Model.Group.Name;
         m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
     }
+
 }
