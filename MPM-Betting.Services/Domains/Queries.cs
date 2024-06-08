@@ -134,7 +134,7 @@ public partial class UserDomain
     
     private static readonly Func<MpmDbContext,IAsyncEnumerable<Bet>> s_GetAllBetsQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext) => dbContext.Bets
-            .Include(b => b.Game));
+                .Include(b => b.Game));
     
     
     
@@ -142,7 +142,7 @@ public partial class UserDomain
     
     private static readonly Func<MpmDbContext,IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext) => dbContext.FootballGameBets
-            .Include(b => b.Game));
+                .Include(b => b.Game));
     
     private static readonly Func<MpmDbContext,MpmUser,IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsForUserQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext, MpmUser user) =>
@@ -155,8 +155,8 @@ public partial class UserDomain
             dbContext.FootballGameBets
                 .Where(b => b.GroupId == groupId)
                 .Include(b => b.Game));
-
-    private static readonly Func<MpmDbContext, int, IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsForGameQuery =
+    
+    private static readonly Func<MpmDbContext,int,IAsyncEnumerable<GameBet>> s_GetAllFootballGameBetsForGameQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext, int gameId) =>
             dbContext.FootballGameBets
                 .Where(b => b.GameId == gameId)

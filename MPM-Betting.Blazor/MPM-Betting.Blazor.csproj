@@ -32,7 +32,6 @@
 
     <ItemGroup>
       <Folder Include="wwwroot\js\" />
-      <Folder Include="wwwroot\NewDirectory1\" />
       <Folder Include="wwwroot\uploads\" />
     </ItemGroup>
 

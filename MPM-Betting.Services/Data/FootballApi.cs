@@ -50,16 +50,18 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     {
         None = 0,
         Cancelled,
+        
         FirstHalf,
         HalfTimeBreak,
         SecondHalf,
-        EndedAfterSecondHalf,
         BreakAfterSecondHalf,
         FirstOvertime,
         OvertimeBreak,
         SecondOvertime,
-        EndedAfterOverTime,
         PenaltyShootout,
+        
+        EndedAfterSecondHalf = 101,
+        EndedAfterOverTime,
         EndedAfterPenaltyShootout
     }
 
