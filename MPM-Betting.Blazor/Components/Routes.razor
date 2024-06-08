@@ -1,8 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using MPM_Betting.Blazor.Components.Account.Shared
 @using Blazorise
-@using MudBlazor
-@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 <Router AppAssembly="typeof(Program).Assembly" >
     <NotFound>
@@ -27,4 +25,6 @@
     <MudThemeProvider @bind-IsDarkMode="@darkMode" @rendermode="InteractiveServer" />
     <MudDialogProvider/>
     <MudSnackbarProvider/>
+    <MudBreakpointProvider/>
+    <MudPopoverProvider/>
 }

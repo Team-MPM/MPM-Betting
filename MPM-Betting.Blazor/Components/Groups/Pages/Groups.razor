@@ -1,4 +1,4 @@
-﻿@page "/Groups/{GroupId:int?}/{Page?}"
+﻿@page "/Groups/{GroupId:int?}/{Page?}/{SeasonId:int?}"
 @using Microsoft.AspNetCore.Authorization
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.User
@@ -9,6 +9,8 @@
 @using Size = MudBlazor.Size
 @using Blazorise
 @using MPM_Betting.DataModel.Betting
+@using MPM_Betting.Services.Data
+@using OneOf
 @using SortDirection = MudBlazor.SortDirection
 @using Width = Blazorise.Width
 
@@ -17,6 +19,7 @@
 @inject UserDomain UserDomain
 @inject NavigationManager NavigationManager
 @inject IServiceProvider ServiceProvider
+@inject FootballApi FootballApi
 
 <div class="group-view flex flex-row grow">
     @if (GroupId != null && m_Model.Group is not null && m_Model.Entry is not null)
@@ -122,7 +125,7 @@
 
                         @foreach (var season in sport.Value)
                         {
-                            <div class="flex flex-row align-content-space-between py-1 px-2">
+                            <div class="flex flex-row align-content-space-between py-1 px-2" onclick="@(() => NavigationManager.NavigateTo($"/groups/{GroupId}/season/{season.Id}"))">
                                 <div>@season.Name</div>
                                 <MudIcon Class="ml-auto" Icon="@Icons.Material.Outlined.Star" Size="Size.Small"></MudIcon>
                             </div>
@@ -278,8 +281,63 @@
                     }
 
                     break;
-                case "league":
-                    <p>league</p>
+                case "season":
+                    <div class="mx-4 mt-2">
+                        <h1 class="alert-heading">Season</h1>
+                    </div>
+
+                    <div class="flex flex-column mx-4 my-6">
+                        @if (m_SeasonModel.Season is not null && m_SeasonModel.Season.Sport == ESportType.Football)
+                        {
+                            <h2>@m_SeasonModel.Season.Name</h2>
+                            <div class="flex flex-row gap-3">
+                                <MudTable Items="@(m_SeasonModel.DataModel.AsT0.LeagueTable.Table)" Class="grow">
+                                    <HeaderContent>
+                                        <MudTh>Rank</MudTh>
+                                        <MudTh>Name</MudTh>
+                                        <MudTh>Played</MudTh>
+                                        <MudTh>Wins</MudTh>
+                                        <MudTh>Draws</MudTh>
+                                        <MudTh>Losses</MudTh>
+                                        <MudTh>+/-</MudTh>
+                                        <MudTh>Points</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd>@context.Rank</MudTd>
+                                        <MudTd>@context.Team.Name</MudTd>
+                                        <MudTd>@context.Played</MudTd>
+                                        <MudTd>@context.Won</MudTd>
+                                        <MudTd>@context.Drawn</MudTd>
+                                        <MudTd>@context.Lost</MudTd>
+                                        <MudTd>@($"{context.GoalsFor}/{context.GoalsAgainst}")</MudTd>
+                                        <MudTd>@context.Points</MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                                <MudTable Items="@(m_SeasonModel.DataModel.AsT0.LeagueTable.Table)" Class="grow">
+                                    <HeaderContent>
+                                        <MudTh>Rank</MudTh>
+                                        <MudTh>Name</MudTh>
+                                        <MudTh>Played</MudTh>
+                                        <MudTh>Wins</MudTh>
+                                        <MudTh>Draws</MudTh>
+                                        <MudTh>Losses</MudTh>
+                                        <MudTh>+/-</MudTh>
+                                        <MudTh>Points</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd>@context.Rank</MudTd>
+                                        <MudTd>@context.Team.Name</MudTd>
+                                        <MudTd>@context.Played</MudTd>
+                                        <MudTd>@context.Won</MudTd>
+                                        <MudTd>@context.Drawn</MudTd>
+                                        <MudTd>@context.Lost</MudTd>
+                                        <MudTd>@($"{context.GoalsFor}/{context.GoalsAgainst}")</MudTd>
+                                        <MudTd>@context.Points</MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            </div>
+                        }
+                    </div>
                     break;
                 default:
                     <p>not found</p>
@@ -414,7 +472,6 @@
                 <FieldLabel>Name</FieldLabel>
                 <TextEdit @bind-Text="m_AddUserModel.Name" Placeholder="Enter name..."/>
             </Field>
-
         </ModalBody>
         <ModalFooter Background="Background.Dark">
             <Button Color="Color.Secondary" Clicked="@HideAddUserModal">Close</Button>
@@ -426,6 +483,7 @@
 @code {
     private int m_OldId = -1;
     [Parameter] public int? GroupId { get; set; }
+    [Parameter] public int? SeasonId { get; set; }
     [Parameter] public string? Page { get; set; } = "overview";
 
 
@@ -437,6 +495,7 @@
     private readonly NewSeasonModel m_NewSeasonModel = new();
     private readonly UpdateGroupModel m_UpdateGroupModel = new();
     private readonly AddUserModel m_AddUserModel = new();
+    private readonly SeasonModel m_SeasonModel = new();
 
     private class Model
     {
@@ -457,6 +516,19 @@
             public int Members { get; set; }
             public int Rank { get; set; }
         }
+    }
+
+    private class SeasonModel
+    {
+        public ESportType SportType = ESportType.None;
+        public Season? Season;
+        public OneOf<FootballSeasonModel> DataModel;
+    }
+
+    private class FootballSeasonModel
+    {
+        public List<FootballApi.GameEntry> Games = new();
+        public FootballApi.LeagueTable LeagueTable;
     }
 
     private class NewSeasonModel
@@ -563,6 +635,51 @@
             var usersResult = await userDomain.GetUsersByGroup(m_Model.Group);
             if (usersResult.IsFaulted) NavigationManager.NavigateTo("/error");
             m_Model.Uges = usersResult.Value;
+            
+            if (SeasonId is not null)
+            {
+                var seasonEntry = m_Model.SeasonEntries.FirstOrDefault(s => s.Season.Id == SeasonId);
+                if (seasonEntry is null) NavigationManager.NavigateTo($"/groups/{GroupId}");
+                
+                var concreteSeasonResult = await userDomain.GetConcreteSeasonById(SeasonId.Value);
+                if (concreteSeasonResult.IsFaulted) NavigationManager.NavigateTo($"/groups/{GroupId}");
+                var isBuiltin = concreteSeasonResult.Value.IsT0;
+
+
+                m_SeasonModel.Season = seasonEntry!.Season;
+                m_SeasonModel.SportType = seasonEntry.Season.Sport;
+
+                if (seasonEntry.Season.Sport is ESportType.Football)
+                {
+                    m_SeasonModel.DataModel = new FootballSeasonModel();
+
+                    if (isBuiltin)
+                    {
+                        var builtInSeason = concreteSeasonResult.Value.AsT0;
+                        var leagueTableTask = FootballApi.GetLeagueTable(builtInSeason.ReferenceId, null);
+                        var gameEntriesTask = FootballApi.GetGameEntries(builtInSeason.ReferenceId, null);
+
+                        await Task.WhenAll(leagueTableTask, gameEntriesTask);
+
+                        if (leagueTableTask.Result.IsFaulted) NavigationManager.NavigateTo("/error");
+                        if (gameEntriesTask.Result.IsFaulted) NavigationManager.NavigateTo("/error");
+
+                        m_SeasonModel.DataModel.AsT0.LeagueTable = leagueTableTask.Result.Value;
+                        m_SeasonModel.DataModel.AsT0.Games = gameEntriesTask.Result.Value;
+                    }
+                    else
+                    {
+                        var customInSeason = concreteSeasonResult.Value.AsT1;
+                        // TODO: Implement custom season handler
+                    }
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/error");
+                }
+                
+            }
+            
         }
 
 

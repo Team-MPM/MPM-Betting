@@ -267,7 +267,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     /// </exception>
     public async Task<MpmResult<List<GameEntry>>> GetGameEntries(int leagueId, DateOnly? date)
     {
-        return await cache.Get(TimeSpan.FromSeconds(3), 
+        return await cache.Get(TimeSpan.FromSeconds(5), 
             $"game-entries-l:{leagueId}-d:{date ?? DateOnly.MaxValue}", async () =>
             {
                 var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
