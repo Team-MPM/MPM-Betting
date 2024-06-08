@@ -52,12 +52,13 @@ public partial class UserDomain
     private static readonly Func<MpmDbContext, MpmGroup, IAsyncEnumerable<SeasonEntry?>> s_GetSeasonEntriesByGroup =
         EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup group) =>
             dbContext.SeasonEntries
-                .Where(se => se.Group == group));
+                .Where(se => se.Group == group)
+                .Include(se => se.Season));
 
-    private static readonly Func<MpmDbContext, MpmGroup, Season, Task<SeasonEntry?>>
+    private static readonly Func<MpmDbContext, MpmGroup, int, Task<SeasonEntry?>>
         s_GetSeasonEntriesByGroupAndSeason =
-            EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup group, Season season) =>
-                dbContext.SeasonEntries.FirstOrDefault(se => se.Season == season && se.Group == group));
+            EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup group, int seasonId) =>
+                dbContext.SeasonEntries.FirstOrDefault(se => se.SeasonId == seasonId && se.Group == group));
 
     private static readonly Func<MpmDbContext, int, Task<Season?>> s_GetSeasonById =
         EF.CompileAsyncQuery((MpmDbContext dbContext, int id) =>

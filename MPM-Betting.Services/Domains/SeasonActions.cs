@@ -44,7 +44,7 @@ public partial class UserDomain
         if(season is null)
             return s_SeasonNotFoundException;
 
-        var existingSeasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var existingSeasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, seasonId);
         if (existingSeasonEntry is not null)
             return s_AlreadyExistsException;
         
@@ -53,27 +53,26 @@ public partial class UserDomain
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        m_DbContext.SeasonEntries.Add(new SeasonEntry()
+        await m_DbContext.SeasonEntries.AddAsync(new SeasonEntry()
         {
-            Group = group,
-            Season = season
+            GroupId = group.Id,
+            SeasonId = seasonId
         });
         await m_DbContext.SaveChangesAsync();
         
         return true;
     }
     
-    public async Task<MpmResult<bool>> RemoveSeasonFromGroup(MpmGroup group, Season season)
+    public async Task<MpmResult<bool>> RemoveSeasonFromGroup(MpmGroup group, int seasonId)
     {
         ArgumentNullException.ThrowIfNull(group);
-        ArgumentNullException.ThrowIfNull(season);
         if (m_User is null) return s_NoUserException;
         
         var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, seasonId);
         if (seasonEntry is null)
             return s_GroupNotFoundException;
         
@@ -140,7 +139,7 @@ public partial class UserDomain
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season.Id);
         if (seasonEntry is null)
             return s_SeasonNotFoundException;
         
@@ -166,7 +165,7 @@ public partial class UserDomain
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
 
-        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season.Id);
         if (seasonEntry is null)
             return s_SeasonNotFoundException;
         
@@ -190,7 +189,7 @@ public partial class UserDomain
         if (uge is null)
             return s_AccessDeniedException;
         
-        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season.Id);
         if (seasonEntry is null)
             return s_SeasonNotFoundException;
         

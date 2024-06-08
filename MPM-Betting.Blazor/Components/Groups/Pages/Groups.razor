@@ -236,14 +236,14 @@
                             
                             <div class="flex flex-row mt-4 mb-4">
                                 <Button TextColor="TextColor.Light" Background="Background.Primary" @onclick="ShowAddUserModal" Class="mx-2">Add</Button>
-                                <p class="mx-4">@m_Model.LeagueSettingsStatus</p>
+                                <p class="mx-4">@m_Model.UserSettingsStatus</p>
                             </div>
                         </div>
 
 
                         <div class="px-4 pt-1 pb-1 m-4 settings-box">
                             <div class="mx-2 my-4">
-                                <h4>Leagues</h4>
+                                <h4>Seasons</h4>
                             </div>
 
                             <div class="flex flex-row grow justify-between my-2">
@@ -257,7 +257,7 @@
                                         <TemplateColumn Editable="false">
                                             <CellTemplate>
                                                 <MudStack Row>
-                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
+                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small" OnClick="@(async () => await RemoveSeason(context.Item))">Remove</MudButton>
                                                     @if (context.Item is CustomSeason)
                                                     {
                                                         <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Size="Size.Small">Edit</MudButton>
@@ -269,7 +269,7 @@
                                 </MudDataGrid>
                             </div>
 
-                            <p class="mx-4 alert-danger">@m_Model.LeagueSettingsStatus</p>
+                            <p class="mx-4 mt-4">@m_Model.SeasonSettingsStatus</p>
                         </div>
                     }
                     else
@@ -448,7 +448,8 @@
         public MpmUser? User { get; set; }
         public List<UserGroupEntry> Uges { get; set; } = [];
         public List<GroupEntry> GroupEntries { get; set; } = [];
-        public string LeagueSettingsStatus { get; set; } = "";
+        public string UserSettingsStatus { get; set; } = "";
+        public string SeasonSettingsStatus { get; set; } = "";
 
         public class GroupEntry
         {
@@ -729,11 +730,23 @@
         var result = await UserDomain.RemoveUserFromGroup(m_Model.Group!, itemMpmUser.Id);
         if (result.IsFaulted)
         {
-            m_Model.LeagueSettingsStatus = "An error occurred";
+            m_Model.UserSettingsStatus = "An error occurred";
         }
 
         await OnParametersSetAsync();
-        m_Model.LeagueSettingsStatus = $"Removed {itemMpmUser.UserName} from group";
+        m_Model.UserSettingsStatus = $"Removed {itemMpmUser.UserName} from group";
+    }
+
+    private async Task RemoveSeason(Season contextItem)
+    {
+        var result = await UserDomain.RemoveSeasonFromGroup(m_Model.Group!, contextItem.Id);
+        if (result.IsFaulted)
+        {
+            m_Model.SeasonSettingsStatus = "An error occurred";
+        }
+
+        await OnParametersSetAsync();
+        m_Model.SeasonSettingsStatus = $"Removed {contextItem.Name} from group";
     }
 
 }
