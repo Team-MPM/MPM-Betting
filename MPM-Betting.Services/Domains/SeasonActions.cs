@@ -1,5 +1,6 @@
 ﻿using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.User;
+using OneOf;
 
 namespace MPM_Betting.Services.Domains;
 
@@ -200,8 +201,7 @@ public partial class UserDomain
             
         return games;
     }
-    
- 
+     
     public async Task<MpmResult<BuiltinSeason>> GetCurrentBuiltInSeasonById(int id)
     {
         //Returns most current, doesn't check if the season is active
@@ -215,5 +215,22 @@ public partial class UserDomain
         }
         
         return season;
+    }
+    
+    public async Task<MpmResult<OneOf<BuiltinSeason, CustomSeason>>> GetConcreteSeasonById(int id)
+    {
+        var customSeason = await m_DbContext.CustomSeasons.FindAsync(id);
+        if (customSeason is not null)
+        {
+            return new MpmResult<OneOf<BuiltinSeason, CustomSeason>>(customSeason);
+        }
+        
+        var builtinSeason = await m_DbContext.BuiltinSeasons.FindAsync(id);
+        if (builtinSeason is not null)
+        {
+            return new MpmResult<OneOf<BuiltinSeason, CustomSeason>>(builtinSeason);
+        }
+        
+        return s_SeasonNotFoundException;
     }
 }

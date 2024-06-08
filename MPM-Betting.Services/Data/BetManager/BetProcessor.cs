@@ -83,6 +83,7 @@ public class BetProcessor(
                 {
                     bet.Hit = true;
                     bet.Completed = true;
+                    bet.ResultHit = true;
                 }
             }
             else if (home < away)
@@ -92,6 +93,7 @@ public class BetProcessor(
                 {
                     bet.Hit = true;
                     bet.Completed = true;
+                    bet.ResultHit = true;
                 }
             }
             else
@@ -101,7 +103,13 @@ public class BetProcessor(
                 {
                     bet.Hit = true;
                     bet.Completed = true;
+                    bet.ResultHit = true;
                 }
+            }
+            
+            if (bet.HomeScore == gameData.GameEntry.Score.HomeScore && bet.AwayScore == gameData.GameEntry.Score.AwayScore)
+            {
+                bet.ScoreHit = true;
             }
 
             if (bet.Group is MpmGroup group)
