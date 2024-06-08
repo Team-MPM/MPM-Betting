@@ -22,16 +22,16 @@ public partial class UserDomain
         ArgumentNullException.ThrowIfNull(group);
         if (m_User is null) return s_NoUserException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
         if (uge is null)
             return s_AccessDeniedException;
 
-        List<SeasonEntry> _se = [];
+        List<SeasonEntry> ses = [];
         
         await foreach(var se in s_GetSeasonEntriesByGroup.Invoke(m_DbContext, group))
-            _se.Add(se);
+            ses.Add(se!);
         
-        return _se;
+        return ses;
     }
     
     
@@ -44,36 +44,35 @@ public partial class UserDomain
         if(season is null)
             return s_SeasonNotFoundException;
 
-        var existingSeasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var existingSeasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, seasonId);
         if (existingSeasonEntry is not null)
             return s_AlreadyExistsException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        m_DbContext.SeasonEntries.Add(new SeasonEntry()
+        await m_DbContext.SeasonEntries.AddAsync(new SeasonEntry()
         {
-            Group = group,
-            Season = season
+            GroupId = group.Id,
+            SeasonId = seasonId
         });
         await m_DbContext.SaveChangesAsync();
         
         return true;
     }
     
-    public async Task<MpmResult<bool>> RemoveSeasonFromGroup(MpmGroup group, Season season)
+    public async Task<MpmResult<bool>> RemoveSeasonFromGroup(MpmGroup group, int seasonId)
     {
         ArgumentNullException.ThrowIfNull(group);
-        ArgumentNullException.ThrowIfNull(season);
         if (m_User is null) return s_NoUserException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, seasonId);
         if (seasonEntry is null)
             return s_GroupNotFoundException;
         
@@ -96,7 +95,7 @@ public partial class UserDomain
         if (name.Length > 50 || description.Length > 2000)
             return s_BadWordException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
@@ -135,12 +134,12 @@ public partial class UserDomain
         ArgumentNullException.ThrowIfNull(game);
         if (m_User is null) return s_NoUserException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season.Id);
         if (seasonEntry is null)
             return s_SeasonNotFoundException;
         
@@ -161,12 +160,12 @@ public partial class UserDomain
         ArgumentNullException.ThrowIfNull(game);
         if (m_User is null) return s_NoUserException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
 
-        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season.Id);
         if (seasonEntry is null)
             return s_SeasonNotFoundException;
         
@@ -186,26 +185,26 @@ public partial class UserDomain
         ArgumentNullException.ThrowIfNull(season);
         if (m_User is null) return s_NoUserException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
         if (uge is null)
             return s_AccessDeniedException;
         
-        var seasonEntry = s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season);
+        var seasonEntry = await s_GetSeasonEntriesByGroupAndSeason.Invoke(m_DbContext, group, season.Id);
         if (seasonEntry is null)
             return s_SeasonNotFoundException;
         
-        List<Game> _games = [];
+        List<Game> games = [];
 
         await foreach (var game in s_GetSeasonEntriesByGameAndSeason.Invoke(m_DbContext, group, season))
-            _games.Add(game);
+            games.Add(game);
             
-        return _games;
+        return games;
     }
     
  
     public async Task<MpmResult<BuiltinSeason>> GetCurrentBuiltInSeasonById(int id)
     {
-        //Returns most current, doesnt check if season is active
+        //Returns most current, doesn't check if the season is active
 
         var season = await s_GetCurrentBuiltInSeasonById.Invoke(m_DbContext, id);
         

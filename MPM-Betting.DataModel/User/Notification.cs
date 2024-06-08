@@ -7,6 +7,7 @@ public class Notification(MpmUser target, string message)
     [Key]
     public int Id { get; set; }
 
+    public string TargetId { get; set; }
     public MpmUser Target { get; set; } = target;
 
     [StringLength(200)]
@@ -16,5 +17,5 @@ public class Notification(MpmUser target, string message)
     
     public DateTime Date { get; set; } = DateTime.Now;
     
-    private Notification() : this(null!, null!) {}
+    public Notification() : this(null!, null!) {}
 }

@@ -8,10 +8,10 @@ namespace MPM_Betting.Services.Domains;
 
 public partial class UserDomain
 {
-    private static readonly Func<MpmDbContext, MpmGroup, MpmUser, Task<UserGroupEntry?>> s_GetUserGroupEntryQuery =
-        EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup Group, MpmUser user) =>
+    private static readonly Func<MpmDbContext, int, string, Task<UserGroupEntry?>> s_GetUserGroupEntryQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, int groupId, string userId) =>
             dbContext.UserGroupEntries
-                .FirstOrDefault(uge => uge.Group == Group && uge.MpmUser == user));
+                .FirstOrDefault(uge => uge.GroupId == groupId && uge.MpmUserId == userId));
 
     private static readonly Func<MpmDbContext, MpmUser, IAsyncEnumerable<MpmGroup>> s_GetUserGroupsQuery =
         EF.CompileAsyncQuery((MpmDbContext dbContext, MpmUser user) =>
@@ -52,12 +52,13 @@ public partial class UserDomain
     private static readonly Func<MpmDbContext, MpmGroup, IAsyncEnumerable<SeasonEntry?>> s_GetSeasonEntriesByGroup =
         EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup group) =>
             dbContext.SeasonEntries
-                .Where(se => se.Group == group));
+                .Where(se => se.Group == group)
+                .Include(se => se.Season));
 
-    private static readonly Func<MpmDbContext, MpmGroup, Season, Task<SeasonEntry?>>
+    private static readonly Func<MpmDbContext, MpmGroup, int, Task<SeasonEntry?>>
         s_GetSeasonEntriesByGroupAndSeason =
-            EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup group, Season season) =>
-                dbContext.SeasonEntries.FirstOrDefault(se => se.Season == season && se.Group == group));
+            EF.CompileAsyncQuery((MpmDbContext dbContext, MpmGroup group, int seasonId) =>
+                dbContext.SeasonEntries.FirstOrDefault(se => se.SeasonId == seasonId && se.Group == group));
 
     private static readonly Func<MpmDbContext, int, Task<Season?>> s_GetSeasonById =
         EF.CompileAsyncQuery((MpmDbContext dbContext, int id) =>
@@ -160,5 +161,11 @@ public partial class UserDomain
         EF.CompileAsyncQuery((MpmDbContext dbContext, int referenceId, string userId, MpmGroup? group) =>
             dbContext.FootballGameBets
                 .Any(b => b.Game.ReferenceId == referenceId && b.Group == group && b.UserId == userId));
+    
+    
+    
+    private static readonly Func<MpmDbContext, string, Task<MpmUser?>> s_GetUserByNameOrMailQuery =
+        EF.CompileAsyncQuery((MpmDbContext dbContext, string name) =>
+            dbContext.Users.FirstOrDefault(u => u.UserName == name && u.Email == name));
     
 }

@@ -13,6 +13,10 @@ public partial class UserDomain
     public class GroupNotFoundException : Exception;
 
     private static readonly GroupNotFoundException s_GroupNotFoundException = new();
+    
+    public class UserNotFoundException : Exception;
+
+    private static readonly UserNotFoundException s_UserNotFoundException = new();
 
     public class SeasonNotFoundException : Exception;
 

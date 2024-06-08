@@ -8,8 +8,8 @@
 @using Margin = Blazorise.Margin
 @using Size = MudBlazor.Size
 @using Blazorise
-@using LanguageExt
 @using MPM_Betting.DataModel.Betting
+@using SortDirection = MudBlazor.SortDirection
 @using Width = Blazorise.Width
 
 @attribute [Authorize]
@@ -18,7 +18,7 @@
 @inject NavigationManager NavigationManager
 @inject IServiceProvider ServiceProvider
 
-<div class="group-view grow">
+<div class="group-view flex flex-row grow">
     @if (GroupId != null && m_Model.Group is not null && m_Model.Entry is not null)
     {
         var groupUrl = $"/groups/{m_Model.Group.Id}";
@@ -145,10 +145,30 @@
                     <p>overview</p>
                     break;
                 case "ranking":
-                    <p>ranking</p>
+                    // TODO: Ranking for different sport types
+                    <div class="mx-4 mt-2">
+                        <h1 class="alert-heading">Ranking</h1>
+                    </div>
+
+                    <div class="flex flex-column mx-4 my-6">
+                        <MudTable Items="@m_Model.Uges" Class="grow">
+                            <HeaderContent>
+                                <MudTh>Username</MudTh>
+                                <MudTh>Email</MudTh>
+                                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<int, object>(x=>x)">Score</MudTableSortLabel></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd>@context.MpmUser.UserName</MudTd>
+                                <MudTd>@context.MpmUser.Email</MudTd>
+                                <MudTd>@(context.Score)</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </div>
                     break;
                 case "users":
-                    <p>users</p>
+                    <div class="settings-box">
+                        <p>users</p>
+                    </div>
                     break;
                 case "chat":
                     <p>chat</p>
@@ -205,7 +225,7 @@
                                         <TemplateColumn Editable="false">
                                             <CellTemplate>
                                                 <MudStack Row>
-                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
+                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small" OnClick="@(async () => await RemoveUser(context.Item.MpmUser))">Remove</MudButton>
                                                 </MudStack>
                                             </CellTemplate>
                                         </TemplateColumn>
@@ -213,13 +233,17 @@
                                 </MudDataGrid>
                             </div>
 
-                            <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                            
+                            <div class="flex flex-row mt-4 mb-4">
+                                <Button TextColor="TextColor.Light" Background="Background.Primary" @onclick="ShowAddUserModal" Class="mx-2">Add</Button>
+                                <p class="mx-4">@m_Model.UserSettingsStatus</p>
+                            </div>
                         </div>
 
 
                         <div class="px-4 pt-1 pb-1 m-4 settings-box">
                             <div class="mx-2 my-4">
-                                <h4>Leagues</h4>
+                                <h4>Seasons</h4>
                             </div>
 
                             <div class="flex flex-row grow justify-between my-2">
@@ -233,7 +257,7 @@
                                         <TemplateColumn Editable="false">
                                             <CellTemplate>
                                                 <MudStack Row>
-                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small">Remove</MudButton>
+                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small" OnClick="@(async () => await RemoveSeason(context.Item))">Remove</MudButton>
                                                     @if (context.Item is CustomSeason)
                                                     {
                                                         <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Size="Size.Small">Edit</MudButton>
@@ -245,7 +269,7 @@
                                 </MudDataGrid>
                             </div>
 
-                            <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                            <p class="mx-4 mt-4">@m_Model.SeasonSettingsStatus</p>
                         </div>
                     }
                     else
@@ -335,7 +359,7 @@
                                               .OrderBy(s => s!.Name)
                                               .ToList() ?? [])
                                 {
-                                    <SelectItem Value="@season!.Id">@season!.Sport: @season!.Name</SelectItem>
+                                    <SelectItem Value="@season!.Id">@season.Sport: @season.Name</SelectItem>
                                 }
                             </Select>
                         </Field>
@@ -378,9 +402,30 @@
     </ModalContent>
 </Blazorise.Modal>
 
+<Blazorise.Modal @bind-Visible="m_AddUserModel.Visible">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Add User</ModalTitle>
+            <CloseButton/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark">
+            <Text>@m_AddUserModel.Status</Text>
+            <Field>
+                <FieldLabel>Name</FieldLabel>
+                <TextEdit @bind-Text="m_AddUserModel.Name" Placeholder="Enter name..."/>
+            </Field>
+
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Color.Secondary" Clicked="@HideAddUserModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@(async () => await AddUser())">Add</Button>
+        </ModalFooter>
+    </ModalContent>
+</Blazorise.Modal>
+
 @code {
     private int m_OldId = -1;
-    [Parameter] public int? GroupId { get; set; } = default!;
+    [Parameter] public int? GroupId { get; set; }
     [Parameter] public string? Page { get; set; } = "overview";
 
 
@@ -391,6 +436,7 @@
     private readonly Model m_Model = new();
     private readonly NewSeasonModel m_NewSeasonModel = new();
     private readonly UpdateGroupModel m_UpdateGroupModel = new();
+    private readonly AddUserModel m_AddUserModel = new();
 
     private class Model
     {
@@ -402,6 +448,8 @@
         public MpmUser? User { get; set; }
         public List<UserGroupEntry> Uges { get; set; } = [];
         public List<GroupEntry> GroupEntries { get; set; } = [];
+        public string UserSettingsStatus { get; set; } = "";
+        public string SeasonSettingsStatus { get; set; } = "";
 
         public class GroupEntry
         {
@@ -428,6 +476,14 @@
     {
         public string Name = "";
         public string Description = "";
+        public string Status = "";
+    }
+    
+    private class AddUserModel
+    {
+        public bool Visible;
+        public string Name = "";
+        public EGroupRole Role = EGroupRole.Member;
         public string Status = "";
     }
 
@@ -488,8 +544,10 @@
 
             m_Model.Group = m_GroupResult.Value.group;
             m_Model.Entry = m_GroupResult.Value.entry;
+            
+            if (m_Model.Group is null || m_Model.Entry is null) NavigationManager.NavigateTo("/error");
 
-            var seasonsResult = await userDomain.GetGroupSeasons(m_Model.Group);
+            var seasonsResult = await userDomain.GetGroupSeasons(m_Model.Group!);
             if (seasonsResult.IsFaulted) NavigationManager.NavigateTo("/error");
 
             m_Model.SeasonEntries = seasonsResult.Value;
@@ -499,7 +557,7 @@
                 .GroupBy(s => s.Sport)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            m_UpdateGroupModel.Name = m_Model.Group.Name;
+            m_UpdateGroupModel.Name = m_Model.Group!.Name;
             m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
 
             var usersResult = await userDomain.GetUsersByGroup(m_Model.Group);
@@ -519,6 +577,52 @@
     private void HideNewSeasonModal()
     {
         m_NewSeasonModel.Visible = false;
+    }
+    
+    private void ShowAddUserModal()
+    {
+        m_AddUserModel.Visible = true;
+    }
+
+    private void HideAddUserModal()
+    {
+        m_AddUserModel.Visible = false;
+    }
+
+    private async Task AddUser()
+    {
+        var userResult = await UserDomain.GetUserIdByNameOrMail(m_AddUserModel.Name);
+        
+        if (userResult.Exception is UserDomain.UserNotFoundException)
+        {
+            m_AddUserModel.Status = "User not found";
+            return;
+        }
+
+        var result = await UserDomain.AddUserToGroup(m_Model.Group!, userResult.Value, m_AddUserModel.Role);
+
+        if (result.IsSuccess)
+        {
+            await OnParametersSetAsync();
+            m_AddUserModel.Visible = false;
+            m_AddUserModel.Name = "";
+            m_AddUserModel.Status = "";
+            return;
+        }
+        
+        if (result.Exception is UserDomain.AccessDeniedException)
+        {
+            m_AddUserModel.Status = "Access denied";
+            return;
+        }
+        
+        if (result.Exception is UserDomain.AlreadyExistsException)
+        {
+            m_AddUserModel.Status = "User is already in group";
+            return;
+        }
+        
+        m_AddUserModel.Status = "An error occurred";
     }
 
     private async Task CreateSeason()
@@ -619,6 +723,30 @@
         m_UpdateGroupModel.Status = "Updated";
         m_UpdateGroupModel.Name = m_Model.Group.Name;
         m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
+    }
+
+    private async Task RemoveUser(MpmUser itemMpmUser)
+    {
+        var result = await UserDomain.RemoveUserFromGroup(m_Model.Group!, itemMpmUser.Id);
+        if (result.IsFaulted)
+        {
+            m_Model.UserSettingsStatus = "An error occurred";
+        }
+
+        await OnParametersSetAsync();
+        m_Model.UserSettingsStatus = $"Removed {itemMpmUser.UserName} from group";
+    }
+
+    private async Task RemoveSeason(Season contextItem)
+    {
+        var result = await UserDomain.RemoveSeasonFromGroup(m_Model.Group!, contextItem.Id);
+        if (result.IsFaulted)
+        {
+            m_Model.SeasonSettingsStatus = "An error occurred";
+        }
+
+        await OnParametersSetAsync();
+        m_Model.SeasonSettingsStatus = $"Removed {contextItem.Name} from group";
     }
 
 }
