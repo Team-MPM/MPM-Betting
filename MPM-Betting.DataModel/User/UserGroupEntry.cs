@@ -36,5 +36,5 @@ public class UserGroupEntry(string userId, MpmGroup group)
     
     public List<ScoreEntry> ScoreEntries { get; set; } = [];
     
-    private UserGroupEntry() : this(null!, null!) { }
+    public UserGroupEntry() : this(null!, null!) { }
 }

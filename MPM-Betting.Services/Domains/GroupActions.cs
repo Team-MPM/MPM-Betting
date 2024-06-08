@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
-using MPM_Betting.DataModel.Betting;
 using MPM_Betting.DataModel.User;
 
 namespace MPM_Betting.Services.Domains;
@@ -38,12 +37,12 @@ public partial class UserDomain
     {
         if (m_User is null) return s_NoUserException;
 
-        List<MpmGroup> _group = [];
+        List<MpmGroup> groups = [];
 
-        await foreach(var Group in s_GetGroupsBySeasonChosen.Invoke(m_DbContext,id))
-            _group.Add(Group);
+        await foreach(var group in s_GetGroupsBySeasonChosen.Invoke(m_DbContext,id))
+            groups.Add(group);
         
-        return _group;
+        return groups;
     }
 
     public async Task<MpmResult<MpmGroup>> CreateGroup(string name, string description)
@@ -111,7 +110,7 @@ public partial class UserDomain
         if (name.Length > 30)
             return s_BadWordException;
 
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
@@ -137,7 +136,7 @@ public partial class UserDomain
         if (description.Length > 1024)
             return s_BadWordException;
 
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group, m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         var groupEntry = await s_GetGroupById.Invoke(m_DbContext,group.Id);
@@ -151,27 +150,43 @@ public partial class UserDomain
         return true;
     }
     
-    public async Task<MpmResult<bool>> AddUserToGroup(MpmGroup group, MpmUser target, EGroupRole role)
+    /// <summary>
+    /// Adds a user to a group with a specific role
+    /// </summary>
+    /// <param name="group"></param>
+    /// <param name="targetId">Expected to correspond to valid user</param>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    public async Task<MpmResult<bool>> AddUserToGroup(MpmGroup group, string targetId, EGroupRole role)
     {
-        ArgumentNullException.ThrowIfNull(group);
-        ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(targetId);
         if (m_User is null) return s_NoUserException;
         
         if (role is EGroupRole.Owner) return s_AccessDeniedException;
         
-        var existingUge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext,group,target);
+        var existingUge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, targetId);
         if (existingUge is not null)
             return s_AlreadyExistsException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext,group,m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
 
-        m_DbContext.UserGroupEntries.Add(new UserGroupEntry(target.Id, group) { Role = role });
+        await m_DbContext.UserGroupEntries.AddAsync(new UserGroupEntry
+        {
+            MpmUserId = targetId,
+            GroupId = group.Id,
+            Role = role
+        });
 
-        m_DbContext.Notifications.Add(new Notification(target,
-            $"You have been added to Group {group.Name} by {m_User.UserName}"));
+        await m_DbContext.Notifications.AddAsync(new Notification
+        {
+            Date = DateTime.Now,
+            TargetId = targetId,
+            Message = $"You have been added to Group '{group.Name}' by {m_User.UserName}"
+        });
+        
         await m_DbContext.SaveChangesAsync();
 
         return true;
@@ -185,12 +200,12 @@ public partial class UserDomain
 
         if (role is EGroupRole.Owner) return s_AccessDeniedException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext,group,m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not EGroupRole.Owner)
             return s_AccessDeniedException;
         
-        var targetUge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext,group,target);
+        var targetUge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, target.Id);
         if (targetUge is null)
             return s_GroupNotFoundException;
         
@@ -203,18 +218,18 @@ public partial class UserDomain
         return true;
     }
     
-    public async Task<MpmResult<bool>> RemoveUserFromGroup(MpmGroup group, MpmUser target)
+    public async Task<MpmResult<bool>> RemoveUserFromGroup(MpmGroup group, string targetId)
     {
         ArgumentNullException.ThrowIfNull(group);
-        ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(targetId);
         if (m_User is null) return s_NoUserException;
         
-        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext,group,m_User);
+        var uge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, m_User.Id);
 
         if (uge?.Role is not (EGroupRole.Owner or EGroupRole.Admin))
             return s_AccessDeniedException;
         
-        var targetUge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext,group,target);
+        var targetUge = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id, targetId);
         if (targetUge is null)
             return s_GroupNotFoundException;
         
@@ -222,11 +237,15 @@ public partial class UserDomain
             return s_AccessDeniedException;
 
         m_DbContext.UserGroupEntries.Remove(targetUge);
+
+        m_DbContext.Notifications.Add(new Notification
+        {
+            Date = DateTime.Now,
+            TargetId = targetId,
+            Message = $"You have been removed from Group {group.Name} by {m_User.UserName}"
+        });
+
         await m_DbContext.SaveChangesAsync();
-
-        m_DbContext.Notifications.Add(new Notification(target,
-            $"You have been removed from Group {group.Name} by {m_User.UserName}"));
-
         return true;
     }
     public async Task<MpmResult<List<UserGroupEntry>>> GetUsersByGroup(MpmGroup group)
@@ -234,15 +253,15 @@ public partial class UserDomain
         ArgumentNullException.ThrowIfNull(group);
         if (m_User is null) return s_NoUserException;
         
-        var query = await s_GetUserGroupEntryQuery.Invoke(m_DbContext,group,m_User);
+        var query = await s_GetUserGroupEntryQuery.Invoke(m_DbContext, group.Id ,m_User.Id);
         if (query is null)
             return s_AccessDeniedException;
-        List<UserGroupEntry> _uges = [];
+        List<UserGroupEntry> uges = [];
         
-        await foreach(var uge in s_GetUserGroupEntryByGroup.Invoke(m_DbContext,group))
-            _uges.Add(uge); 
+        await foreach(var uge in s_GetUserGroupEntryByGroup.Invoke(m_DbContext, group))
+            uges.Add(uge!); 
         
-        return _uges;
+        return uges;
     }
     
      public async Task<MpmResult<int>> GetUserPosition(MpmGroup group)
@@ -250,13 +269,13 @@ public partial class UserDomain
         ArgumentNullException.ThrowIfNull(group);
         if(m_User == null) return s_NoUserException;
         
-        List<UserGroupEntry> _uges = [];
+        List<UserGroupEntry> uges = [];
         await foreach(var uge in s_GetUserGroupEntriesByGroup.Invoke(m_DbContext, group))
-           _uges.Add(uge);
+           uges.Add(uge!);
         
-        _uges.OrderBy(uge => uge.Score);
+        uges = uges.OrderBy(uge => uge.Score).ToList();
         
-        return _uges.FindIndex(uge => uge.MpmUser == m_User)+1;
+        return uges.FindIndex(uge => uge.MpmUser == m_User) + 1;
     }
      
     public async Task<MpmResult<(MpmGroup group, UserGroupEntry entry)>> GetGroupByIdWithEntry(int id)

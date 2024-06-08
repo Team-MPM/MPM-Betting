@@ -6,6 +6,17 @@ namespace MPM_Betting.Services.Domains;
 
 public partial class UserDomain
 {
+    public async Task<MpmResult<string>> GetUserIdByNameOrMail(string searchTerm)
+    {
+        ArgumentNullException.ThrowIfNull(searchTerm);
+
+        var result = await s_GetUserByNameOrMailQuery.Invoke(m_DbContext, searchTerm);
+
+        if (result is null) return s_UserNotFoundException;
+        
+        return result.Id;
+    }
+    
     public async Task<MpmResult<List<Notification>>> GetAllNotificationOfUser()
     {
         if (m_User is null) return s_NoUserException;
