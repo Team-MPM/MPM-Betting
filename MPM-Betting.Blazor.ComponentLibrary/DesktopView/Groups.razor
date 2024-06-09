@@ -2,6 +2,7 @@
 @using MPM_Betting.Services.Data
 @using MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
 @using Blazorise
+@using LanguageExt.Pipes
 @using Microsoft.AspNetCore.Authorization
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.User
@@ -33,15 +34,15 @@
         }
         else
         {
-            @foreach(var group in GroupsList)
+            @foreach(var groupEntry  in GroupsAndPlaces)
             {
                 <div class="GroupEntry row">
                     <div class="col-3 GroupEntryImageBox">
                         <img width="60%" src="./Images/Logo_cropped.png" alt="image"/>
                     </div>
-                    <div class="col-7">@group.Name</div>
+                    <div class="col-7">@groupEntry.Item1.Name</div>
                     @* TODO Abfrage >:c *@
-                    @switch(1)
+                    @switch(groupEntry.Item2)
                     {
                         case 1:
                             <div class="col-2 gold">1st</div>
@@ -53,7 +54,7 @@
                             <div class="col-2 bronze">3rd</div>
                             break;
                         default:
-                            <div class="col-2">4th</div>
+                            <div class="col-2">@(groupEntry.Item2)th</div>
                             break;
                     }
                 </div>
@@ -66,9 +67,11 @@
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? UserTask { get; set; }
     MpmUser? User;
     public List<MpmGroup> GroupsList { get; set; }
-
+    public List<Tuple<MpmGroup, int>> GroupsAndPlaces { get; set; }
+    
     protected override async Task OnInitializedAsync()
     {
+        GroupsAndPlaces = new List<Tuple<MpmGroup, int>>();
         if (UserTask is null)
             return;
         
@@ -85,6 +88,16 @@
             GroupsList = groupResult.Value;
             StateHasChanged();
         }
+
+        foreach (var group in GroupsList)
+        {
+            var result = await UserDomain.GetUserPosition(group);
+            if (result.IsSuccess)
+            {
+                GroupsAndPlaces.Add(new Tuple<MpmGroup, int>(group, result.Value));
+            }
+        }
+        
     }
     
     private void SwitchToGroups()
@@ -92,25 +105,6 @@
         NavigationManager.NavigateTo("/groups");
     }
 
-    public class TestGroups
-    {
-        public TestGroups() {}
-
-        public TestGroups(string name, int members, string description, int points, int position)
-        {
-            Name = name;
-            Members = members;
-            Description = description;
-            Points = points;
-            Position = position;
-        }
-        
-        public string Name { get; set; }
-        public int Members { get; set; }
-        public string Description { get; set; }
-        public int Points { get; set; }
-        public int Position { get; set; }
-    }
     
     
     
