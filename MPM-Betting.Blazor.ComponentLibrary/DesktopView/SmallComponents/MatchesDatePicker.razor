@@ -1,5 +1,8 @@
 ﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
 @using Blazorise
+@using LanguageExt
+@using OneOf.Types
+@using SharpCompress
 @attribute [StreamRendering(true)]
 
 @* TODO - Search -> Ask gabriel *@
@@ -9,12 +12,12 @@
         <div onclick="@(() => UpdateDay(-1))" class="DateLeftArrow"><img src="./Images/Arrow_left.png"/></div>
         <div class="DatePicker">
             <Addons>
-                <Addon AddonType="AddonType.Body">
-                    <DatePicker @ref="@datePicker" TValue="DateTime?" @bind-Date="@Value"/>
+                <Addon AddonType="AddonType.Body" >
+                    <DatePicker class="DatePicker" Background="Background.Secondary" TextColor="TextColor.Light" @ref="@datePicker" TextAlignment="TextAlignment.Center" TValue="DateTime?" @bind-Date="@Value"/>
                 </Addon>
                 <Addon AddonType="AddonType.End">
-                    <Button Color="Color.Light" Clicked="@(() => datePicker.ToggleAsync())">
-                        <Icon Name="IconName.CalendarDay"/>
+                    <Button Background="Background.Secondary" Color="Color.Light" Clicked="@(() => datePicker.ToggleAsync())">
+                        <Icon Name="IconName.CalendarCheck"/>
                     </Button>
                 </Addon>
             </Addons>
@@ -25,9 +28,10 @@
 
 
 @code {
+    [Parameter]
+    public Matches MatchesPage { get; set; }
     DatePicker<DateTime?> datePicker;
 
-    public bool test { get; set; }
     
     DateTime? date;
 
@@ -38,12 +42,14 @@
         {
             date = value;
             StateHasChanged();
+            MatchesPage.SelectedDate = value.IsNull() ? DateTime.Now : value.Value;
         }
     }
     
+    
     protected override async Task OnInitializedAsync()
     {
-        Value = DateTime.Now;
+        Value = new DateTime(2024, 5, 19);
     }
     
     public bool _isOpen = true;

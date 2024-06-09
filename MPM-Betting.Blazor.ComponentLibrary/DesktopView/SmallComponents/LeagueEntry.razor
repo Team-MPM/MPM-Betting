@@ -1,13 +1,57 @@
-﻿@using MPM_Betting.Services.Data
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.User
+@using MPM_Betting.Services.Data
+@using MPM_Betting.Services.Domains
 @namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView.SmallComponents
+@inject NavigationManager NavigationManager
+@inject UserDomain UserDomain
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject FootballApi Api
 
-<div class="Box LeagueBox">
-    <img class="LeagueBoxIcon" src="./Images/Logo_cropped.png" height="40px"/>
+<div class="Box LeagueBox" onclick="@Redirect">
+    <img class="LeagueBoxIcon" src="https://images.fotmob.com/image_resources/logo/leaguelogo/dark/@(league.Id).png" height="40px"/>
     <div>@league.Name</div>
-    <img class="LeagueBoxStar" src="./Images/star_empty.webp" height="40px"/>
+    @if (FavouriteLeagues is not null)
+    {
+        @if (FavouriteLeagues.Any(x => x.Id == league.Id))
+        {
+            <img class="LeagueBoxStar" src="./Images/star_full.webp" height="40px"/>
+        }
+        else
+        {
+            <img class="LeagueBoxStar" src="./Images/star_empty.png" height="40px"/>
+        }
+    }
 </div>
 
 @code {
     [Parameter]
     public FootballApi.League league { get; set; }
+    
+    public List<FootballApi.League> FavouriteLeagues { get; set; }
+    [Parameter]
+    public LeaguesList List { get; set; }
+    [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
+    MpmUser? m_UserInstance;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+        {
+            m_UserInstance = User.Payload;
+            UserDomain.SetUser(m_UserInstance);
+        }
+        FavouriteLeagues = List.UpdateFavouriteLeagues();
+    }
+    
+
+    public void Redirect()
+    {
+        NavigationManager.NavigateTo("/league/" + league.Id);
+    }
+    
 }

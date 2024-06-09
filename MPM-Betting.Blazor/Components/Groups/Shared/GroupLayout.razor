@@ -23,11 +23,18 @@
     <Authorized>
         <div class="flex flex-row groups">
             <div class="flex flex-column h-full text-primary side-nav">
-                @foreach(var group in m_Groups)
+                <button @onclick="@(() => NavigationManager.NavigateTo("/groups"))">
+                    <div>
+                        <img src="Images/discover.png" alt="group logo"/>
+                    </div>
+                    <div class="bar"></div>
+                </button>
+                
+                @foreach (var group in m_Groups)
                 {
                     var groupId = group.Id;
                     var groupUrl = $"/groups/{groupId}";
-                    <button class="mb-4" @onclick="() => NavigationManager.NavigateTo(groupUrl)">
+                    <button class="mt-4" @onclick="() => NavigationManager.NavigateTo(groupUrl)">
                         <div>
                             <img src="@(group.ProfilePictureUrl ?? "images/coin.png")" alt="group logo"/>
                         </div>
@@ -35,14 +42,14 @@
                     </button>
                 }
 
-                <button class="mb-4" @onclick="ShowNewGroupModal">
+                <button class="mt-4" @onclick="ShowNewGroupModal">
                     <div>
                         <img src="Images/plus-icon-design-png.webp" alt="group logo"/>
                     </div>
                     <div class="bar"></div>
                 </button>
             </div>
-            <div>
+            <div class="flex flex-row grow">
                 @Body
             </div>
         </div>
@@ -67,7 +74,7 @@
             </Field>
             <Field>
                 <FieldLabel>Description</FieldLabel>
-                <TextEdit @bind-Text="m_NewGroupDescription" Placeholder="Enter surname..."/>
+                <TextEdit @bind-Text="m_NewGroupDescription" Placeholder="Enter description..."/>
             </Field>
         </ModalBody>
         <ModalFooter Background="Background.Dark">

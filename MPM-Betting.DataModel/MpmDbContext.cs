@@ -21,27 +21,31 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
     public DbSet<AchievementEntry> AchievementEntries { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<FavouriteFootballLeague> UserFavouriteSeasons { get; set; }
     
     public DbSet<Bet> Bets { get; set; } = null!;
-    public DbSet<Football.ResultBet> FootballResultBets { get; set; } = null!;
-    public DbSet<Football.ScoreBet> FootballScoreBets { get; set; } = null!;
-    
+    public DbSet<Football.GameBet> FootballGameBets { get; set; } = null!;
+  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<FavouriteFootballLeague>(builder =>
+        {
+            builder.HasKey(s => new { s.UserId, LeaueeId = s.LeagueId });
+            builder
+                .HasOne<MpmUser>(s => s.User)
+                .WithMany(u => u.FavouriteFootballLeagues)
+                .HasForeignKey(s => s.UserId);
+        });
+
+       
         modelBuilder.Entity<Bet>(builder =>
         {
             builder.ToTable(nameof(Bets));
         });
         
-        modelBuilder.Entity<Football.ResultBet>(builder =>
+        modelBuilder.Entity<Football.GameBet>(builder =>
         {
-            builder.ToTable(nameof(FootballResultBets));
-            builder.HasBaseType<Bet>();
-        });
-        
-        modelBuilder.Entity<Football.ScoreBet>(builder =>
-        {
-            builder.ToTable(nameof(FootballScoreBets));
+            builder.ToTable(nameof(FootballGameBets));
             builder.HasBaseType<Bet>();
         });
         
@@ -59,7 +63,24 @@ public class MpmDbContext(DbContextOptions<MpmDbContext> options) : IdentityDbCo
                 .WithOne(uge => uge.Group)
                 .OnDelete(DeleteBehavior.NoAction);
         });
+        
+        modelBuilder.Entity<Bet>(builder =>
+        {
+            builder
+                .HasOne(b => b.Group)
+                .WithMany(g => g.AllBets)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
 
+        modelBuilder.Entity<CustomSeasonEntry>(builder =>
+        {
+            builder
+                .HasOne(cse => cse.Season)
+                .WithMany(s => s.Entries)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        
         modelBuilder.Entity<ScoreEntry>(builder =>
         {
             builder

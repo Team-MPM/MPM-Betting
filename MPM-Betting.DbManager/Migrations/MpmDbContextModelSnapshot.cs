@@ -17,20 +17,20 @@ namespace MPM_Betting.DbManager.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.5")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("AchievementMpmUser", b =>
                 {
-                    b.Property<int>("AchievementsId")
+                    b.Property<int>("AchievmentsId")
                         .HasColumnType("int");
 
                     b.Property<string>("UsersId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("AchievementsId", "UsersId");
+                    b.HasKey("AchievmentsId", "UsersId");
 
                     b.HasIndex("UsersId");
 
@@ -48,19 +48,26 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<bool>("Completed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("GameId")
+                    b.Property<int?>("GameId")
                         .HasColumnType("int");
 
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Score")
+                    b.Property<bool>("Hit")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Points")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Processed")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -107,7 +114,7 @@ namespace MPM_Betting.DbManager.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BuiltinSeasonId")
+                    b.Property<int>("BuiltinSeasonId")
                         .HasColumnType("int");
 
                     b.Property<int>("GameState")
@@ -274,6 +281,19 @@ namespace MPM_Betting.DbManager.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AchievementEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.User.FavouriteFootballLeague", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "LeagueId");
+
+                    b.ToTable("UserFavouriteSeasons");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.Message", b =>
@@ -611,17 +631,7 @@ namespace MPM_Betting.DbManager.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.ResultBet", b =>
-                {
-                    b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
-
-                    b.Property<int>("Result")
-                        .HasColumnType("int");
-
-                    b.ToTable("FootballResultBets", (string)null);
-                });
-
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.ScoreBet", b =>
+            modelBuilder.Entity("MPM_Betting.DataModel.Football.GameBet", b =>
                 {
                     b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
 
@@ -631,7 +641,16 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<int>("HomeScore")
                         .HasColumnType("int");
 
-                    b.ToTable("FootballScoreBets", (string)null);
+                    b.Property<double>("Quote")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("ResultHit")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ScoreHit")
+                        .HasColumnType("bit");
+
+                    b.ToTable("FootballGameBets", (string)null);
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.Betting.BuiltinSeason", b =>
@@ -655,7 +674,7 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.Rewarding.Achievement", null)
                         .WithMany()
-                        .HasForeignKey("AchievementsId")
+                        .HasForeignKey("AchievmentsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -670,17 +689,18 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.Game", "Game")
                         .WithMany("Bets")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GameId");
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId");
+                        .WithMany("AllBets")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Game");
 
@@ -698,9 +718,9 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.Betting.CustomSeason", "Season")
-                        .WithMany()
+                        .WithMany("Entries")
                         .HasForeignKey("SeasonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Game");
@@ -712,7 +732,9 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.BuiltinSeason", "BuiltinSeason")
                         .WithMany()
-                        .HasForeignKey("BuiltinSeasonId");
+                        .HasForeignKey("BuiltinSeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("BuiltinSeason");
                 });
@@ -768,6 +790,17 @@ namespace MPM_Betting.DbManager.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("Achievement");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.User.FavouriteFootballLeague", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", "User")
+                        .WithMany("FavouriteFootballLeagues")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -883,20 +916,11 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.ResultBet", b =>
+            modelBuilder.Entity("MPM_Betting.DataModel.Football.GameBet", b =>
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.Bet", null)
                         .WithOne()
-                        .HasForeignKey("MPM_Betting.DataModel.Football.ResultBet", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MPM_Betting.DataModel.Football.ScoreBet", b =>
-                {
-                    b.HasOne("MPM_Betting.DataModel.Betting.Bet", null)
-                        .WithOne()
-                        .HasForeignKey("MPM_Betting.DataModel.Football.ScoreBet", "Id")
+                        .HasForeignKey("MPM_Betting.DataModel.Football.GameBet", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -913,6 +937,8 @@ namespace MPM_Betting.DbManager.Migrations
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
+                    b.Navigation("AllBets");
+
                     b.Navigation("Seasons");
 
                     b.Navigation("UserGroupEntries");
@@ -920,12 +946,19 @@ namespace MPM_Betting.DbManager.Migrations
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmUser", b =>
                 {
+                    b.Navigation("FavouriteFootballLeagues");
+
                     b.Navigation("UserGroupEntries");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
                 {
                     b.Navigation("ScoreEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.CustomSeason", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

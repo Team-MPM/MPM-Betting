@@ -1,0 +1,71 @@
+﻿/*GLOBAL STYLES*/
+
+
+.TopNavBarContainer {
+    margin-bottom: 100px;
+}
+
+.label-dark {
+    color: black !important;
+}
+
+
+.NavBarList li {
+    display: grid;
+    grid-template-columns: 0.25fr 2fr;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 5%;
+}
+
+.NavBarList li:hover {
+    background: rgba(80,80,80, 0.8);
+    transform: scale(1.02);
+}
+
+.NavBarList a {
+    font-size: 20px;
+    color: white
+}
+
+.NavBarList a:hover {
+    text-decoration: none;
+    color: white;
+}
+
+.active {
+    background: rgba(37, 103, 231, 0.8) !important;
+    color: white !important;
+}
+
+.active a {
+    font-weight: bold;
+}
+
+.ProfilePicManage {
+    width: 100%;
+    height: auto;
+}
+
+.align-center-manage {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.ButtonTheme {
+    padding: 10px;
+    border-radius: 10px;
+    background: rgb(11, 48, 196);
+    color: white;
+    font-size: 15px;
+}
+
+.ButtonTheme:hover {
+    background: rgb(38, 75, 218);
+    color: white;
+    text-decoration: none;
+    transform: scale(1.02);
+}

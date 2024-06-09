@@ -15,4 +15,5 @@ public class ScoreEntry(UserGroupEntry userGroupEntry, SeasonEntry seasonEntry)
     public int Score { get; set; } = 0;
 
     private ScoreEntry() : this(null!, null!) {}
+    
 }

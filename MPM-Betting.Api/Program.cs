@@ -1,8 +1,8 @@
 using System.Net.Mail;
-using Microsoft.EntityFrameworkCore;
 using MPM_Betting.DataModel;
 using MPM_Betting.Services;
-using MPM_Betting.Services.Data;
+using MPM_Betting.Services.Data.BetManager;
+using MPM_Betting.Services.Data.GameData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +16,15 @@ builder.AddMpmAuth();
 builder.AddMpmMail();
 builder.AddFootballApi();
 
-
-
+builder.Services.AddSingleton<BetProcessor>();
+builder.Services.AddSingleton<GameDataUpdater>();
+builder.Services.AddSingleton<GameDataUpdateScheduler>();
+builder.Services.AddSingleton<GameDataQueueWorker>();
+builder.Services.AddSingleton<IBackgroundTaskQueue>(_ => new GameDataUpdateQueue(100));
+builder.Services.AddHostedService(services => services.GetRequiredService<BetProcessor>());
+builder.Services.AddHostedService(services => services.GetRequiredService<GameDataUpdater>());
+builder.Services.AddHostedService(services => services.GetRequiredService<GameDataUpdateScheduler>());
+builder.Services.AddHostedService(services => services.GetRequiredService<GameDataQueueWorker>());
 
 var app = builder.Build();
 

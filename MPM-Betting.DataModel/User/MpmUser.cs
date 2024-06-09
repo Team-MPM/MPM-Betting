@@ -11,9 +11,11 @@ public class MpmUser : IdentityUser
     public List<UserGroupEntry> UserGroupEntries { get; set; } = [];
     
     public int Points { get; set; } = 0;
-    public DateTime LastRedeemed { get; set; } = DateTime.Now;
+    public DateTime LastRedeemed { get; set; } = DateTime.MinValue;
     
-    public List<Achievement> Achievements { get; set; } = [];
+    public List<Achievement> Achievments { get; set; } = [];
+    
+    public List<FavouriteFootballLeague> FavouriteFootballLeagues { get; set; } = [];
 
     [StringLength(200)] public string? ProfilePictureUrl { get; set; } 
 }

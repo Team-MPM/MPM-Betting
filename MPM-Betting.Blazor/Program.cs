@@ -1,6 +1,5 @@
 using BlazorApp1.Components.Account;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using MPM_Betting.Blazor;
 using MPM_Betting.Blazor.Components;
 using MPM_Betting.Services;
@@ -61,8 +60,6 @@ var app = builder.Build();
 app.UseRouting();
 
 
-
-
 // Auth
 app.UseAuthentication();
 app.UseAuthorization();
@@ -83,5 +80,6 @@ if (!app.Environment.IsDevelopment())
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 
 app.Run();

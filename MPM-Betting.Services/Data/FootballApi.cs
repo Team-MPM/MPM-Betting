@@ -1,7 +1,4 @@
 ﻿using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -34,7 +31,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
     public record struct ScoreEntry(Team HomeTeam, Team AwayTeam, int HomeScore, int AwayScore, GameState State);
 
-    public record struct GameEntry(int Id, ScoreEntry Score, DateTime StartTime, string? Time);
+    public record struct GameEntry(int Id, ScoreEntry Score, DateTime StartTime, string? Time, League League);
 
     public record struct GameDetails(GameEntry GameEntry, GameTimeData TimeData); // TODO: add actual details (goals, cards, subs, passing, possession, etc.)
 
@@ -53,16 +50,18 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     {
         None = 0,
         Cancelled,
+        
         FirstHalf,
         HalfTimeBreak,
         SecondHalf,
-        EndedAfterSecondHalf,
         BreakAfterSecondHalf,
         FirstOvertime,
         OvertimeBreak,
         SecondOvertime,
-        EndedAfterOverTime,
         PenaltyShootout,
+        
+        EndedAfterSecondHalf = 101,
+        EndedAfterOverTime,
         EndedAfterPenaltyShootout
     }
 
@@ -157,9 +156,20 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         var halfs = status["halfs"]!;
 
         var gameTimes = GameTimeDataFromHalfs(halfs);
-        var state = ExtractGameStateFromStatus(gameTimes, cancelled);
+        // TODO: idk, maybe fix?
+        //var state = ExtractGameStateFromStatus(gameTimes, cancelled);
+        var state = GameState.None;
+        if (started)
+            state = GameState.FirstHalf;
+        if (finished)
+            state = GameState.EndedAfterSecondHalf;
 
-        var gameEntry = new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state), matchTimeUtcDate, currentTime);
+        var gameEntry = new GameEntry(
+            matchId, 
+            new ScoreEntry(home, away, homeScore, awayScore, state), 
+            matchTimeUtcDate, 
+            currentTime,
+            league);
         return new GameDetails(gameEntry, gameTimes);
     }
 
@@ -259,7 +269,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     /// </exception>
     public async Task<MpmResult<List<GameEntry>>> GetGameEntries(int leagueId, DateOnly? date)
     {
-        return await cache.Get(TimeSpan.FromSeconds(3), 
+        return await cache.Get(TimeSpan.FromSeconds(5), 
             $"game-entries-l:{leagueId}-d:{date ?? DateOnly.MaxValue}", async () =>
             {
                 var uri = new Uri($"https://www.fotmob.com/api/leagues?id={leagueId}");
@@ -277,6 +287,12 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
         var matches = jObject["matches"]!;
         var allMatches = (JArray)matches["allMatches"]!;
+        
+        var details = jObject["details"]!;
+        var leagueId = details["id"]!.Value<int>();
+        var leagueName = details["name"]!.Value<string>()!;
+        var country = details["country"]!.Value<string>()!;
+        var league = new League(leagueName, country, leagueId);
 
         List<GameEntry> gameEntries = [];
 
@@ -326,8 +342,13 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
 
             state = cancelled ? GameState.Cancelled : state;
 
-            gameEntries.Add(new GameEntry(matchId, new ScoreEntry(home, away, homeScore, awayScore, state),
-                utcTime, currentTime));
+            gameEntries.Add(
+                new GameEntry(
+                    matchId, 
+                    new ScoreEntry(home, away, homeScore, awayScore, state),
+                    utcTime, 
+                    currentTime,
+                    league));
         }
 
         //finished
@@ -420,7 +441,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         // },
 
 
-        // half time
+        // half-time
 
         // "liveTime": {
         //     "short": "HT",
@@ -508,7 +529,7 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
     /// Get a list of string representing the available seasons for a league
     /// </summary>
     /// <param name="leagueId">The league id to query the data for</param>
-    /// <returns>Result of string list</returns>
+    /// <returns>Result of a string list</returns>
     public async Task<MpmResult<List<string>>> GetSeasonsForLeague(int leagueId)
     {
         return await cache.Get(TimeSpan.FromSeconds(1), $"league-seasons-{leagueId}", async () =>
@@ -521,8 +542,9 @@ public class FootballApi(ILogger<FootballApi> logger, MpmCache cache)
         });
     }
 
-    private static MpmResult<List<string>> GetSeasonsForLeagueFromJson(string json)
+    private static MpmResult<List<string>> GetSeasonsForLeagueFromJson(string? json)
     {
+        if (json is null or "null") return new ArgumentNullException(nameof(json));
         var jObject = JObject.Parse(json);
         var allAvailableSeasons = (JArray)jObject["allAvailableSeasons"]!;
         var seasons = allAvailableSeasons.Select(availableSeason => availableSeason.Value<string>()!).ToList();
