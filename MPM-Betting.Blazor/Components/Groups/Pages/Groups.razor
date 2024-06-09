@@ -302,12 +302,14 @@
                             <MudTable Items="@(m_SeasonModel.DataModel.AsT0.Games)" Class="grow" Hover="true">
                                 <ColGroup>
                                     <col style="width:26px;"/>
+                                    <col style="width:130px;"/>
                                     <col/>
                                     <col style="width:180px;"/>
-                                    <col style="width:50px;"/>
+                                    <col style="width:60px;"/>
                                 </ColGroup>
                                 <HeaderContent>
-                                    <MudTh/>
+                                    <MudTh>Details</MudTh>
+                                    <MudTh>Bet</MudTh>
                                     <MudTh>Team</MudTh>
                                     <MudTh>Start Time</MudTh>
                                     <MudTh>Result</MudTh>
@@ -317,6 +319,14 @@
                                         <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Dark" Size="Size.Small" @onclick="() => context.ShowDetails = !context.ShowDetails">
                                             <MudIcon Icon="@Icons.Material.Filled.ExpandMore"/>
                                         </MudButton>
+                                    </MudTd>
+                                    <MudTd>
+                                        @{
+                                            var hasBet = context.Bets?.Where(b => b.Game.ReferenceId == context.Game.Id && b.User.Id == m_Model.User!.Id).Any() ?? false;
+                                            <MudButton Disabled="hasBet" Variant="Variant.Filled" Color="MudBlazor.Color.Dark" Size="Size.Small" @onclick="() => PlaceBetClick(context)">
+                                                Place Bet
+                                            </MudButton>
+                                        }
                                     </MudTd>
                                     <MudTd>@context.Game.Score.HomeTeam.Name vs. @context.Game.Score.AwayTeam.Name</MudTd>
                                     <MudTd>@context.Game.StartTime</MudTd>
@@ -339,12 +349,12 @@
                                                     <MudCardContent Class="pa-0">
                                                         @if (context.Bets is not null)
                                                         {
-                                                            <MudTable Items="@context.Bets" Hover="true" Elevation="0" Context="betContext">
+                                                            <MudTable Items="@context.Bets" Hover="true" Elevation="0" Context="betContext" Dense="true">
                                                                 <ColGroup>
                                                                     <col style="width:60px;"/>
                                                                     <col/>
                                                                     <col style="width:40px;"/>
-                                                                    <col style="width:60px;"/>
+                                                                    <col style="width:80px;"/>
                                                                     <col style="width:30px;"/>
                                                                     <col style="width:50px;"/>
                                                                 </ColGroup>
@@ -359,16 +369,15 @@
                                                                 <RowTemplate>
                                                                     <MudTd></MudTd>
                                                                     <MudTd>@betContext.User.UserName</MudTd>
-                                                                    <MudTd>@betContext.Points</MudTd>
-                                                                    <MudTd>@betContext.HomeScore - @betContext.AwayScore</MudTd>
                                                                     <MudTd>@betContext.Quote</MudTd>
+                                                                    <MudTd>@betContext.HomeScore - @betContext.AwayScore</MudTd>
+                                                                    <MudTd>@betContext.Points</MudTd>
                                                                     <MudTd>@betContext.Hit</MudTd>
                                                                 </RowTemplate>
                                                             </MudTable>
                                                         }
                                                     </MudCardContent>
                                                 </MudCard>
-
                                             </td>
                                         </MudTr>
                                     }
@@ -545,6 +554,30 @@ else
     </ModalContent>
 </Blazorise.Modal>
 
+<Blazorise.Modal @bind-Visible="m_PlaceBetModel.IsVisible">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Place Bet</ModalTitle>
+            <CloseButton/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark">
+            <Text>@m_PlaceBetModel.Status</Text>
+            <Field>
+                <FieldLabel>Home Score</FieldLabel>
+                <NumericEdit @bind-Value="m_PlaceBetModel.HomeScore" Placeholder="0"/>
+            </Field>
+            <Field>
+                <FieldLabel>Away Score</FieldLabel>
+                <NumericEdit @bind-Value="m_PlaceBetModel.AwayScore" Placeholder="0"/>
+            </Field>
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Color.Secondary" Clicked="@HidePlaceBetModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@(async () => await PlaceBet())">Submit</Button>
+        </ModalFooter>
+    </ModalContent>
+</Blazorise.Modal>
+
 @code {
     private int m_OldId = -1;
     [Parameter] public int? GroupId { get; set; }
@@ -561,6 +594,7 @@ else
     private readonly UpdateGroupModel m_UpdateGroupModel = new();
     private readonly AddUserModel m_AddUserModel = new();
     private readonly SeasonModel m_SeasonModel = new();
+    private readonly PlaceBetModel m_PlaceBetModel = new();
 
     private class Model
     {
@@ -622,6 +656,18 @@ else
         public string Name = "";
         public string Description = "";
         public string Status = "";
+    }
+    
+    private class PlaceBetModel
+    {
+        public double HomeeQuote = Random.Shared.NextDouble() * 1.5 + 1.0;
+        public double AwayQuote = Random.Shared.NextDouble() * 1.5 + 1.0;
+        public double DrawQuote = Random.Shared.NextDouble() * 1.5 + 1.0;
+        public int HomeScore = 0;
+        public int AwayScore = 0;
+        public string Status = "";
+        public bool IsVisible = false;
+        public FootballApi.GameEntry? GameEntry;
     }
 
     private class AddUserModel
@@ -784,6 +830,16 @@ else
         m_AddUserModel.Visible = false;
     }
 
+    private void ShowPlaceBetModal()
+    {
+        m_PlaceBetModel.IsVisible = true;
+    }
+
+    private void HidePlaceBetModal()
+    {
+        m_PlaceBetModel.IsVisible = false;
+    }
+
     private async Task AddUser()
     {
         var userResult = await UserDomain.GetUserIdByNameOrMail(m_AddUserModel.Name);
@@ -944,4 +1000,30 @@ else
         m_Model.SeasonSettingsStatus = $"Removed {contextItem.Name} from group";
     }
 
+    private void PlaceBetClick(FootballGameEntry? entry)
+    {
+        if (entry is null) return;
+        m_PlaceBetModel.GameEntry = entry.Game;
+        ShowPlaceBetModal();
+    }
+    
+    private async Task PlaceBet()
+    {
+        if (m_Model.Group is null || m_PlaceBetModel.GameEntry is null) return;
+        
+        var quote = m_PlaceBetModel.HomeScore == m_PlaceBetModel.AwayScore ? m_PlaceBetModel.DrawQuote : m_PlaceBetModel.HomeScore < m_PlaceBetModel.AwayScore ? m_PlaceBetModel.AwayQuote : m_PlaceBetModel.HomeeQuote;
+        
+        var result = await UserDomain.PlaceGameBet(quote,  m_PlaceBetModel.HomeScore,  m_PlaceBetModel.AwayScore, m_PlaceBetModel.GameEntry.Value.Id, 10, m_Model.Group);
+        if (result.IsFaulted)
+        {
+            m_PlaceBetModel.Status = $"An error occurred {quote}";
+            return;
+        }
+
+        m_PlaceBetModel.Status = "";
+        m_PlaceBetModel.HomeScore = 0;
+        m_PlaceBetModel.AwayScore = 0;
+        HidePlaceBetModal();
+        await OnParametersSetAsync();
+    }
 }

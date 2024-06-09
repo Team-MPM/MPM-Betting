@@ -43,7 +43,7 @@ public partial class UserDomain
         if (quote < 1 || homeScore < 0 || awayScore < 0 || points < 1)
             return s_InvalidBetParameter;
         
-        if (m_User.Points < points)
+        if (group is not null && m_User.Points < points)
             return s_InvalidBetParameter;
         
         if (await s_UserHasFootballGameBetQuery(m_DbContext, referenceId, m_User.Id, group))
@@ -88,8 +88,11 @@ public partial class UserDomain
             Points = points,
         };
 
-        m_User.Points -= points;
-        m_DbContext.Users.Update(m_User);
+        if (group is null)
+        {
+            m_User.Points -= points;
+            m_DbContext.Users.Update(m_User);
+        }
         
         await m_DbContext.FootballGameBets.AddAsync(bet);
         await m_DbContext.SaveChangesAsync();
