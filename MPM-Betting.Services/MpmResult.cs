@@ -142,6 +142,14 @@ public readonly struct MpmResult<T> : IEquatable<MpmResult<T>>, IComparable<MpmR
     {
         return !IsFaulted ? suc(Value) : fail(Exception);
     }
+    
+    public void Match(Action<T> suc, Action<Exception> fail)
+    {
+        if (!IsFaulted) 
+            suc(Value);
+        else 
+            fail(Exception);
+    }
 
     [Pure]
     internal OptionalResult<T> ToOptional()

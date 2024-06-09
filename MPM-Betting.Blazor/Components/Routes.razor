@@ -1,6 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using MPM_Betting.Blazor.Components.Account.Shared
-<Router AppAssembly="typeof(Program).Assembly">
+@using Blazorise
+
+<Router AppAssembly="typeof(Program).Assembly" >
+    <NotFound>
+        <NotFound/>
+    </NotFound>
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
@@ -9,6 +14,17 @@
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1"/>
     </Found>
+
 </Router>
 
-@* TODO - NotFound *@
+<ModalProvider UseModalStructure Animated Size="ModalSize.Fullscreen" />
+<ToastProvider />
+
+@{
+    var darkMode = true;
+    <MudThemeProvider @bind-IsDarkMode="@darkMode" @rendermode="InteractiveServer" />
+    <MudDialogProvider/>
+    <MudSnackbarProvider/>
+    <MudBreakpointProvider/>
+    <MudPopoverProvider/>
+}

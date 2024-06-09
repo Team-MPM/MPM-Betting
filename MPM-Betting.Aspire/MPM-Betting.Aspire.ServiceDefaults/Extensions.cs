@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using Prometheus;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -52,7 +51,7 @@ public static class Extensions
             services.AddOpenTelemetryExporters(context.Configuration);
         });
 
-        builder.ConfigureServices((context, services) => {
+        builder.ConfigureServices((_, services) => {
             services.AddServiceDiscovery();
             services.ConfigureHttpClientDefaults(http =>
             {
@@ -185,7 +184,7 @@ public static class Extensions
     public static IHostApplicationBuilder AddDefaultHealthChecks(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHealthChecks()
-            // Add a default liveness check to ensure app is responsive
+            // Add a default liveness check to ensure the app is responsive
             .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
 
         return builder;

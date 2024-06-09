@@ -1,79 +1,319 @@
-﻿@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
-@using Blazorise
-@attribute [StreamRendering(true)]
+﻿@using Blazorise.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.User
+@using Microsoft.AspNetCore.Components.Forms
+@using Blazorise.Icons.FontAwesome
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using MPM_Betting.DataModel
+@using MudBlazor
+@namespace MPM_Betting.Blazor.ComponentLibrary.DesktopView
+@using Color = Blazorise.Color
 
-<div class="NavBar col-12">
-    <div class="col-1 logo">
-        <a href="/" class="NoHoverUnderline">
-            <div class="NavBarLogoText">MPM</div></a>
-    </div>
-    <div class="col-4 sportarten">
-        <div/>
-        <a href="/" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Home ? "NavBarActive" : "")">
-            <div class="NavBarItem">Home</div>
-        </a>
-        <a href="/dashboard" class="NoHoverUnderline NavBarLink @(Tab == ActiveTab.Dashboard ? "NavBarActive" : "")">
-            <div class="NavBarItem">Dashboard</div>
-        </a>
+@inject UserManager<MpmUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IDbContextFactory<MpmDbContext> DbContext
 
-        <div></div>
 
-        <div class="NavBarDropDown">
-            <div class="NavBarItem NavBarDropDownSP">@SportArt.ToString()</div>
-            <Dropdown>
-                <DropdownToggle>
-                </DropdownToggle>
-                <DropdownMenu>
-                    <DropdownItem TextColor="TextColor.Primary">Fußball</DropdownItem>
-                    <DropdownDivider/>
-                    <DropdownItem Disabled>Basketball</DropdownItem>
-                    <DropdownDivider/>
-                    <DropdownItem Disabled>Formula 1</DropdownItem>
-                </DropdownMenu>
+@* Modal *@
 
-            </Dropdown>
+@if (reedemable)
+{
+    <Modal @ref="ModalRef" Class="ModalSettings" Closing="OnModalClosing">
+        <ModalContent Centered>
+            <ModalHeader Background="Background.Dark">
+                <ModalTitle TextColor="TextColor.Default">Points Redeemed!</ModalTitle>
+                <CloseButton Clicked="HideModal" TextColor="TextColor.White"/>
+            </ModalHeader>
+            <ModalBody Background="Background.Dark" Class="ModalSettings">
+                <Field>
+                    <div class="PointRedeemModalContent">
+                        <i class="fa-solid fa-gift"></i>
+                        @if (IsFirstLogin)
+                        {
+                            <Label class="fs-6">As a newcomer you have received extra Points! </Label>
+                            <Label class="fs-6">You have redeemed your Bonus worth <span class="fw-bolder">@Points</span> Points!</Label>
+                            <Label class="fs-6">Good luck on your bets!</Label>
+                        }
+                        else
+                        {
+                            <div>
+                                <Label class="fs-5">You have redeemed <span class="fw-bold">@Points</span> Points!</Label>
+                            </div>
+                        }
+                    </div> 
+                </Field>
+            </ModalBody>
+            <ModalFooter Background="Background.Dark">
+                <Button Color="Color.Primary" Clicked="@HideModal">OK</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+else
+{
+    <Modal @ref="ModalRef" Class="ModalSettings" Closing="OnModalClosing">
+        <ModalContent Centered>
+            <ModalHeader Background="Background.Dark">
+                <ModalTitle TextColor="TextColor.Default">Error redeeming points</ModalTitle>
+                <CloseButton TextColor="TextColor.White" Clicked="HideModal"/>
+            </ModalHeader>
+            <ModalBody Background="Background.Dark" Class="ModalSettings">
+                <Field>
+                    <Label>Sorry, you can only redeem points once every 24 hours.</Label>
+                   @if (m_UserInstance is not null)
+                    {
+                        <Label>You can redeem your points: <span class="fw-bold"> @m_UserInstance.LastRedeemed.AddHours(24).ToString("dd.MM.yyyy, hh:mm")</span></Label>
+                    }
+                    </Field>
+            </ModalBody>
+            <ModalFooter Background="Background.Dark">
+                <Button Color="Blazorise.Color.Primary" Clicked="HideModal">Close</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+
+
+<div class="NavBar flex flex-row justify-between align-center">
+    <div class="nav-left flex flex-row h-full align-center">
+        <div class="logo">
+            <a href="/" class="NoHoverUnderline">
+                <span class="NavBarLogoText">MPM</span>
+            </a>
         </div>
-        <div/>
-    </div>
-    <div class="col-3">
 
-    </div>
-    <div class="col-1 light_dark">
+        <ul class="nav-list">
+            <li>
+                <a href="/dashboard" class="NoHoverUnderline nav-link @(NavigationManager.Uri.Contains("dashboard") ? "nav-active" : "")">
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="/groups" class="NoHoverUnderline nav-link @(NavigationManager.Uri.Contains("groups") ? "nav-active" : "")">
+                    Groups
+                </a>
+            </li>
+        </ul>
 
+        @* <div class="nav-sport-menu"> *@
+        @*     <Select @bind-SelectedValue="@SportType"> *@
+        @*         <SelectItem Value="@ESportType.None">None</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Football">Football</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Basketball">Basketball</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Tennis">Tennis</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Hockey">Hockey</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Baseball">Baseball</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.AmericanFootball">American Football</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Formula1">Formula1</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Handball">Handball</SelectItem> *@
+        @*         <SelectItem Value="@ESportType.Volleyball">Volleyball</SelectItem> *@
+        @*     </Select> *@
+        @* </div> *@
     </div>
-    <div class="col-1 notifications">
-        <img src="Images/bell_white.png" height="40px"/>
-    </div>
-    <div class="col-1 credits">
 
-        <div>7524</div>
-        <img src="Images/coin.png" height="30px" alt="xxx"/>
-    </div>
-    <div class="col-1 profile-pic">
-        <img src="Images/pfp.jpg" height="50px" alt="xxx"/>
+
+    <div class="nav-right flex flex-row mr-4">
+        @if (m_UserInstance is not null)
+        {
+            <div class="gift_icon mr-10">
+                <i onclick="@ShowModal" class="fa-solid fa-gift @(m_UserInstance is not null ? CheckIfPointsCanBeRedeemed() ? "icon glow" : "" : "")"></i> 
+            </div>
+        }
+        @if (m_UserInstance is null)
+        {
+            <div>
+                <Button Color="Color.Primary" Clicked="@(() => NavigationManager.NavigateTo(LoginUrl))">Login</Button>
+                <Button Color="Color.Primary" Clicked="@(() => NavigationManager.NavigateTo(RegisterUrl))">Register</Button>
+            </div>
+        }
+        else
+        {
+            <div class="NavBarPoints">
+                @{
+                    var x = ConvertToLog10(m_UserInstance.Points);
+                    <div>@x</div>
+                }
+                <img src="./Images/Logo_cropped.png" height="50px"/>
+            </div>
+            <Dropdown>
+                <DropdownToggle Color="Color.Light" Background="Background.Secondary">
+                    <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
+                </DropdownToggle>
+                <DropdownMenu Background="Background.Secondary" TextColor="TextColor.Light">
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/BetHistory", true))"><a  class="NoHoverUnderline">Bet History</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/groups", true))"><a  class="NoHoverUnderline">Groups</a></DropdownItem>
+                    @* <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem> *@
+                    <DropdownDivider/>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/profile", true))"><a  class="NoHoverUnderline">Profile</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/account/manage/profile", true))"><a  class="NoHoverUnderline">Manage</a></DropdownItem>
+                    <DropdownItem>
+                        <form action="Account/Logout" method="post">
+                            <AntiforgeryToken/>
+                            <input type="hidden" name="ReturnUrl" value=""/>
+                            <button type="submit">
+                                <a class="NoHoverUnderline" aria-hidden="true">Logout</a>
+                            </button>
+                        </form>
+                    </DropdownItem>
+                </DropdownMenu>
+            </Dropdown>
+        }
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public ActiveTab Tab { get; set; }
-    
-    [Parameter]
-    public SelectedSportArt SportArt { get; set; }
-    
-    
-    public enum ActiveTab
+
+    [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
+    MpmUser? m_UserInstance;
+    MpmDbContext m_DbContext;
+    private bool cancelClose;
+    private bool reedemable = false;
+    private int Points { get; set; }
+    private bool IsFirstLogin = false;
+
+    private string m_ImageUrl = "./Images/default-profile-picture.png";
+
+    const string LoginUrl = "/account/login";
+    const string RegisterUrl = "/account/register";
+
+    protected override async Task OnInitializedAsync()
     {
-        Home,
-        Dashboard,
-        Sportarten
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+        {
+            m_UserInstance = User.Payload;
+        }
+        else
+        {
+            return;
+        }
+
+        m_ImageUrl = m_UserInstance.ProfilePictureUrl.IsNullOrEmpty() ? m_ImageUrl : m_UserInstance?.ProfilePictureUrl!;
+        m_DbContext = await DbContext.CreateDbContextAsync();
     }
 
-    public enum SelectedSportArt
+    #region Points
+
+    private Modal modalRef;
+
+    private Modal ModalRef
     {
-        Fußball,
-        Basketball,
-        Formula1,
-        None
+        get => modalRef;
+        set
+        {
+            modalRef = value;
+            StateHasChanged();
+        }
     }
+
+    private async Task ShowModal()
+    {
+        cancelClose = true;
+        reedemable = CheckIfPointsCanBeRedeemed();
+        if (reedemable)
+        {
+            if (m_UserInstance.LastRedeemed == DateTime.MinValue) 
+            {
+                IsFirstLogin = true;
+                Points = 50000;
+            }
+            else
+                Points = GetRandomAmountOfPoints();
+           
+            m_UserInstance.Points += Points;
+            m_UserInstance.LastRedeemed = DateTime.Now;
+            m_DbContext.Users.Update(m_UserInstance);
+            await m_DbContext.SaveChangesAsync();
+        }
+
+        await ModalRef.Show();
+    }
+
+    private Task HideModal()
+    {
+        cancelClose = false;
+        IsFirstLogin = false;
+        Points = 0;
+        return modalRef.Hide();
+    }
+    
+    private Task OnModalClosing( ModalClosingEventArgs e )
+    {
+        // just set Cancel to prevent modal from closing
+        e.Cancel = cancelClose 
+                   || e.CloseReason != CloseReason.UserClosing;
+
+        return Task.CompletedTask;
+    }
+
+    private bool CheckIfPointsCanBeRedeemed() => DateTime.Now.AddHours(-24) > m_UserInstance.LastRedeemed;
+    // private bool CheckIfPointsCanBeRedeemed() => DateTime.Now.AddSeconds(-1) > m_UserInstance.LastRedeemed;
+    // // For testing
+
+    private int GetRandomAmountOfPoints()
+    {
+        int[] pointValues = new []{100,200,300,400,500,600,700,800,900,1000, 5000, 10000, 50000};
+        int[] odds = new[] {5,5,5,10,10,10,5,5,5,5,3,2,1};
+        int random = new Random().Next(0, odds.Sum() + 1);
+        int value = 0;
+        for (int i = 0; i < odds.Length; i++)
+        {
+            value += odds[i];
+            if (random <= value)
+            {
+                return pointValues[i];
+            }
+        }
+
+        return 1000;
+    }
+
+    #endregion
+    
+    
+    
+    
+    
+
+    private string ConvertToLog10(int number)
+    {
+        if (number == 0)
+            return "0";
+        int mag = (int)(Math.Floor(Math.Log10(number)) / 3);
+        double divisor = Math.Pow(10, mag * 3);
+
+        double shortNumber = number / divisor;
+
+        string suffix;
+        switch (mag)
+        {
+            case 0:
+                suffix = string.Empty;
+                break;
+            case 1:
+                suffix = "k";
+                break;
+            case 2:
+                suffix = "m";
+                break;
+            case 3:
+                suffix = "b";
+                break;
+            case 4:
+                suffix = "t";
+                break;
+            default:
+                suffix = "a fuck ton";
+                break;
+
+        }
+
+        return shortNumber.ToString("N1") + ' ' + suffix;
+    }
+
 }

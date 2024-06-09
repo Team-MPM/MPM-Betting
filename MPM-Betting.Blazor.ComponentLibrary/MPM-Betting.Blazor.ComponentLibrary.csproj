@@ -18,14 +18,14 @@
         <PackageReference Include="Blazorise.Components" Version="1.5.2" />
         <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.5.2" />
         <PackageReference Include="Blazorise.SpinKit" Version="1.5.2" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.4" />
-        <PackageReference Include="Microsoft.JSInterop" Version="8.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.6" />
+        <PackageReference Include="Microsoft.JSInterop" Version="8.0.6" />
         <PackageReference Include="MudBlazor" Version="7.0.0-preview.2" />
         <PackageReference Include="MudBlazor.Extensions" Version="1.7.88-prev-2405061530-main" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="wwwroot\Images\" />
+      <Folder Include="wwwroot\Images\NewDirectory1\" />
     </ItemGroup>
 
     <ItemGroup>

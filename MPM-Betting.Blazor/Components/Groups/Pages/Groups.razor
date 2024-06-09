@@ -1,0 +1,1029 @@
+﻿@page "/Groups/{GroupId:int?}/{Page?}/{SeasonId:int?}"
+@using Microsoft.AspNetCore.Authorization
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.User
+@using MPM_Betting.Services
+@using MPM_Betting.Services.Domains
+@using Color = Blazorise.Color
+@using Margin = Blazorise.Margin
+@using Size = MudBlazor.Size
+@using Blazorise
+@using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.Football
+@using MPM_Betting.Services.Data
+@using OneOf
+@using SortDirection = MudBlazor.SortDirection
+@using Width = Blazorise.Width
+@using Blazorise
+@using MPM_Betting.DataModel.Betting
+@using MudBlazor
+@using Breakpoint = MudBlazor.Breakpoint
+@using Button = MudBlazor.Button
+
+@attribute [Authorize]
+
+@inject UserDomain UserDomain
+@inject NavigationManager NavigationManager
+@inject IServiceProvider ServiceProvider
+@inject FootballApi FootballApi
+
+<div class="group-view flex flex-row grow">
+@if (GroupId != null && m_Model.Group is not null && m_Model.Entry is not null)
+{
+    var groupUrl = $"/groups/{m_Model.Group.Id}";
+    <div class="side-nav">
+        <Dropdown Class="m-0">
+            <DropdownToggle Class="m-0 p-0" TextColor="TextColor.Light">
+                <div class="group-title flex flex-row">
+                    <img src="@(m_Model.Group.ProfilePictureUrl ?? "images/coin.png")"
+                         class="ml-3 mt-3 mb-2 mr-2" alt="group logo"/>
+                    <div class="mt-3 mx-2">@m_Model.Group.Name</div>
+                    <i class="m-2 my-3">
+                        <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown"></MudIcon>
+                    </i>
+                </div>
+            </DropdownToggle>
+            <DropdownMenu Class="bg-dark mt-2" Margin="Margin.Is2.FromStart" Width="Width.Px(235)">
+                <DropdownItem TextColor="TextColor.Light" Clicked="@(() => NavigationManager.NavigateTo(Path.Combine(groupUrl, "users")))">
+                    <div class="flex flex-row align-content-space-between">
+                        <div>Users</div>
+                        <MudIcon Class="ml-auto" Icon="@Icons.Material.Filled.SupervisedUserCircle" Size="Size.Small"></MudIcon>
+                    </div>
+                </DropdownItem>
+                <DropdownItem TextColor="TextColor.Light" Clicked="@(() => NavigationManager.NavigateTo(Path.Combine(groupUrl, "insights")))">
+                    <div class="flex flex-row align-content-space-between">
+                        <div>Insights</div>
+                        <MudIcon Class="ml-auto" Icon="@Icons.Material.Filled.Insights" Size="Size.Small"></MudIcon>
+                    </div>
+                </DropdownItem>
+                @if (m_Model.Entry.Role is EGroupRole.Admin or EGroupRole.Owner)
+                {
+                    <DropdownItem TextColor="TextColor.Light" Clicked="@(() => NavigationManager.NavigateTo(Path.Combine(groupUrl, "settings")))">
+                        <div class="flex flex-row align-content-space-between">
+                            <div>Settings</div>
+                            <MudIcon Class="ml-auto" Icon="@Icons.Material.Filled.Settings" Size="Size.Small"></MudIcon>
+                        </div>
+                    </DropdownItem>
+                }
+                <DropdownDivider/>
+                @if (m_Model.Entry.Role is EGroupRole.Admin or EGroupRole.Owner)
+                {
+                    <DropdownItem TextColor="TextColor.Light" Clicked="ShowNewSeasonModal">
+                        <div class="flex flex-row align-content-space-between">
+                            <div>Add Season</div>
+                            <MudIcon Class="ml-auto" Icon="@Icons.Material.Filled.Add" Size="Size.Small"></MudIcon>
+                        </div>
+                    </DropdownItem>
+                    <DropdownDivider/>
+                }
+                <DropdownItem TextColor="TextColor.Danger">
+                    <div class="flex flex-row align-content-space-between">
+                        <div>Report Group</div>
+                        <MudIcon Class="ml-auto" Icon="@Icons.Material.Filled.Report" Size="Size.Small"></MudIcon>
+                    </div>
+                </DropdownItem>
+                <DropdownItem TextColor="TextColor.Danger">
+                    <div class="flex flex-row align-content-space-between">
+                        <div>Leave Group</div>
+                        <MudIcon Class="ml-auto" Icon="@Icons.Material.Filled.ExitToApp" Size="Size.Small"></MudIcon>
+                    </div>
+                </DropdownItem>
+                @if (m_Model.Entry.Role is EGroupRole.Admin or EGroupRole.Owner)
+                {
+                    <DropdownItem TextColor="TextColor.Danger">
+                        <div class="flex flex-row align-content-space-between">
+                            <div>Delete Group</div>
+                            <MudIcon Class="ml-auto" Icon="@Icons.Material.Filled.Delete" Size="Size.Small"></MudIcon>
+                        </div>
+                    </DropdownItem>
+                }
+            </DropdownMenu>
+        </Dropdown>
+
+
+        <div class="list m-2">
+
+            <MudDivider Class="mb-3"/>
+
+            <div class="flex flex-row py-1 px-2" @onclick="@(() => NavigationManager.NavigateTo(Path.Combine(groupUrl, "overview")))">
+                <MudIcon Class="mr-auto" Icon="@Icons.Material.Outlined.BarChart" Size="Size.Small"></MudIcon>
+                <div>Overview</div>
+            </div>
+            <div class="flex flex-row py-1 px-2" @onclick="@(() => NavigationManager.NavigateTo(Path.Combine(groupUrl, "ranking")))">
+                <MudIcon Class="mr-auto" Icon="@Icons.Material.Outlined.Score" Size="Size.Small"></MudIcon>
+                <div>Ranking</div>
+            </div>
+            <div class="flex flex-row py-1 px-2" @onclick="@(() => NavigationManager.NavigateTo(Path.Combine(groupUrl, "chat")))">
+                <MudIcon Class="mr-auto" Icon="@Icons.Material.Outlined.Chat" Size="Size.Small"></MudIcon>
+                <div>Chat</div>
+            </div>
+
+            @if (m_Model.ActiveSeasons is not null && m_Model.ActiveSeasons.Count > 0)
+            {
+                @foreach (var sport in m_Model.ActiveSeasons)
+                {
+                    <MudDivider Class="my-3"/>
+
+                    <div class="flex flex-row align-content-center justify-center py-1 px-2 mb-2">
+                        <MudIcon Icon="@Icons.Material.Outlined.SportsSoccer" Size="Size.Small"/>
+                        <div class="font-monospace font-weight-semibold">@sport.Key</div>
+                    </div>
+
+                    @foreach (var season in sport.Value)
+                    {
+                        <div class="flex flex-row align-content-space-between py-1 px-2" onclick="@(() => NavigationManager.NavigateTo($"/groups/{GroupId}/season/{season.Id}"))">
+                            <div>@season.Name</div>
+                            <MudIcon Class="ml-auto" Icon="@Icons.Material.Outlined.Star" Size="Size.Small"></MudIcon>
+                        </div>
+                    }
+                }
+            }
+
+
+            <MudDivider Class="my-3"/>
+        </div>
+
+        <div>
+        </div>
+    </div>
+
+    <div class="px-4 py-2 group-page">
+        @switch (Page)
+        {
+            case "overview":
+                <p>overview</p>
+                break;
+            case "ranking":
+                // TODO: Ranking for different sport types
+                <div class="mx-4 mt-2">
+                    <h1 class="alert-heading">Ranking</h1>
+                </div>
+
+                <div class="flex flex-column mx-4 my-6">
+                    <MudTable Items="@m_Model.Uges" Class="grow">
+                        <HeaderContent>
+                            <MudTh>Username</MudTh>
+                            <MudTh>Email</MudTh>
+                            <MudTh>
+                                <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<int, object>(x => x)">Score</MudTableSortLabel>
+                            </MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.MpmUser.UserName</MudTd>
+                            <MudTd>@context.MpmUser.Email</MudTd>
+                            <MudTd>@(context.Score)</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </div>
+                break;
+            case "users":
+                <div class="settings-box">
+                    <p>users</p>
+                </div>
+                break;
+            case "chat":
+                <p>chat</p>
+                break;
+            case "settings":
+                @if (m_Model.Entry?.Role is EGroupRole.Admin or EGroupRole.Owner)
+                {
+                    <div class="mx-4 mt-2">
+                        <h3 class="alert-heading">Group Settings</h3>
+                    </div>
+
+                    <div class="px-4 pt-1 pb-5 m-4 settings-box">
+                        <div class="mx-2 my-4">
+                            <h4>General</h4>
+                        </div>
+                        <div class="flex flex-row grow justify-between">
+                            <Field Class="mx-2 w-50">
+                                <FieldLabel>Name</FieldLabel>
+                                <TextEdit @bind-Text="m_UpdateGroupModel.Name"/>
+                            </Field>
+                            <Field Class="mx-2 w-50">
+                                <FieldLabel>Description</FieldLabel>
+                                <TextEdit @bind-Text="m_UpdateGroupModel.Description"/>
+                            </Field>
+                        </div>
+                        <div class="flex flex-row">
+                            <Button TextColor="TextColor.Light" Background="Background.Primary" @onclick="@(async () => await UpdateGroup())" Class="mx-2">Update</Button>
+                            <p class="mx-4 alert-danger">@m_UpdateGroupModel.Status</p>
+                        </div>
+                    </div>
+
+                    <div class="px-4 pt-1 pb-1 m-4 settings-box">
+                        <div class="mx-2 my-4">
+                            <h4>Users</h4>
+                        </div>
+
+                        <div class="flex flex-row grow justify-between">
+                            <MudDataGrid Items="@m_Model.Uges" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
+                                         Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
+                                <Columns>
+                                    <PropertyColumn Property="entry => entry.MpmUser.UserName" Editable="false"/>
+                                    <PropertyColumn Property="entry => entry.Score" Editable="false"/>
+                                    <PropertyColumn Property="entry => entry.Role">
+                                        <EditTemplate>
+                                            <MudSelect T="string" Margin="@MudBlazor.Margin.Dense" @bind-Value="context.Item.RoleAsString" Required RequiredError="Role can not be empty">
+                                                @foreach (var role in Enum.GetValues<EGroupRole>())
+                                                {
+                                                    // TODO: WHYHHYHYHHY NOT WORK I ZUCK AUS, ICH KANN NICHT MEHR, ICH WILL NICHT MEHR, OLAV HILF MIR
+                                                    <MudSelectItem Value="role.ToString()">@role.ToString()</MudSelectItem>
+                                                }
+                                            </MudSelect>
+                                        </EditTemplate>
+                                    </PropertyColumn>
+                                    <TemplateColumn Editable="false">
+                                        <CellTemplate>
+                                            <MudStack Row>
+                                                <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small" OnClick="@(async () => await RemoveUser(context.Item.MpmUser))">Remove</MudButton>
+                                            </MudStack>
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                </Columns>
+                            </MudDataGrid>
+                        </div>
+
+
+                        <div class="flex flex-row mt-4 mb-4">
+                            <Button TextColor="TextColor.Light" Background="Background.Primary" @onclick="ShowAddUserModal" Class="mx-2">Add</Button>
+                            <p class="mx-4">@m_Model.UserSettingsStatus</p>
+                        </div>
+                    </div>
+
+
+                    <div class="px-4 pt-1 pb-1 m-4 settings-box">
+                        <div class="mx-2 my-4">
+                            <h4>Seasons</h4>
+                        </div>
+
+                        <div class="flex flex-row grow justify-between my-2">
+                            <MudDataGrid Items="@m_Model.ActiveSeasons!.Values.SelectMany(x => x)" Filterable="false" SortMode="@SortMode.None" Groupable="false" Class="grow" EditMode="DataGridEditMode.Cell"
+                                         Bordered="true" Dense="true" ReadOnly="false" ColumnResizeMode="ResizeMode.Column">
+                                <Columns>
+                                    <PropertyColumn Property="entry => entry.Name" Editable="false"/>
+                                    <PropertyColumn Property="entry => entry.Start" Editable="false"/>
+                                    <PropertyColumn Property="entry => entry.End" Editable="false"/>
+                                    <PropertyColumn Property="x => x.Sport.ToString()" Grouping GroupBy="@(e => e.Sport)"/>
+                                    <TemplateColumn Editable="false">
+                                        <CellTemplate>
+                                            <MudStack Row>
+                                                <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Error" Size="Size.Small" OnClick="@(async () => await RemoveSeason(context.Item))">Remove</MudButton>
+                                                @if (context.Item is CustomSeason)
+                                                {
+                                                    <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Size="Size.Small">Edit</MudButton>
+                                                }
+                                            </MudStack>
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                </Columns>
+                            </MudDataGrid>
+                        </div>
+
+                        <p class="mx-4 mt-4">@m_Model.SeasonSettingsStatus</p>
+                    </div>
+                }
+                else
+                {
+                    <h3>Access Denied</h3>
+                }
+
+                break;
+            case "season":
+                <div class="mx-4 mt-2">
+                    <h1 class="alert-heading">Season</h1>
+                </div>
+
+                <div class="flex flex-column mx-4 my-6">
+                    @if (m_SeasonModel.Season is not null && m_SeasonModel.Season.Sport == ESportType.Football)
+                    {
+                        <h2>@m_SeasonModel.Season.Name</h2>
+                        <div class="flex flex-row gap-3">
+                            <MudTable Items="@(m_SeasonModel.DataModel.AsT0.Games)" Class="grow" Hover="true">
+                                <ColGroup>
+                                    <col style="width:26px;"/>
+                                    <col style="width:130px;"/>
+                                    <col/>
+                                    <col style="width:180px;"/>
+                                    <col style="width:60px;"/>
+                                </ColGroup>
+                                <HeaderContent>
+                                    <MudTh>Details</MudTh>
+                                    <MudTh>Bet</MudTh>
+                                    <MudTh>Team</MudTh>
+                                    <MudTh>Start Time</MudTh>
+                                    <MudTh>Result</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd>
+                                        <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Dark" Size="Size.Small" @onclick="() => context.ShowDetails = !context.ShowDetails">
+                                            <MudIcon Icon="@Icons.Material.Filled.ExpandMore"/>
+                                        </MudButton>
+                                    </MudTd>
+                                    <MudTd>
+                                        @{
+                                            var hasBet = context.Bets?.Where(b => b.Game.ReferenceId == context.Game.Id && b.User.Id == m_Model.User!.Id).Any() ?? false;
+                                            <MudButton Disabled="hasBet" Variant="Variant.Filled" Color="MudBlazor.Color.Dark" Size="Size.Small" @onclick="() => PlaceBetClick(context)">
+                                                Place Bet
+                                            </MudButton>
+                                        }
+                                    </MudTd>
+                                    <MudTd>@context.Game.Score.HomeTeam.Name vs. @context.Game.Score.AwayTeam.Name</MudTd>
+                                    <MudTd>@context.Game.StartTime</MudTd>
+                                    <MudTd>
+                                        @(context.Game.Score.State >= FootballApi.GameState.EndedAfterSecondHalf ? $"{context.Game.Score.HomeScore} : {context.Game.Score.AwayScore}"
+                                        : context.Game.Score.State == FootballApi.GameState.Cancelled ? "cancelled" : "upcoming")
+                                    </MudTd>
+                                </RowTemplate>
+                                <ChildRowContent>
+                                    @if (context.ShowDetails)
+                                    {
+                                        <MudTr>
+                                            <td colspan="4">
+                                                <MudCard Elevation="0">
+                                                    <MudCardHeader>
+                                                        <CardHeaderContent>
+                                                            <MudText>Total bets: @(context.Bets?.Count ?? 0)</MudText>
+                                                        </CardHeaderContent>
+                                                    </MudCardHeader>
+                                                    <MudCardContent Class="pa-0">
+                                                        @if (context.Bets is not null)
+                                                        {
+                                                            <MudTable Items="@context.Bets" Hover="true" Elevation="0" Context="betContext" Dense="true">
+                                                                <ColGroup>
+                                                                    <col style="width:60px;"/>
+                                                                    <col/>
+                                                                    <col style="width:40px;"/>
+                                                                    <col style="width:80px;"/>
+                                                                    <col style="width:30px;"/>
+                                                                    <col style="width:50px;"/>
+                                                                </ColGroup>
+                                                                <HeaderContent>
+                                                                    <MudTh></MudTh>
+                                                                    <MudTh>Username</MudTh>
+                                                                    <MudTh>Quote</MudTh>
+                                                                    <MudTh>Bet</MudTh>
+                                                                    <MudTh>Points</MudTh>
+                                                                    <MudTh>Hit</MudTh>
+                                                                </HeaderContent>
+                                                                <RowTemplate>
+                                                                    <MudTd></MudTd>
+                                                                    <MudTd>@betContext.User.UserName</MudTd>
+                                                                    <MudTd>@betContext.Quote</MudTd>
+                                                                    <MudTd>@betContext.HomeScore - @betContext.AwayScore</MudTd>
+                                                                    <MudTd>@betContext.Points</MudTd>
+                                                                    <MudTd>@betContext.Hit</MudTd>
+                                                                </RowTemplate>
+                                                            </MudTable>
+                                                        }
+                                                    </MudCardContent>
+                                                </MudCard>
+                                            </td>
+                                        </MudTr>
+                                    }
+                                </ChildRowContent>
+                                <PagerContent>
+                                    <MudTablePager HideRowsPerPage="true" PageSizeOptions="new int[] { m_SeasonModel.DataModel.AsT0.LeagueTable.Table.Count - 1 }"/>
+                                </PagerContent>
+                            </MudTable>
+
+                            <MudTable Items="@(m_SeasonModel.DataModel.AsT0.LeagueTable.Table)" Class="grow" Hover="true" FixedHeader="true">
+                                <HeaderContent>
+                                    <MudTh>Rank</MudTh>
+                                    <MudTh>Name</MudTh>
+                                    <MudTh>Played</MudTh>
+                                    <MudTh>Wins</MudTh>
+                                    <MudTh>Draws</MudTh>
+                                    <MudTh>Losses</MudTh>
+                                    <MudTh>+/-</MudTh>
+                                    <MudTh>Points</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd>@context.Rank</MudTd>
+                                    <MudTd>@context.Team.Name</MudTd>
+                                    <MudTd>@context.Played</MudTd>
+                                    <MudTd>@context.Won</MudTd>
+                                    <MudTd>@context.Drawn</MudTd>
+                                    <MudTd>@context.Lost</MudTd>
+                                    <MudTd>@($"{context.GoalsFor}/{context.GoalsAgainst}")</MudTd>
+                                    <MudTd>@context.Points</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </div>
+                    }
+                </div>
+                break;
+            default:
+                <p>not found</p>
+                break;
+        }
+    </div>
+}
+else
+{
+    <div class="flex flex-column mx-8 mt-2 grow">
+        <h1 class="">Group Home</h1>
+        <div class="flex flex-row mt-4 grow">
+            <div class="flex flex-column mr-8">
+                <h2 class="pb-2">Top Groups</h2>
+                <MudTable Items="@m_Model.GroupEntries" Class="grow">
+                    <HeaderContent>
+                        <MudTh>Group</MudTh>
+                        <MudTh>Members</MudTh>
+                        <MudTh>Rank</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Group.Name</MudTd>
+                        <MudTd>@context.Members</MudTd>
+                        <MudTd>@(context.Rank + 1)</MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager/>
+                    </PagerContent>
+                </MudTable>
+            </div>
+            <div class="flex ">
+                <div class="flex flex-column mr-8">
+                    <h2 class="pb-2">Bet Stats</h2>
+                    <MudPaper Class="pa-4">
+                        <MudChart ChartType="ChartType.Pie" InputData="@( [123, 234])" InputLabels="@( ["Hit", "Loss"])" Width="320px" Height="320px"/>
+                    </MudPaper>
+                </div>
+                <div class="flex flex-column">
+                    <h2 class="pb-2">Bet Graph</h2>
+                    <MudPaper Class="pl-4">
+                        @{
+                            var options = new ChartOptions
+                            {
+                                YAxisFormat = "0",
+                                InterpolationOption = InterpolationOption.NaturalSpline
+                            };
+                            <MudChart ChartType="ChartType.Line" ChartSeries="@( [new ChartSeries() { Name = "FootballBets", Data = new double[] { 15, 5, 17, 8, 10 } }, new ChartSeries() { Name = "FootballBets", Data = new double[] { 4, 0, 2, 9, 25 } }, new ChartSeries() { Name = "FootballBets", Data = new double[] { 9, 6, 6, 8, 18 } }])" XAxisLabels="@( ["Q1", "Q2", "Q3", "Q4"])" Width="100%" Height="350" ChartOptions="options"></MudChart>
+                        }
+                    </MudPaper>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</div>
+
+
+<Blazorise.Modal @bind-Visible="m_NewSeasonModel.Visible">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Add new Season</ModalTitle>
+            <CloseButton/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark">
+            <Text>@m_NewSeasonModel.Status</Text>
+            <Tabs SelectedTab="@m_NewSeasonModel.Tab" SelectedTabChanged="@OnNewSeasonSelectedTabChanged">
+                <Items>
+                    <Tab Name="Builtin">Builtin</Tab>
+                    <Tab Name="Custom">Custom</Tab>
+                </Items>
+                <Content>
+                    <TabPanel Name="Builtin">
+                        <Field>
+                            <Select TValue="int" Class="mt-4" @bind-SelectedValue="@m_NewSeasonModel.SelectedSeasonId">
+                                @foreach (var season in m_Model.BuiltinSeasons?.GroupBy(s => s.Name)
+                                              .Select(g => g.MaxBy(s => s.Start))
+                                              .OrderBy(s => s!.Name)
+                                              .ToList() ?? [])
+                                {
+                                    <SelectItem Value="@season!.Id">@season.Sport: @season.Name</SelectItem>
+                                }
+                            </Select>
+                        </Field>
+                    </TabPanel>
+                    <TabPanel Name="Custom">
+                        <Field>
+                            <FieldLabel>Name</FieldLabel>
+                            <TextEdit @bind-Text="m_NewSeasonModel.Name" Placeholder="Enter name..."/>
+                        </Field>
+                        <Field>
+                            <FieldLabel>Description</FieldLabel>
+                            <TextEdit @bind-Text="m_NewSeasonModel.Description" Placeholder="Enter description..."/>
+                        </Field>
+                        <Field>
+                            <FieldLabel>Sport</FieldLabel>
+                            <Select TValue="ESportType" @bind-SelectedValue="@m_NewSeasonModel.SelectedSportType">
+                                @foreach (var sport in Enum.GetValues<ESportType>())
+                                {
+                                    <SelectItem Value="@sport">@sport</SelectItem>
+                                }
+                            </Select>
+                        </Field>
+                        <Field>
+                            <FieldLabel>Start Date</FieldLabel>
+                            <DateEdit @bind-Date="m_NewSeasonModel.StartDate"/>
+                        </Field>
+                        <Field>
+                            <FieldLabel>End Date</FieldLabel>
+                            <DateEdit @bind-Date="m_NewSeasonModel.EndDate"/>
+                        </Field>
+                    </TabPanel>
+                </Content>
+            </Tabs>
+
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Color.Secondary" Clicked="@HideNewSeasonModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@(async () => await CreateSeason())">Create</Button>
+        </ModalFooter>
+    </ModalContent>
+</Blazorise.Modal>
+
+<Blazorise.Modal @bind-Visible="m_AddUserModel.Visible">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Add User</ModalTitle>
+            <CloseButton/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark">
+            <Text>@m_AddUserModel.Status</Text>
+            <Field>
+                <FieldLabel>Name</FieldLabel>
+                <TextEdit @bind-Text="m_AddUserModel.Name" Placeholder="Enter name..."/>
+            </Field>
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Color.Secondary" Clicked="@HideAddUserModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@(async () => await AddUser())">Add</Button>
+        </ModalFooter>
+    </ModalContent>
+</Blazorise.Modal>
+
+<Blazorise.Modal @bind-Visible="m_PlaceBetModel.IsVisible">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Place Bet</ModalTitle>
+            <CloseButton/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark">
+            <Text>@m_PlaceBetModel.Status</Text>
+            <Field>
+                <FieldLabel>Home Score</FieldLabel>
+                <NumericEdit @bind-Value="m_PlaceBetModel.HomeScore" Placeholder="0"/>
+            </Field>
+            <Field>
+                <FieldLabel>Away Score</FieldLabel>
+                <NumericEdit @bind-Value="m_PlaceBetModel.AwayScore" Placeholder="0"/>
+            </Field>
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Color.Secondary" Clicked="@HidePlaceBetModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@(async () => await PlaceBet())">Submit</Button>
+        </ModalFooter>
+    </ModalContent>
+</Blazorise.Modal>
+
+@code {
+    private int m_OldId = -1;
+    [Parameter] public int? GroupId { get; set; }
+    [Parameter] public int? SeasonId { get; set; }
+    [Parameter] public string? Page { get; set; } = "overview";
+
+
+    [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
+    MpmUser? m_UserInstance;
+    MpmResult<(MpmGroup group, UserGroupEntry entry)> m_GroupResult;
+
+    private readonly Model m_Model = new();
+    private readonly NewSeasonModel m_NewSeasonModel = new();
+    private readonly UpdateGroupModel m_UpdateGroupModel = new();
+    private readonly AddUserModel m_AddUserModel = new();
+    private readonly SeasonModel m_SeasonModel = new();
+    private readonly PlaceBetModel m_PlaceBetModel = new();
+
+    private class Model
+    {
+        public MpmGroup? Group { get; set; }
+        public UserGroupEntry? Entry { get; set; }
+        public Dictionary<ESportType, List<Season>>? ActiveSeasons { get; set; }
+        public List<SeasonEntry>? SeasonEntries { get; set; }
+        public List<BuiltinSeason>? BuiltinSeasons { get; set; }
+        public MpmUser? User { get; set; }
+        public List<UserGroupEntry> Uges { get; set; } = [];
+        public List<GroupEntry> GroupEntries { get; set; } = [];
+        public string UserSettingsStatus { get; set; } = "";
+        public string SeasonSettingsStatus { get; set; } = "";
+
+        public class GroupEntry
+        {
+            public MpmGroup Group { get; set; }
+            public int Members { get; set; }
+            public int Rank { get; set; }
+        }
+    }
+
+    private class SeasonModel
+    {
+        public ESportType SportType = ESportType.None;
+        public Season? Season;
+        public OneOf<FootballSeasonModel> DataModel;
+    }
+
+    private class FootballSeasonModel
+    {
+        public List<FootballGameEntry> Games = new();
+        public List<GameBet> Bets = new();
+        public FootballApi.LeagueTable LeagueTable;
+    }
+
+    private class FootballGameEntry
+    {
+        public FootballApi.GameEntry Game;
+        public bool ShowDetails = false;
+        public List<GameBet>? Bets;
+    }
+
+    private class NewSeasonModel
+    {
+        public bool Visible;
+        public string Status = "";
+        public string Name = "";
+        public string Description = "";
+        public DateTime StartDate = DateTime.Today;
+        public DateTime EndDate = DateTime.Today;
+        public string Tab = "Builtin";
+        public int SelectedSeasonId = -1;
+        public ESportType SelectedSportType = ESportType.None;
+    }
+
+    private class UpdateGroupModel
+    {
+        public string Name = "";
+        public string Description = "";
+        public string Status = "";
+    }
+    
+    private class PlaceBetModel
+    {
+        public double HomeeQuote = Random.Shared.NextDouble() * 1.5 + 1.0;
+        public double AwayQuote = Random.Shared.NextDouble() * 1.5 + 1.0;
+        public double DrawQuote = Random.Shared.NextDouble() * 1.5 + 1.0;
+        public int HomeScore = 0;
+        public int AwayScore = 0;
+        public string Status = "";
+        public bool IsVisible = false;
+        public FootballApi.GameEntry? GameEntry;
+    }
+
+    private class AddUserModel
+    {
+        public bool Visible;
+        public string Name = "";
+        public EGroupRole Role = EGroupRole.Member;
+        public string Status = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (User is null) return;
+        await User.SyncEvent.Task;
+        if (User.Payload is not null)
+            m_UserInstance = User.Payload;
+
+        if (m_UserInstance is null)
+        {
+            NavigationManager.NavigateTo("/account/login");
+            return;
+        }
+
+        UserDomain.SetUser(m_UserInstance);
+
+        m_Model.User = User.Payload;
+        m_Model.BuiltinSeasons = await UserDomain.GetAllBuiltinSeasons();
+
+        var allGroupsResult = await UserDomain.GetGroups();
+        if (allGroupsResult.IsFaulted) NavigationManager.NavigateTo("/error");
+
+        var groupEntries = allGroupsResult.Value.Select(g => new Model.GroupEntry { Group = g }).ToList();
+        foreach (var groupEntry in groupEntries)
+        {
+            var members = await UserDomain.GetUsersByGroup(groupEntry.Group);
+            var rank = await UserDomain.GetUserPosition(groupEntry.Group);
+
+            if (members.IsFaulted || rank.IsFaulted)
+                NavigationManager.NavigateTo("/error");
+
+            groupEntry.Members = members.Value.Count();
+            groupEntry.Rank = rank.Value;
+        }
+
+        m_Model.GroupEntries = groupEntries;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (m_UserInstance is null) return;
+        if (GroupId is null) return;
+
+        //if (m_OldId != GroupId)
+        {
+            m_OldId = GroupId.Value;
+
+            if (string.IsNullOrEmpty(Page)) Page = "overview";
+
+            using var scope = ServiceProvider.CreateScope();
+            var userDomain = scope.ServiceProvider.GetRequiredService<UserDomain>();
+            userDomain.SetUser(m_UserInstance);
+
+            m_GroupResult = await userDomain.GetGroupByIdWithEntry(GroupId.Value);
+            if (m_GroupResult.IsFaulted) NavigationManager.NavigateTo("/error");
+
+            m_Model.Group = m_GroupResult.Value.group;
+            m_Model.Entry = m_GroupResult.Value.entry;
+
+            if (m_Model.Group is null || m_Model.Entry is null) NavigationManager.NavigateTo("/error");
+
+            var seasonsResult = await userDomain.GetGroupSeasons(m_Model.Group!);
+            if (seasonsResult.IsFaulted) NavigationManager.NavigateTo("/error");
+
+            m_Model.SeasonEntries = seasonsResult.Value;
+            m_Model.ActiveSeasons = m_Model.SeasonEntries
+                .Where(se => se.IsActive)
+                .Select(se => se.Season)
+                .GroupBy(s => s.Sport)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            m_UpdateGroupModel.Name = m_Model.Group!.Name;
+            m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
+
+            var usersResult = await userDomain.GetUsersByGroup(m_Model.Group);
+            if (usersResult.IsFaulted) NavigationManager.NavigateTo("/error");
+            m_Model.Uges = usersResult.Value;
+
+            if (SeasonId is not null)
+            {
+                var seasonEntry = m_Model.SeasonEntries.FirstOrDefault(s => s.Season.Id == SeasonId);
+                if (seasonEntry is null) NavigationManager.NavigateTo($"/groups/{GroupId}");
+
+                var concreteSeasonResult = await userDomain.GetConcreteSeasonById(SeasonId.Value);
+                if (concreteSeasonResult.IsFaulted) NavigationManager.NavigateTo($"/groups/{GroupId}");
+                var isBuiltin = concreteSeasonResult.Value.IsT0;
+
+
+                m_SeasonModel.Season = seasonEntry!.Season;
+                m_SeasonModel.SportType = seasonEntry.Season.Sport;
+
+                if (seasonEntry.Season.Sport is ESportType.Football)
+                {
+                    m_SeasonModel.DataModel = new FootballSeasonModel();
+
+                    if (isBuiltin)
+                    {
+                        var builtInSeason = concreteSeasonResult.Value.AsT0;
+                        var leagueTableTask = FootballApi.GetLeagueTable(builtInSeason.ReferenceId, null);
+                        var gameEntriesTask = FootballApi.GetGameEntries(builtInSeason.ReferenceId, null);
+                        var allBetsTask = userDomain.GetAllFootballGameBetsForGroup(m_Model.Group.Id);
+
+                        await Task.WhenAll(leagueTableTask, gameEntriesTask, allBetsTask);
+
+                        if (leagueTableTask.Result.IsFaulted) NavigationManager.NavigateTo("/error");
+                        if (gameEntriesTask.Result.IsFaulted) NavigationManager.NavigateTo("/error");
+                        if (allBetsTask.Result.IsFaulted) NavigationManager.NavigateTo("/error");
+
+                        m_SeasonModel.DataModel.AsT0.LeagueTable = leagueTableTask.Result.Value;
+                        m_SeasonModel.DataModel.AsT0.Bets = allBetsTask.Result.Value;
+                        m_SeasonModel.DataModel.AsT0.Games = gameEntriesTask.Result.Value.Select(g =>
+                        {
+                            var bets = allBetsTask.Result.Value.Where(b => b.Game.ReferenceId == g.Id).ToList();
+                            return new FootballGameEntry { Game = g, Bets = bets.Count > 0 ? bets : null };
+                        }).ToList();
+                    }
+                    else
+                    {
+                        var customInSeason = concreteSeasonResult.Value.AsT1;
+                        // TODO: Implement custom season handler
+                    }
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/error");
+                }
+            }
+        }
+
+
+        StateHasChanged();
+    }
+
+    private void ShowNewSeasonModal()
+    {
+        m_NewSeasonModel.Visible = true;
+    }
+
+    private void HideNewSeasonModal()
+    {
+        m_NewSeasonModel.Visible = false;
+    }
+
+    private void ShowAddUserModal()
+    {
+        m_AddUserModel.Visible = true;
+    }
+
+    private void HideAddUserModal()
+    {
+        m_AddUserModel.Visible = false;
+    }
+
+    private void ShowPlaceBetModal()
+    {
+        m_PlaceBetModel.IsVisible = true;
+    }
+
+    private void HidePlaceBetModal()
+    {
+        m_PlaceBetModel.IsVisible = false;
+    }
+
+    private async Task AddUser()
+    {
+        var userResult = await UserDomain.GetUserIdByNameOrMail(m_AddUserModel.Name);
+
+        if (userResult.Exception is UserDomain.UserNotFoundException)
+        {
+            m_AddUserModel.Status = "User not found";
+            return;
+        }
+
+        var result = await UserDomain.AddUserToGroup(m_Model.Group!, userResult.Value, m_AddUserModel.Role);
+
+        if (result.IsSuccess)
+        {
+            await OnParametersSetAsync();
+            m_AddUserModel.Visible = false;
+            m_AddUserModel.Name = "";
+            m_AddUserModel.Status = "";
+            return;
+        }
+
+        if (result.Exception is UserDomain.AccessDeniedException)
+        {
+            m_AddUserModel.Status = "Access denied";
+            return;
+        }
+
+        if (result.Exception is UserDomain.AlreadyExistsException)
+        {
+            m_AddUserModel.Status = "User is already in group";
+            return;
+        }
+
+        m_AddUserModel.Status = "An error occurred";
+    }
+
+    private async Task CreateSeason()
+    {
+        if (m_NewSeasonModel.Tab is "Builtin")
+        {
+            if (m_NewSeasonModel.SelectedSeasonId is -1)
+            {
+                Console.WriteLine("hi");
+                m_NewSeasonModel.Status = "Please select a season";
+                return;
+            }
+
+            var result = await UserDomain.AddSeasonToGroup(m_Model.Group!, m_NewSeasonModel.SelectedSeasonId);
+            if (result.IsFaulted)
+            {
+                m_NewSeasonModel.Status = "An error occurred";
+                return;
+            }
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(m_NewSeasonModel.Name))
+            {
+                m_NewSeasonModel.Status = "Please enter a name";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(m_NewSeasonModel.Description))
+            {
+                m_NewSeasonModel.Status = "Please enter a description";
+                return;
+            }
+
+            if (m_NewSeasonModel.SelectedSportType is ESportType.None)
+            {
+                m_NewSeasonModel.Status = "Please select a sport";
+                return;
+            }
+
+            var result = await UserDomain.CreateCustomSeason(
+                m_Model.Group!, m_NewSeasonModel.Name, m_NewSeasonModel.Description, m_NewSeasonModel.StartDate, m_NewSeasonModel.EndDate, m_NewSeasonModel.SelectedSportType);
+
+            switch (result.IsFaulted)
+            {
+                case true when result.Exception is UserDomain.InvalidDateException:
+                    m_NewSeasonModel.Status = "Invalid date range";
+                    return;
+                case true:
+                    m_NewSeasonModel.Status = "An error occurred";
+                    return;
+            }
+        }
+
+        await OnParametersSetAsync();
+
+        m_NewSeasonModel.Visible = false;
+        m_NewSeasonModel.Name = "";
+        m_NewSeasonModel.Description = "";
+        m_NewSeasonModel.Status = "";
+        m_NewSeasonModel.SelectedSeasonId = -1;
+        m_NewSeasonModel.StartDate = DateTime.Today;
+        m_NewSeasonModel.EndDate = DateTime.Today;
+        m_NewSeasonModel.SelectedSportType = ESportType.None;
+    }
+
+    private Task OnNewSeasonSelectedTabChanged(string name)
+    {
+        m_NewSeasonModel.Tab = name;
+        return Task.CompletedTask;
+    }
+
+    private async Task UpdateGroup()
+    {
+        if (m_Model.Group is null) return;
+
+        if (m_Model.Group.Name != m_UpdateGroupModel.Name)
+        {
+            var result = await UserDomain.UpdateGroupName(m_Model.Group, m_UpdateGroupModel.Name);
+            if (result.IsFaulted)
+            {
+                m_UpdateGroupModel.Status = "An error occurred";
+                return;
+            }
+        }
+
+        if (m_Model.Group.Description != m_UpdateGroupModel.Description)
+        {
+            var result = await UserDomain.UpdateGroupDescription(m_Model.Group, m_UpdateGroupModel.Description);
+            if (result.IsFaulted)
+            {
+                m_UpdateGroupModel.Status = "An error occurred";
+                return;
+            }
+        }
+
+        await OnParametersSetAsync();
+        m_UpdateGroupModel.Status = "Updated";
+        m_UpdateGroupModel.Name = m_Model.Group.Name;
+        m_UpdateGroupModel.Description = m_Model.Group.Description ?? "";
+    }
+
+    private async Task RemoveUser(MpmUser itemMpmUser)
+    {
+        var result = await UserDomain.RemoveUserFromGroup(m_Model.Group!, itemMpmUser.Id);
+        if (result.IsFaulted)
+        {
+            m_Model.UserSettingsStatus = "An error occurred";
+        }
+
+        await OnParametersSetAsync();
+        m_Model.UserSettingsStatus = $"Removed {itemMpmUser.UserName} from group";
+    }
+
+    private async Task RemoveSeason(Season contextItem)
+    {
+        var result = await UserDomain.RemoveSeasonFromGroup(m_Model.Group!, contextItem.Id);
+        if (result.IsFaulted)
+        {
+            m_Model.SeasonSettingsStatus = "An error occurred";
+        }
+
+        await OnParametersSetAsync();
+        m_Model.SeasonSettingsStatus = $"Removed {contextItem.Name} from group";
+    }
+
+    private void PlaceBetClick(FootballGameEntry? entry)
+    {
+        if (entry is null) return;
+        m_PlaceBetModel.GameEntry = entry.Game;
+        ShowPlaceBetModal();
+    }
+    
+    private async Task PlaceBet()
+    {
+        if (m_Model.Group is null || m_PlaceBetModel.GameEntry is null) return;
+        
+        var quote = m_PlaceBetModel.HomeScore == m_PlaceBetModel.AwayScore ? m_PlaceBetModel.DrawQuote : m_PlaceBetModel.HomeScore < m_PlaceBetModel.AwayScore ? m_PlaceBetModel.AwayQuote : m_PlaceBetModel.HomeeQuote;
+        
+        var result = await UserDomain.PlaceGameBet(quote,  m_PlaceBetModel.HomeScore,  m_PlaceBetModel.AwayScore, m_PlaceBetModel.GameEntry.Value.Id, 10, m_Model.Group);
+        if (result.IsFaulted)
+        {
+            m_PlaceBetModel.Status = $"An error occurred {quote}";
+            return;
+        }
+
+        m_PlaceBetModel.Status = "";
+        m_PlaceBetModel.HomeScore = 0;
+        m_PlaceBetModel.AwayScore = 0;
+        HidePlaceBetModal();
+        await OnParametersSetAsync();
+    }
+}

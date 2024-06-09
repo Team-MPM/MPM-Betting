@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using Aspire.Hosting;
-using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Publishing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.UserSecrets;
@@ -71,7 +69,8 @@ public static class Extensions
     {
         ParameterDefault generatedPassword = new GenerateParameterDefault
         {
-            MinLength = 22, // enough to give 128 bits of entropy when using the default 67 possible characters. See remarks in PasswordGenerator.Generate
+            MinLength = 22, // Enough to give 128 bits of entropy when using the default 67 possible characters.
+                            // See remarks in PasswordGenerator.Generate
             Lower = lower,
             Upper = upper,
             Numeric = numeric,
@@ -122,7 +121,7 @@ public static class Extensions
                 return false;
             
             var appAssembly = Assembly.Load(new AssemblyName(applicationName));
-            if (appAssembly?.GetCustomAttribute<UserSecretsIdAttribute>()?.UserSecretsId is not { } userSecretsId) 
+            if (appAssembly.GetCustomAttribute<UserSecretsIdAttribute>()?.UserSecretsId is not { } userSecretsId) 
                 return false;
             
             // Save the value to the secret store

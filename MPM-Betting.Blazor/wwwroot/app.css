@@ -1,9 +1,15 @@
+:root {
+    --mud-palette-background: rgba(30,30,30,0) !important; 
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     overflow-x: hidden;
-    background: rgba(15,15,15);
+    background: rgba(30,30,30);
     color: ghostwhite;
+    min-height: 100vh;
 }
+
 
 a, .btn-link {
     color: #006bb7;
@@ -16,7 +22,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -45,10 +51,236 @@ h1:focus {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+
+/* Auth */
+
+.soft-bg {
+    background: rgba(30, 30, 30, 0.7);
+    border-radius: 0.8rem;
+}
+
+
+/* Groups */
+
+.groups {
+    overflow: hidden;
+
+    .side-nav::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+
+    .side-nav {
+        width: 72px;
+        background: #1a1a1a;
+        border-right: 1px solid #333;
+        height: calc(100vh - 100px);
+        overflow-y: auto;
+
+        -ms-overflow-style: none; /* Internet Explorer 10+ */
+        scrollbar-width: none; /* Firefox */
+
+        button {
+            display: flex;
+
+            .bar {
+                position: absolute;
+                width: 4px;
+                height: 0;
+                left: 0;
+                border-radius: 4px;
+                background: #acd4ff;
+            }
+
+            .selected {
+                height: 38px;
+                scale: 1.04;
+            }
+
+
+            div:hover + div {
+                min-height: 32px;
+            }
+
+            div {
+                transition: all 0.3s ease-in;
+
+                img {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    margin: 0 auto;
+                    display: block;
+                }
+            }
+        }
+    }
+}
+
+.group-view {
+    
+     .side-nav::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+    
+    .side-nav {
+        width: 250px;
+        background: #1c1c1c;
+        border-right: 1px solid #333;
+        height: calc(100vh - 100px);
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        -ms-overflow-style: none; /* Internet Explorer 10+ */
+        scrollbar-width: none; /* Firefox */
+
+        .group-title {
+            width: 250px;
+            background-clip: content-box;
+            transition: all 0.1s ease-in-out;
+
+            img {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+            }
+
+            div {
+                width: 180px;
+                font-size: 20px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            i {
+                margin-left: auto;
+                margin-right: 15px;
+            }
+        }
+
+        .group-title:hover {
+            cursor: pointer;
+            background-color: #333;
+        }
+        
+        .list {
+            div {
+                transition: all 0.1s ease-in-out;
+            }
+            
+            div:hover {
+                background-color: #333;
+            }
+        }
+    }
+}
+
+.group-page::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+
+.group-page {
+    background-color: #222;
+    min-width: 0;
+    flex: 1;
+    overflow-y: scroll;  
+    height: calc(100vh - 100px);
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+    
+    .settings-box {
+        background-color: #333;
+        border-radius: 0.8rem;
+    }
+}
+
+
+/* Utils */
+
+.underline {
+    text-decoration: underline;
+}
+
+.flex {
+    display: flex;
+}
+
+.grow {
+    flex-grow: 1;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-row-reverse {
+    flex-direction: row-reverse;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.align-start {
+    align-items: start;
+}
+
+.align-end {
+    align-items: end;
+}
+
+.align-stretch {
+    align-items: stretch;
+}
+
+.align-baseline {
+    align-items: baseline;
+}
+
+.justify-start {
+    justify-content: start;
+}
+
+.justify-end {
+    justify-content: end;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-around {
+    justify-content: space-around;
+}
+
+.justify-evenly {
+    justify-content: space-evenly;
+}
+
+
+.h-full {
+    height: 100%;
+}
+
+
+

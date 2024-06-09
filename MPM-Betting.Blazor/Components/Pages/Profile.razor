@@ -1,0 +1,193 @@
+﻿@page "/profile"
+@using Microsoft.AspNetCore.Components.Authorization
+@using MPM_Betting.Blazor.ComponentLibrary.Core
+@using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.Football
+@using MPM_Betting.DataModel.User
+@using MPM_Betting.Services.Domains
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserDomain UserDomain
+@inject NavigationManager NavigationManager
+
+<PageTitle>Profile</PageTitle>
+
+<div class="container-fluid">
+    @if (User is not null)
+    {
+        <div class="row ProfileDataRow">
+            <div class="col-1"></div>
+            <div class="col-2">
+               @if (User.ProfilePictureUrl is not null)
+               {
+                   <img src="@User.ProfilePictureUrl" alt="ProfilePicture"/>
+               }
+               else
+               {
+                   <img src="/Images/default-profile-picture.png" alt="ProfilePicture"/>
+               }
+            </div>
+            <div class="col-6">
+                <div class="ProfileUserName">@User.UserName</div>
+            </div>
+        </div>
+        <MudDivider/>
+        
+        <div class="row ProfileDataOverBox">
+            <div class="col-3 ProfileDataBox">
+                <div class="row">
+                    <div class="col-12 DataTitleBox">
+                        <h2>ResultBets</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <MudPaper Class="pa-4">
+                            <MudChart ChartType="ChartType.Pie" InputData="@RightWrongBets" @bind-SelectedIndex="IndexBets" InputLabels="@LabelsRightWrong" Width="300px" Height="300px" />
+                        </MudPaper>
+                        <MudDivider Class="mt-5 mb-5"/>
+                        <MudText Typo="Typo.h6">@LabelsRightWrong[IndexBets] Bets : @RightWrongBets[IndexBets]</MudText>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1"></div>
+            <div class="col-3 ProfileDataBox">
+                <div class="row">
+                    <div class="col-12 DataTitleBox">
+                        <h2>ScoreBets</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <MudPaper Class="pa-4">
+                            <MudChart ChartType="ChartType.Pie" InputData="@RightWrongScoreBets" @bind-SelectedIndex="IndexScoreBets" InputLabels="@LabelsRightWrong" Width="300px" Height="300px"/>
+                        </MudPaper>
+                        <MudDivider Class="mt-5 mb-5"/>
+                        <MudText Typo="Typo.h6">@LabelsRightWrong[IndexScoreBets] Bets : @RightWrongScoreBets[IndexScoreBets]</MudText>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1"></div>
+            <div class="col-3 ProfileDataBox">
+                <div class="row">
+                    <div class="col-12 DataTitleBox">
+                        <h2>Right/Wrong Guesses</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <MudSimpleTable Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Style="overflow-x: auto;">
+                            <thead>
+                            <tr>
+                                @foreach (var h in headings)
+                                {
+                                    <th>@h</th>
+                                }
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @* @foreach (var team in LeagueTable.Table) *@
+                            @* { *@
+                            @*     <tr> *@
+                            @*         <td>@team.Rank</td> *@
+                            @*         <td><img class="TeamImage" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(team.Team.Id).png"/> @team.Team.Name</td> *@
+                            @*         <td>@team.Won</td> *@
+                            @*         <td>@team.Drawn</td> *@
+                            @*         <td>@team.Lost</td> *@
+                            @*         <td>@(team.GoalsFor - team.GoalsAgainst)</td> *@
+                            @*         <td>@team.Points</td> *@
+                            @*     </tr> *@
+                            @* } *@
+                            </tbody>
+                        </MudSimpleTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>Loading</div>
+    }
+</div>
+
+@code {
+    [CascadingParameter] private SyncContextWithPayload<MpmUser>? UserTask { get; set; }
+    MpmUser? User;
+    
+    // Charts
+    
+    private int IndexBets = 0;
+    private int IndexScoreBets = 0;
+    
+    string[] LabelsRightWrong = { "Right", "Wrong" };
+    
+    public double[] RightWrongBets { get; set; } = { 5, 6 };
+    public double[] RightWrongScoreBets { get; set; } = { 1, 9 };
+    
+    // Table 
+    
+    private bool dense = false;
+    private bool hover = true;
+    private bool striped = false;
+    private bool bordered = false;
+    string[] headings = { "#", "SetPoints", "Quote", "Result" };
+    
+    public List<GameBet> Bets { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserTask is null)
+            return;
+        
+        await UserTask.SyncEvent.Task;
+
+        if (UserTask.Payload is not null)
+        {
+            User = UserTask.Payload;
+            UserDomain.SetUser(User);
+        }
+
+        if (User is null)
+        {
+            RedirectToLogin();
+            return;
+        }
+
+        await GetAllBets();
+        await CalcRightWrongBets();
+        await CalcRightWrongScoreBets();
+    }
+
+    private async Task CalcRightWrongBets()
+    {
+        RightWrongBets[0] = Bets.Count(s => s.Hit);
+        RightWrongBets[1] = Bets.Count(s => !s.Hit);
+    }
+    
+    private async Task CalcRightWrongScoreBets()
+    {
+        //TODO fix this c:
+        RightWrongScoreBets[0] = Bets.Count(s => s.Hit);
+        RightWrongScoreBets[1] = Bets.Count(s => !s.Hit);
+    }
+
+    private async Task GetAllBets()
+    {
+        //TODO
+        // var result = await UserDomain.GetAllBetsForUser();
+        var result = await UserDomain.GetAllBetsFootballGameForUser();
+        if (result.IsSuccess)
+        {
+            Bets = result.Value;
+        }
+    }
+
+    private void RedirectToLogin()
+    {
+        NavigationManager.NavigateTo("/account/login", true);
+    }
+
+}   

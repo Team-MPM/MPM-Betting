@@ -3,14 +3,19 @@
 
 <head>
     <meta charset="utf-8"/>
+    <title>MPM-Betting</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css"/>
     <link rel="stylesheet" href="app.css"/>
     <link rel="stylesheet" href="MPM-Betting.Blazor.styles.css"/>
+    <link rel="stylesheet" href="./css/LandingPage.css"/>
     <link rel="stylesheet" href="css/MainStyles.css"/>
+    <link rel="stylesheet" href="css/Leagues.css"/>
     <link rel="icon" type="image/png" href="favicon.png"/>
-    <link rel="stylesheet" href="css/Login.css"/>
+    <link rel="stylesheet" href="css/AdministrationPages.css"/>
+    <link rel="stylesheet" href="css/ManageAccountStyles.css"/>
+    <link rel="stylesheet" href="css/ProfileStyles.css"/>
     
     <!-- Blazorise-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
@@ -27,10 +32,28 @@
 </head>
 
 <body>
-<Routes/>
+<Routes @rendermode="RenderModeForPage"/>
 <script src="_framework/blazor.web.js"></script>
 <script src="qrcode.min.js"></script>
 <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+<script src="_content/Microsoft.AspNetCore.ProtectedBrowserStorage/protectedBrowserStorage.js"></script>
 </body>
 
 </html>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? RenderModeForPage {
+        get
+        {
+            if (HttpContext.Request.Path.StartsWithSegments("/Account/Manage/upload-profile-picture")) return new InteractiveServerRenderMode(prerender: false);
+            if (HttpContext.Request.Path.StartsWithSegments("/Account")) return null;
+            if (HttpContext.Request.Path.StartsWithSegments("/Account/Manage")) return null;
+            return new InteractiveServerRenderMode(prerender: false);
+        }
+
+    }
+
+}

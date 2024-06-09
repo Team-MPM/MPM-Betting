@@ -15,103 +15,155 @@
 /*NORMAL CLASSES*/
 
 .NavBar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 0;
     background: rgba(50,50,50,1);
-    width: 101vw;
-    height: fit-content;
-    display: flex;
-    border-bottom: gray solid 2px;
-    margin-bottom: 1%;
-    justify-content: space-evenly;
+    box-shadow: 0 4px 8px rgba(50, 50, 50, 0.4);
+    border-bottom: 3px solid rgb(30,30,30)  ;
 }
 
+/* LOGO */
+
+.logo {
+    margin: 0 10%;
+}
 
 .NavBarLogoText {
     font-family: Impact, fantasy;
     font-size: 32px;
     font-style: italic;
     font-weight: bold;
-    font-decoration: none;
+    text-decoration: none;
     cursor: default;
     color: #0BBCC7; /*TODO*/
 }
 
 .NavBarLogoText:hover {
-    transform: scale(1.04);
-    text-decoration: none;
+    text-decoration: underline;
     cursor: pointer;
 }
 
-.NavBar img {
-    margin: 10px;
-    justify-self: center;
-}
+/* NAVIGATION */
 
-.NavBar > * {
-    flex-direction: row;
-    justify-content: center;
-    justify-self: center;
-    align-content: center;
-    align-self: center; 
+.nav-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
     display: flex;
 }
 
-.credits {
-    display: flex;
-    flex-direction: row;
-}
-
-.sportarten{
-    display: flex;
-    justify-content: space-between;
-}
-
-.credits {
-    display: flex;
-    align-items: center;
-}
-
-.credits > div {
-    font-size: 1.2em;
-    font-family: Tahoma;
-}
-
-.NavBarLink {
-    display: flex;
-    align-items: center;
-    align-content: center;
-    text-decoration: none;
-}
-
-
-.NavBarLink:hover {
-    text-decoration: none;
-    cursor: pointer;
-    transform: scale(103%);
-}
-
-.NavBarItem {
-    font-family: "Lucida Bright";
+.nav-link {
+    margin: 0 15px;
     font-size: 20px;
-    color: white;
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #fff;
+    align-content: center;
     text-decoration: none;
 }
 
-.NavBarActive {
+.nav-active {
     font-weight: bold;
     border-bottom: 3px solid #0BBCC7;
 }
 
-.NavBarDropDown {
-    display: grid;
-    grid-template-columns: 2fr 0.1fr;
+.nav-sport-menu{
+    width: 300px;
 }
 
-.NavBarDropDownSP {
-    diplay: flex;
-    align-content: center;
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 0 10px;
+}
+
+/*Credits*/
+
+.NavBarPoints {
+    display: flex;
+    align-self: center;
+    /*margin-left: -5%;*/
+    margin-right: 50px;
     align-items: center;
-    color: rgb(200,200,200);
+    
 }
 
+.NavBarPoints > div {
+    margin: 0 10px;
+    font-size: 19px;
+}
 
+.NavBarPoints > img {
+    height: 25px;
+}
+
+.gift_icon {
+    align-content: center;
+}
+
+.gift_icon  i {
+    font-size: 20px;
+}
+
+.PointRedeemModalContent {
+    display: grid;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    padding: 20px;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    grid-template-columns: 1fr;
+}
+
+.PointRedeemModalContent i {
+    font-size: 30px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+/*icon glow*/
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    border: 2px solid transparent;
+    border-image: linear-gradient(45deg, yellow, yellow);
+    border-image-slice: 1;
+    pointer-events: none; /* So that the border doesn't interfere with clicks */
+    z-index: -1; /* Make sure the border is behind the content */
+}
+
+/* Additional styles for the glowing effect */
+.glow {
+    position: relative;
+    animation: glow 1.5s infinite;
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px yellow;
+    }
+    50% {
+        box-shadow: 0 0 20px yellow;
+    }
+    100% {
+        box-shadow: 0 0 5px yellow;
+    }
+}
+
+.LogoutDropdown {
+    padding: 0;
+}
 

@@ -19,4 +19,4 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: --baseline,qodana.sarif.json
+          args: --baseline,qodana.sarif.json,--property=qodana.net.solution=MPM-Betting.sln 

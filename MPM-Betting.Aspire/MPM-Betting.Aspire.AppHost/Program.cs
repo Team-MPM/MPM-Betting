@@ -3,7 +3,7 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-if (!builder.ExecutionContext.IsPublishMode)
+if (!builder.ExecutionContext.IsPublishMode && Environment.GetEnvironmentVariable("AZF") == "true")
 {
     var azurite = builder.AddContainer("azurite", "mcr.microsoft.com/azure-storage/azurite")
         .WithEndpoint(port: 10000, name: "blob", targetPort: 11000)
@@ -15,20 +15,22 @@ if (!builder.ExecutionContext.IsPublishMode)
     //    .WithReference(queue)
     //    .WithEnvironment("QueueConnectionString", queueConnStrCallback)
 
-    var functions = builder.AddAzureFunction<MPM_Betting_Functions>("functions")
+    builder.AddAzureFunction<MPM_Betting_Functions>("functions")
         .WithReference(azurite.GetEndpoint("queue"))
         .WithEnvironment("QueueConnectionString", queueConnStrCallback);
 }
 
+if (builder.ExecutionContext.IsPublishMode || Environment.GetEnvironmentVariable("METRICS") == "true")
+{
+    builder.AddContainer("grafana", "grafana/grafana")
+        .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana", isReadOnly: false)
+        .WithBindMount(GetFullPath("../grafana/dashboards"), "/var/lib/grafana/dashboards", isReadOnly: false)
+        .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false);
+    builder.AddContainer("prometheus", "prom/prometheus")
+        .WithBindMount(GetFullPath("../prometheus"), "/etc/prometheus")
+        .WithHttpEndpoint(port: 9090, targetPort: 9090, isProxied: false);
+}
 
-var grafana = builder.AddContainer("grafana", "grafana/grafana")
-    .WithBindMount(GetFullPath("../grafana/config"), "/etc/grafana", isReadOnly: false)
-    .WithBindMount(GetFullPath("../grafana/dashboards"), "/var/lib/grafana/dashboards", isReadOnly: false)
-    .WithHttpEndpoint(port: 3000, targetPort: 3000);
-
-var prometheus = builder.AddContainer("prometheus", "prom/prometheus")
-    .WithBindMount(GetFullPath("../prometheus"), "/etc/prometheus")
-    .WithHttpEndpoint(port: 9090, targetPort: 9090);
 
 var redis = builder.AddRedis("redis")
     .WithPersistence()

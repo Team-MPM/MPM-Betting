@@ -1,6 +1,5 @@
 using BlazorApp1.Components.Account;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using MPM_Betting.Blazor;
 using MPM_Betting.Blazor.Components;
 using MPM_Betting.Services;
@@ -22,13 +21,6 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
 
 // Application Services
 
@@ -68,8 +60,6 @@ var app = builder.Build();
 app.UseRouting();
 
 
-
-
 // Auth
 app.UseAuthentication();
 app.UseAuthorization();
@@ -90,5 +80,6 @@ if (!app.Environment.IsDevelopment())
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 
 app.Run();

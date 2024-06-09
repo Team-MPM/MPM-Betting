@@ -7,9 +7,14 @@ public class MpmGroup
 {
     [Key]
     public int Id { get; set; }
-    
+
+    // ReSharper disable once EntityFramework.ModelValidation.UnlimitedStringLength
+    public string CreatorId { get; set; }
     public MpmUser Creator { get; set; }
     
+    [StringLength(200)] public string? ProfilePictureUrl { get; set; }
+
+    public List<Bet> AllBets { get; set; } = [];
     public List<UserGroupEntry> UserGroupEntries { get; set; } = [];
     
     [Required]
@@ -27,11 +32,7 @@ public class MpmGroup
         Name = name;
         Description = description;
         Seasons = seasons;
-        UserGroupEntries.Add(new UserGroupEntry(creator, this));
     }
 
-    private MpmGroup() : this(null!, null!, null!, null!)
-    {
-        
-    }
+    private MpmGroup() : this(null!, null!, null!, null!) { }
 }

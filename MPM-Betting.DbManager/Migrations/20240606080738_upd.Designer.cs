@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MPM_Betting.DbManager.Migrations
 {
     [DbContext(typeof(MpmDbContext))]
-    [Migration("20240514162301_init")]
-    partial class init
+    [Migration("20240606080738_upd")]
+    partial class upd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -57,6 +57,12 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Hit")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Processed")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
@@ -64,6 +70,7 @@ namespace MPM_Betting.DbManager.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -110,7 +117,10 @@ namespace MPM_Betting.DbManager.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BuiltinSeasonId")
+                    b.Property<int>("BuiltinSeasonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GameState")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -123,6 +133,9 @@ namespace MPM_Betting.DbManager.Migrations
 
                     b.Property<int>("SportType")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -273,6 +286,21 @@ namespace MPM_Betting.DbManager.Migrations
                     b.ToTable("AchievementEntries");
                 });
 
+            modelBuilder.Entity("MPM_Betting.DataModel.User.FavoriteSeasons", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("SeasonId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "SeasonId");
+
+                    b.HasIndex("SeasonId");
+
+                    b.ToTable("FavoriteSeasons");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -318,6 +346,7 @@ namespace MPM_Betting.DbManager.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreatorId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
@@ -328,6 +357,10 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -384,6 +417,10 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("int");
 
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -407,6 +444,35 @@ namespace MPM_Betting.DbManager.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("MPM_Betting.DataModel.User.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TargetId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TargetId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
                 {
                     b.Property<int>("Id")
@@ -419,6 +485,7 @@ namespace MPM_Betting.DbManager.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("MpmUserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Role")
@@ -573,6 +640,15 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasBaseType("MPM_Betting.DataModel.Betting.Bet");
 
+                    b.Property<int>("QuoteAway")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuoteDraw")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuoteHome")
+                        .HasColumnType("int");
+
                     b.Property<int>("Result")
                         .HasColumnType("int");
 
@@ -633,12 +709,15 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId");
+                        .WithMany("AllBets")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Game");
 
@@ -656,9 +735,9 @@ namespace MPM_Betting.DbManager.Migrations
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.Betting.CustomSeason", "Season")
-                        .WithMany()
+                        .WithMany("Entries")
                         .HasForeignKey("SeasonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Game");
@@ -670,7 +749,9 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.Betting.BuiltinSeason", "BuiltinSeason")
                         .WithMany()
-                        .HasForeignKey("BuiltinSeasonId");
+                        .HasForeignKey("BuiltinSeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("BuiltinSeason");
                 });
@@ -730,6 +811,25 @@ namespace MPM_Betting.DbManager.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MPM_Betting.DataModel.User.FavoriteSeasons", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.Betting.BuiltinSeason", "Season")
+                        .WithMany()
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", "User")
+                        .WithMany("FavoriteSeasons")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Season");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MPM_Betting.DataModel.User.Message", b =>
                 {
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "RecipientGroup")
@@ -755,9 +855,20 @@ namespace MPM_Betting.DbManager.Migrations
                 {
                     b.HasOne("MPM_Betting.DataModel.User.MpmUser", "Creator")
                         .WithMany()
-                        .HasForeignKey("CreatorId");
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.User.Notification", b =>
+                {
+                    b.HasOne("MPM_Betting.DataModel.User.MpmUser", "Target")
+                        .WithMany()
+                        .HasForeignKey("TargetId");
+
+                    b.Navigation("Target");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
@@ -765,12 +876,14 @@ namespace MPM_Betting.DbManager.Migrations
                     b.HasOne("MPM_Betting.DataModel.User.MpmGroup", "Group")
                         .WithMany("UserGroupEntries")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("MPM_Betting.DataModel.User.MpmUser", "MpmUser")
                         .WithMany("UserGroupEntries")
-                        .HasForeignKey("MpmUserId");
+                        .HasForeignKey("MpmUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Group");
 
@@ -858,6 +971,8 @@ namespace MPM_Betting.DbManager.Migrations
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmGroup", b =>
                 {
+                    b.Navigation("AllBets");
+
                     b.Navigation("Seasons");
 
                     b.Navigation("UserGroupEntries");
@@ -865,12 +980,19 @@ namespace MPM_Betting.DbManager.Migrations
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.MpmUser", b =>
                 {
+                    b.Navigation("FavoriteSeasons");
+
                     b.Navigation("UserGroupEntries");
                 });
 
             modelBuilder.Entity("MPM_Betting.DataModel.User.UserGroupEntry", b =>
                 {
                     b.Navigation("ScoreEntries");
+                });
+
+            modelBuilder.Entity("MPM_Betting.DataModel.Betting.CustomSeason", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

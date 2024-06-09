@@ -3,123 +3,95 @@
 @using System.ComponentModel.DataAnnotations
 @using BlazorApp1.Components.Account
 @using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @using MPM_Betting.DataModel.User
-@using MPM_Betting.Blazor.ComponentLibrary.DesktopView
 
 @inject SignInManager<MpmUser> SignInManager
+@inject UserManager<MpmUser> UserManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Login</PageTitle>
 
-<div class="LoginPageMainBox">
-    <div class="row">
-        <NavBar Tab="NavBar.ActiveTab.Home" SportArt="NavBar.SelectedSportArt.None"/>
-    </div>
+<div class="d-flex align-items-center justify-content-center">
+    <div class="container p-5 px-8 mx-24">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center mb-5">
+                <h1 class="heading-section">Login</h1>
+            </div>
+        </div>
 
-    <div class="LoginPage row">
-        <div class="LoginPageContainer">
-            <div class="LoginTitle">Login</div>
-            <div class="LoginData">
-                <EditForm class="LoginDataBox" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-
-                    <DataAnnotationsValidator/>
-                    <div class="Username">
-                        <label for="email" class="form-label">E-Mail</label>
-                        <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
-                        <ValidationMessage For="() => Input.Email" class="ErrorFont"/>
-                    </div>
-                    <div class="Password">
-                        <div class="PasswordLabelBox">
-                            <label for="password" class="form-label">Password</label>
-                            <a href="Account/ForgotPassword">Forgot your password?</a>
-                        </div>
-                        <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
-                        <ValidationMessage For="() => Input.Password" class="ErrorFont"/>
-                    </div>
-                    <div class="SubmitButton">
-                        <button class="SubmitButton" type="submit" >Log in</button>
-                    </div>
-                    <div class="Error">
-                        <ValidationSummary class="text-danger" role="alert"/>
+        <div class="row justify-content-center align-center">
+            <div class="col-md-6 col-lg-4 pt-4 soft-bg">
+                <div class="login-wrap p-0">
+                    <h3 class="mb-4 text-center">Have an account?</h3>
+                    <EditForm action="Account/Login" class="signin-form" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                         <StatusMessage Message="@m_ErrorMessage"/>
-                    </div>
-                    <div class="OtherLoginOptions">
-                        <div>
-                            <div>Don't have an account?</div>
-                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                        <DataAnnotationsValidator/>
+                        <div class="form-group">
+                            <label for="Email" class="form-label">Username / Email</label>
+                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Username or E-Mail"/>
+                            <ValidationMessage For="() => Input.Email" class="ErrorFont"/>
                         </div>
-                        <div>
-                            <div>Didn't get the email?</div>
+                        <div class="form-group">
+                            <label for="Password" class="form-label">Password</label>
+                            <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
+                            <ValidationMessage For="() => Input.Password" class="ErrorFont"/>
+                        </div>
+                        <div class="form-group d-md-flex">
+                            <button class="form-control btn btn-primary submit px-3" type="submit">Log in</button>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group d-md-flex">
+                                <div class="w-50">
+                                    <label class="checkbox-wrap checkbox-primary">
+                                        <span class="ColorWhite">Remember me</span>
+                                        <InputCheckbox @bind-Value="Input.RememberMe">
+                                            <span class="checkmark"></span>
+                                        </InputCheckbox>
+                                    </label>
+                                </div>
+                                <div class="w-50 text-md-right">
+                                    <a href="Account/ForgotPassword">Forgot your password?</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </EditForm>
+
+                    <hr/>
+
+                    <div class="form-group">
+                        <div class="form-group text-center">
+                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                                Register as a new user
+                            </a>
+                        </div>
+                        <div class="text-center">
                             <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
                         </div>
                     </div>
-                </EditForm>
-                <div class="ExternalLogin">
-                    <section>
-                        <h3>Use another service to log in.</h3>
-                        <hr/>
-                        <ExternalLoginPicker/>
-                    </section>
+
+                    <div class="form-group">
+                        <section>
+                            <hr/>
+                            <h3 class="text-center">Or Sign In With</h3>
+                            <hr/>
+                            <div class="flex justify-content-center">
+                                <ExternalLoginPicker/>
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
-@* <h1>Log in</h1> *@
-@* <div class="row"> *@
-@*     <div class="col-md-4"> *@
-@*         <section> *@
-@*             <StatusMessage Message="@m_ErrorMessage"/> *@
-@*             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login"> *@
-@*                 <DataAnnotationsValidator/> *@
-@*                 <h2>Use a local account to log in.</h2> *@
-@*                 <hr/> *@
-@*                 <ValidationSummary class="text-danger" role="alert"/> *@
-@*                 <div class="form-floating mb-3"> *@
-@*                     <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/> *@
-@*                     <label for="email" class="form-label">Email</label> *@
-@*                     <ValidationMessage For="() => Input.Email" class="text-danger"/> *@
-@*                 </div> *@
-@*                 <div class="form-floating mb-3"> *@
-@*                     <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/> *@
-@*                     <label for="password" class="form-label">Password</label> *@
-@*                     <ValidationMessage For="() => Input.Password" class="text-danger"/> *@
-@*                 </div> *@
-@*                 <div class="checkbox mb-3"> *@
-@*                     <label class="form-label"> *@
-@*                         <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input"/> *@
-@*                         Remember me *@
-@*                     </label> *@
-@*                 </div> *@
-@*                 <div> *@
-@*                     <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button> *@
-@*                 </div> *@
-@*                 <div> *@
-@*                     <p> *@
-@*                         <a href="Account/ForgotPassword">Forgot your password?</a> *@
-@*                     </p> *@
-@*                     <p> *@
-@*                         <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a> *@
-@*                     </p> *@
-@*                     <p> *@
-@*                         <a href="Account/ResendEmailConfirmation">Resend email confirmation</a> *@
-@*                     </p> *@
-@*                 </div> *@
-@*             </EditForm> *@
-@*         </section> *@
-@*     </div> *@
-@*     <div class="col-md-6 col-md-offset-2"> *@
-@*         <section> *@
-@*             <h3>Use another service to log in.</h3> *@
-@*             <hr/> *@
-@*             <ExternalLoginPicker/> *@
-@*         </section> *@
-@*     </div> *@
-@* </div> *@
 
 @code {
     private string? m_ErrorMessage;
@@ -143,7 +115,17 @@
     {
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        MpmUser? User = await UserManager.FindByNameAsync(Input.Email);
+        if (User is null)
+            User = await UserManager.FindByEmailAsync(Input.Email);
+        if (User is null)
+        {
+            Logger.LogWarning("Error: User not found");
+            m_ErrorMessage = "Error: User and password do not match any result";
+            return;
+        }
+        var result = await SignInManager.PasswordSignInAsync(User!, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        // var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in");
@@ -168,7 +150,7 @@
 
     private sealed class InputModel
     {
-        [Required] [EmailAddress] public string Email { get; set; } = "";
+        [Required] public string Email { get; set; } = "";
 
         [Required]
         [DataType(DataType.Password)]

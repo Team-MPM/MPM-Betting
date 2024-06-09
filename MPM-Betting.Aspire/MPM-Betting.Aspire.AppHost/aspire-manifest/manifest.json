@@ -16,7 +16,7 @@
         }
       ],
       "bindings": {
-        "grafana-http": {
+        "http": {
           "scheme": "http",
           "protocol": "tcp",
           "transport": "http",
@@ -35,10 +35,10 @@
         }
       ],
       "bindings": {
-        "tcp": {
-          "scheme": "tcp",
+        "http": {
+          "scheme": "http",
           "protocol": "tcp",
-          "transport": "tcp",
+          "transport": "http",
           "targetPort": 9090
         }
       }
@@ -46,7 +46,7 @@
     "redis": {
       "type": "container.v0",
       "connectionString": "{redis.bindings.tcp.host}:{redis.bindings.tcp.port}",
-      "image": "docker.io/library/redis:7.2.4",
+      "image": "docker.io/library/redis:7.2",
       "args": [
         "--save",
         "60",
@@ -81,6 +81,27 @@
       "type": "value.v0",
       "connectionString": "{sql.connectionString};Database=MPM-Betting"
     },
+    "maildev": {
+      "type": "container.v0",
+      "connectionString": "smtp://{maildev.bindings.smtp.host}:{maildev.bindings.smtp.port}",
+      "image": "docker.io/maildev/maildev:2.0.2",
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "port": 9324,
+          "targetPort": 1080
+        },
+        "smtp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "port": 9325,
+          "targetPort": 1025
+        }
+      }
+    },
     "api": {
       "type": "project.v0",
       "path": "../../../MPM-Betting.Api/MPM-Betting.Api.csproj",
@@ -90,18 +111,21 @@
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
         "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
         "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}",
-        "ConnectionStrings__redis": "{redis.connectionString}"
+        "ConnectionStrings__redis": "{redis.connectionString}",
+        "ConnectionStrings__maildev": "{maildev.connectionString}"
       },
       "bindings": {
         "http": {
           "scheme": "http",
           "protocol": "tcp",
-          "transport": "http"
+          "transport": "http",
+          "external": true
         },
         "https": {
           "scheme": "https",
           "protocol": "tcp",
-          "transport": "http"
+          "transport": "http",
+          "external": true
         }
       }
     },
@@ -116,18 +140,21 @@
         "services__api__http__0": "{api.bindings.http.url}",
         "services__api__https__0": "{api.bindings.https.url}",
         "ConnectionStrings__redis": "{redis.connectionString}",
-        "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}"
+        "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}",
+        "ConnectionStrings__maildev": "{maildev.connectionString}"
       },
       "bindings": {
         "http": {
           "scheme": "http",
           "protocol": "tcp",
-          "transport": "http"
+          "transport": "http",
+          "external": true
         },
         "https": {
           "scheme": "https",
           "protocol": "tcp",
-          "transport": "http"
+          "transport": "http",
+          "external": true
         }
       }
     },
@@ -139,6 +166,7 @@
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
         "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "ConnectionStrings__redis": "{redis.connectionString}",
         "ConnectionStrings__MPM-Betting": "{MPM-Betting.connectionString}"
       },
       "bindings": {
