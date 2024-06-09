@@ -35,8 +35,10 @@
         </div>
         <MudDivider/>
         
-        <div class="row ProfileDataOverBox">
-            <div class="col-3 ProfileDataBox">
+        // Stats for < md
+        
+        <div class="row d-none d-md-flex ProfileDataOverBox mb-15">
+            <div class="col-3 d  d-md-flex ProfileDataBox">
                 <div class="row">
                     <div class="col-12 DataTitleBox">
                         <h2>ResultBets</h2>
@@ -45,7 +47,7 @@
                 <div class="row">
                     <div class="col-12">
                         <MudPaper Class="pa-4">
-                            <MudChart ChartType="ChartType.Pie" InputData="@RightWrongBets" @bind-SelectedIndex="IndexBets" InputLabels="@LabelsRightWrong" Width="300px" Height="300px" />
+                            <MudChart ChartType="ChartType.Pie" InputData="@RightWrongBets" @bind-SelectedIndex="IndexBets" InputLabels="@LabelsRightWrong" Width="100%" Height="auto" />
                         </MudPaper>
                         <MudDivider Class="mt-5 mb-5"/>
                         <MudText Typo="Typo.h6">@LabelsRightWrong[IndexBets] Bets : @RightWrongBets[IndexBets]</MudText>
@@ -62,7 +64,7 @@
                 <div class="row">
                     <div class="col-12">
                         <MudPaper Class="pa-4">
-                            <MudChart ChartType="ChartType.Pie" InputData="@RightWrongScoreBets" @bind-SelectedIndex="IndexScoreBets" InputLabels="@LabelsRightWrong" Width="300px" Height="300px"/>
+                            <MudChart ChartType="ChartType.Pie" InputData="@RightWrongScoreBets" @bind-SelectedIndex="IndexScoreBets" InputLabels="@LabelsRightWrong" Width="100%" Height="auto"/>
                         </MudPaper>
                         <MudDivider Class="mt-5 mb-5"/>
                         <MudText Typo="Typo.h6">@LabelsRightWrong[IndexScoreBets] Bets : @RightWrongScoreBets[IndexScoreBets]</MudText>
@@ -73,11 +75,11 @@
             <div class="col-3 ProfileDataBox">
                 <div class="row">
                     <div class="col-12 DataTitleBox">
-                        <h2>Right/Wrong Guesses</h2>
+                        <h2>Last Bets:</h2>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 flex center flex-column">
                         <MudSimpleTable Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Style="overflow-x: auto;">
                             <thead>
                             <tr>
@@ -88,20 +90,101 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @* @foreach (var team in LeagueTable.Table) *@
-                            @* { *@
-                            @*     <tr> *@
-                            @*         <td>@team.Rank</td> *@
-                            @*         <td><img class="TeamImage" src="https://images.fotmob.com/image_resources/logo/teamlogo/@(team.Team.Id).png"/> @team.Team.Name</td> *@
-                            @*         <td>@team.Won</td> *@
-                            @*         <td>@team.Drawn</td> *@
-                            @*         <td>@team.Lost</td> *@
-                            @*         <td>@(team.GoalsFor - team.GoalsAgainst)</td> *@
-                            @*         <td>@team.Points</td> *@
-                            @*     </tr> *@
-                            @* } *@
+                            @foreach (var bet in Bets.Count > 7 ? Bets.TakeLast(7) : Bets)
+                            {
+                                <tr>
+                                    <td>@(Bets.IndexOf(bet) + 1)</td>
+                                    <td>@bet.Points</td>
+                                    <td>@bet.Quote <span class="fw-bold">@(bet.ScoreHit ? "x2" : "")</span></td>
+                                    <td>@(bet.ScoreHit ? Math.Round((bet.Quote * 2) * bet.Points) :
+                                        bet.ResultHit ? Math.Round(bet.Quote * bet.Points, 2) :
+                                        0)</td>
+                                </tr>
+                            }
                             </tbody>
                         </MudSimpleTable>
+                        <MudButton Color="Color.Primary" Class="mt-5" >View all Bets</MudButton>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        // Stats for > md
+        
+        <div class="row ProfileDataOverBox d-md-none mb-15">
+            <div class="row mb-5">
+                <div class="col-1"></div>
+                <div class="col-10 ProfileDataBox">
+                    <div class="row">
+                        <div class="col-12 DataTitleBox">
+                            <h2>ResultBets</h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <MudPaper Class="pa-4">
+                                <MudChart ChartType="ChartType.Pie" InputData="@RightWrongBets" @bind-SelectedIndex="IndexBets" InputLabels="@LabelsRightWrong" Width="100%" Height="auto"/>
+                            </MudPaper>
+                            <MudDivider Class="mt-5 mb-5"/>
+                            <MudText Typo="Typo.h6">@LabelsRightWrong[IndexBets] Bets : @RightWrongBets[IndexBets]</MudText>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-5">
+                <div class="col-1"></div>
+                <div class="col-10  ProfileDataBox">
+                    <div class="row">
+                        <div class="col-12 DataTitleBox">
+                            <h2>ScoreBets</h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <MudPaper Class="pa-4">
+                                <MudChart ChartType="ChartType.Pie" InputData="@RightWrongScoreBets" @bind-SelectedIndex="IndexScoreBets" InputLabels="@LabelsRightWrong" Width="100%" Height="auto"/>
+                            </MudPaper>
+                            <MudDivider Class="mt-5 mb-5"/>
+                            <MudText Typo="Typo.h6">@LabelsRightWrong[IndexScoreBets] Bets : @RightWrongScoreBets[IndexScoreBets]</MudText>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-5">
+                <div class="col-1"></div>
+                <div class="col-10 ProfileDataBox">
+                    <div class="row">
+                        <div class="col-12 DataTitleBox">
+                            <h2>Last Bets:</h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 flex center flex-column">
+                            <MudSimpleTable Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Style="overflow-x: auto;">
+                                <thead>
+                                <tr>
+                                    @foreach (var h in headings)
+                                    {
+                                        <th>@h</th>
+                                    }
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var bet in Bets.Count > 7 ? Bets.TakeLast(7) : Bets)
+                                {
+                                    <tr>
+                                        <td>@(Bets.IndexOf(bet) + 1)</td>
+                                        <td>@bet.Points</td>
+                                        <td>@bet.Quote <span class="fw-bold">@(bet.ScoreHit ? "x2" : "")</span></td>
+                                        <td>@(bet.ScoreHit ? Math.Round((bet.Quote * 2) * bet.Points) :
+                                            bet.ResultHit ? Math.Round(bet.Quote * bet.Points, 2) :
+                                            0)</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </MudSimpleTable>
+                        <MudButton Color="Color.Primary" Class="mt-5" OnClick="() => RedirectToBetHistory()">View all Bets</MudButton>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,15 +246,15 @@
 
     private async Task CalcRightWrongBets()
     {
-        RightWrongBets[0] = Bets.Count(s => s.Hit);
-        RightWrongBets[1] = Bets.Count(s => !s.Hit);
+        RightWrongBets[0] = Bets.Count(s => s.ResultHit);
+        RightWrongBets[1] = Bets.Count(s => !s.ResultHit);
     }
     
     private async Task CalcRightWrongScoreBets()
     {
         //TODO fix this c:
-        RightWrongScoreBets[0] = Bets.Count(s => s.Hit);
-        RightWrongScoreBets[1] = Bets.Count(s => !s.Hit);
+        RightWrongScoreBets[0] = Bets.Count(s => s.ScoreHit);
+        RightWrongScoreBets[1] = Bets.Count(s => !s.ScoreHit);
     }
 
     private async Task GetAllBets()
@@ -188,6 +271,11 @@
     private void RedirectToLogin()
     {
         NavigationManager.NavigateTo("/account/login", true);
+    }
+    
+    private void RedirectToBetHistory()
+    {
+        NavigationManager.NavigateTo("/BetHistory", true);
     }
 
 }   
