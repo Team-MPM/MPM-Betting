@@ -17,6 +17,7 @@
 @using MPM_Betting.Services.Domains
 @inject UserDomain UserDomain
 @inject FootballApi footballApi
+@inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="row">
@@ -49,18 +50,28 @@
                         <td>@(betDetails[i].Item2.GameEntry.StartTime)</td>
                         <td>@betDetails[i].Item1.Points</td>
                         <td>@(betDetails[i].Item1.ScoreHit ? "Spot on" : @betDetails[i].Item1.ResultHit ? "Hit" : "Miss")</td>
-                        <td>@(betDetails[i].Item1.Quote)</td>
+                        <td>@(betDetails[i].Item1.Quote) <span class="fw-bold">@(betDetails[i].Item1.ScoreHit ? "x2" : "")</span></td>
                         <td>@(betDetails[i].Item1.ScoreHit ? 
                                 Math.Round((betDetails[i].Item1.Quote * 2) * betDetails[i].Item1.Points) : 
                                 betDetails[i].Item1.ResultHit ? 
                                     Math.Round(betDetails[i].Item1.Quote * betDetails[i].Item1.Points, 2) : 
                                     0)</td>
-                       
                     </tr>
                 }
                 </tbody>
             </MudSimpleTable>
         </div>
+    </div>
+}
+
+else if (!DoneProcessing)
+{
+    <div class="row">
+        <div class="col-4"></div>
+        <div class="col-4 BetHistoryNoData">
+            <h2>Loading...</h2>
+        </div>
+        <div class="col-4"></div>
     </div>
 }
 else
@@ -85,15 +96,23 @@ else
     private bool striped = false;
     private bool bordered = false;
     
+    private bool DoneProcessing { get; set; }
+    
     string[] headings = { "#", "Match", "Score", "StartTime", "Stake", "Outcome", "Quote", "Payout", };
     
     protected override async Task OnInitializedAsync()
     {
+        DoneProcessing = false;
         await User.SyncEvent.Task;
         if (User.Payload is not null)
         {
             m_UserInstance = User.Payload;
             UserDomain.SetUser(m_UserInstance);
+        }
+
+        if (m_UserInstance is null)
+        {
+            NavigationManager.NavigateTo("/account/login");
         }
 
         var result = await UserDomain.GetAllBetsFootballGameForUser();
@@ -112,8 +131,9 @@ else
                 }
             }
         }
-        
-        
+
+        DoneProcessing = true;
+
 
     }
 }

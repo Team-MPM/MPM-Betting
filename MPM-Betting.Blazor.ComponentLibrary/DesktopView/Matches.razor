@@ -11,6 +11,8 @@
 @using MPM_Betting.DataModel.User
 @using MPM_Betting.Services.Data
 @using MPM_Betting.Services.Domains
+@using Blazorise.LoadingIndicator
+@using Blazorise
 @using MudBlazor
 @inject FootballApi Api
 @inject NavigationManager NavigationManager
@@ -21,86 +23,90 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 
+<div class="Blocker @(LoadingVisible ? "BlockerVisible" : "")">
+    <div class="loader"></div>
+    <h2>Placing bet...</h2>
+</div>
 
 @if (SelectedTeams != null && !expiredMatch)
 {
-    <Modal @ref="ModalRef" Class="ModalSettings">
-        <ModalContent Centered>
-            <ModalHeader Background="Background.Dark">
-                <ModalTitle TextColor="TextColor.Default">Enter a new Bet</ModalTitle>
-                <CloseButton TextColor="TextColor.White"/>
-            </ModalHeader>
-            <ModalBody Background="Background.Dark" Class="ModalSettings">
-                <Field>
-                    <h4 class="fw-bold">@SelectedTeams.Item1.Item1.Name.ToString() vs @SelectedTeams.Item1.Item2.Name.ToString()</h4>
-                </Field>
-                <Divider></Divider>
-                <Field>
-                    <div class="ModalTeamEntries ModalEntries" >
-                        <span>Home Win</span>
-                        <span>Draw</span>
-                        <span>Away Win</span>
-                    </div>
-                    <div class="ModalBetEntries ModalEntries">
-                        <span class="BetEntry @(ChosenTeam == BetType.HomeWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.HomeWin) )">x @SelectedTeams.Item2.HomeWinPayOut</span>
-                        <span class="BetEntry @(ChosenTeam == BetType.Draw ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.Draw))">x @SelectedTeams.Item2.DrawPayOut</span>
-                        <span class="BetEntry @(ChosenTeam == BetType.AwayWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.AwayWin))">x @SelectedTeams.Item2.AwayWinPayOut</span>
-                    </div>
-                </Field>
-                <Field>
-                    <FieldLabel>Score Predition</FieldLabel>
-                    <div class="mb-5">Getting this right double your win!</div>
-                    
-                    <Validation UsePattern>
-                        <div class="row ModalScoreEntryNames">
-                            <div class="col-1"></div>
-                            <div class="col-6">
-                                <div>@SelectedTeams.Item1.Item1.Name</div>
-                            </div>
-                            <div class="col-4">
-                                <div>@SelectedTeams.Item1.Item2.Name</div>
-                            </div>
-                            <div class="col-1"></div>
+<Modal @ref="ModalRef" Class="ModalSettings">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle TextColor="TextColor.Default">Enter a new Bet</ModalTitle>
+            <CloseButton TextColor="TextColor.White"/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark" Class="ModalSettings">
+            <Field>
+                <h4 class="fw-bold">@SelectedTeams.Item1.Item1.Name.ToString() vs @SelectedTeams.Item1.Item2.Name.ToString()</h4>
+            </Field>
+            <Divider></Divider>
+            <Field>
+                <div class="ModalTeamEntries ModalEntries" >
+                    <span>Home Win</span>
+                    <span>Draw</span>
+                    <span>Away Win</span>
+                </div>
+                <div class="ModalBetEntries ModalEntries">
+                    <span class="BetEntry @(ChosenTeam == BetType.HomeWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.HomeWin) )">x @SelectedTeams.Item2.HomeWinPayOut</span>
+                    <span class="BetEntry @(ChosenTeam == BetType.Draw ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.Draw))">x @SelectedTeams.Item2.DrawPayOut</span>
+                    <span class="BetEntry @(ChosenTeam == BetType.AwayWin ? "ModalActiveBet" : "")" onclick="@(() => SetChosenTeam(BetType.AwayWin))">x @SelectedTeams.Item2.AwayWinPayOut</span>
+                </div>
+            </Field>
+            <Field>
+                <FieldLabel>Score Predition</FieldLabel>
+                <div class="mb-5">Getting this right double your win!</div>
+
+                <Validation UsePattern>
+                    <div class="row ModalScoreEntryNames">
+                        <div class="col-1"></div>
+                        <div class="col-6">
+                            <div>@SelectedTeams.Item1.Item1.Name</div>
                         </div>
-                        <div class="row ModalScoreEntry">
-                            <div class="col-1"></div>
-                            <div class="col-4">
-                                <TextEdit Text="@scoreBets.HomeScore" TextChanged="@OnHomeScoreChanges" Pattern="^[0-9]\d*$" Placeholder="HomeTeam"></TextEdit>
-                            </div>
-                            <div class="col-2">
-                                <div>:</div>
-                            </div>
-                            <div class="col-4">
-                                <TextEdit Text="@scoreBets.AwayScore" TextChanged="@OnAwayScoreChanges" Pattern="^[0-9]\d*$" Placeholder="AwayTeam"></TextEdit>
-                            </div>
-                            <div class="col-1"></div>
+                        <div class="col-4">
+                            <div>@SelectedTeams.Item1.Item2.Name</div>
                         </div>
-                    </Validation>
-                </Field>
-                <Field>
-                    <FieldLabel>Amount of credits to bet:</FieldLabel>
-                    <Validation UsePattern>
-                        <TextEdit Text="@BetAmount" TextChanged="@OnTextChanges" Pattern="^[1-9][0-9]*$" Placeholder="Enter Credits">
-                            
-                        </TextEdit>
-                    </Validation>
-                </Field>
-                @if (ModalErrorMessage != null)
-                {
-                    <Divider/>
-                <Field>
-                    <div class="ModalError ErrorMessage">
-                        <div>@ModalErrorMessage</div>
+                        <div class="col-1"></div>
                     </div>
-                </Field>
-                }
-            </ModalBody>
-            <ModalFooter Background="Background.Dark">
-                <Button Color="Blazorise.Color.Secondary" Clicked="@HideModal">Close</Button>
-                <Button Color="Blazorise.Color.Primary" Clicked="@PlaceBet">Place Bet</Button>
-            </ModalFooter>
-        </ModalContent>
-    </Modal>
+                    <div class="row ModalScoreEntry">
+                        <div class="col-1"></div>
+                        <div class="col-4">
+                            <TextEdit Text="@scoreBets.HomeScore" TextChanged="@OnHomeScoreChanges" Pattern="^[0-9]\d*$" Placeholder="HomeTeam"></TextEdit>
+                        </div>
+                        <div class="col-2">
+                            <div>:</div>
+                        </div>
+                        <div class="col-4">
+                            <TextEdit Text="@scoreBets.AwayScore" TextChanged="@OnAwayScoreChanges" Pattern="^[0-9]\d*$" Placeholder="AwayTeam"></TextEdit>
+                        </div>
+                        <div class="col-1"></div>
+                    </div>
+                </Validation>
+            </Field>
+            <Field>
+                <FieldLabel>Amount of credits to bet:</FieldLabel>
+                <Validation UsePattern>
+                    <TextEdit Text="@BetAmount" TextChanged="@OnTextChanges" Pattern="^[1-9][0-9]*$" Placeholder="Enter Credits">
+
+                    </TextEdit>
+                </Validation>
+            </Field>
+            @if (ModalErrorMessage != null)
+            {
+            <Divider/>
+            <Field>
+                <div class="ModalError ErrorMessage">
+                    <div>@ModalErrorMessage</div>
+                </div>
+            </Field>
+            }
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Blazorise.Color.Secondary" Clicked="@HideModal">Close</Button>
+            <Button Color="Blazorise.Color.Primary" Clicked="@PlaceBet">Place Bet</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 }
 else if (expiredMatch)
 {
@@ -123,23 +129,25 @@ else if (expiredMatch)
 }
 else
 {
-    <Modal @ref="ModalRef" Class="ModalSettings">
-        <ModalContent Centered>
-            <ModalHeader Background="Background.Dark">
-                <ModalTitle>Error Loading</ModalTitle>
-                <CloseButton/>
-            </ModalHeader>
-            <ModalBody Background="Background.Dark" Class="ModalSettings">
-                <Field>
-                    <FieldLabel>Either try again or refresh the page</FieldLabel>
-                </Field>
-            </ModalBody>
-            <ModalFooter Background="Background.Dark">
-                <Button Color="Blazorise.Color.Primary" Clicked="@HideModal">OK</Button>
-            </ModalFooter>
-        </ModalContent>
-    </Modal>
+<Modal @ref="ModalRef" Class="ModalSettings">
+    <ModalContent Centered>
+        <ModalHeader Background="Background.Dark">
+            <ModalTitle>Error Loading</ModalTitle>
+            <CloseButton/>
+        </ModalHeader>
+        <ModalBody Background="Background.Dark" Class="ModalSettings">
+            <Field>
+                <FieldLabel>Either try again or refresh the page</FieldLabel>
+            </Field>
+        </ModalBody>
+        <ModalFooter Background="Background.Dark">
+            <Button Color="Blazorise.Color.Primary" Clicked="@HideModal">OK</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 }
+
+
 
 <div class="MatchesDate">
     <MatchesDatePicker MatchesPage="this"/>
@@ -234,6 +242,8 @@ else
     MpmUser? User;
     MpmDbContext dbContext;
 
+    private bool LoadingVisible { get; set; }
+    
     private bool loaded;
     private bool expiredMatch;
 
@@ -566,6 +576,8 @@ else
                 break;
         }
 
+        UpdateLoading(true);
+
 
         var result = await UserDomain.PlaceGameBet(quote, homeScore, awayScore, SelectedMatch.Id, int.Parse(BetAmount));
 
@@ -577,18 +589,26 @@ else
                 ModalErrorMessage = "Invalid bet parameters!";
             else
                 ModalErrorMessage = $"Some error: {result.Exception.Message}";
+            UpdateLoading(false);
             return;
         }
-
-        //TODO AddBet
+        
+        
         SelectedTeams = null;
         SelectedMatch = default;
         ModalErrorMessage = "";
-        NavigationManager.Refresh();
+        NavigationManager.Refresh(true);
+        UpdateLoading(false);
         await HideModal();
     }
     
     private string ModalErrorMessage { get; set; }
+    
+    void UpdateLoading(bool value)
+    {
+        LoadingVisible = value;
+    }
+
 
     public enum BetType
     {
@@ -597,6 +617,4 @@ else
         Draw,
         AwayWin
     }
-
-
 }
