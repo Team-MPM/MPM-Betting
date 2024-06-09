@@ -11,11 +11,28 @@
 
 <PageTitle>Confirm email</PageTitle>
 
-<h1>Confirm email</h1>
-<StatusMessage Message="@m_StatusMessage"/>
+<div class="AdministrationMiddleBox">
+    <h1>Confirm email</h1>
+    <div class="AdministrationBox">
+        <div class="BoxContent soft-bg">
+            <StatusMessage Message="@m_StatusMessage"/>
+           @if (!m_StatusMessage.Contains("Error"))
+            {
+                <div>Now you can login into your brand new account</div>
+            }
+            <div>Click the button below to switch to the login page</div>
+            <a href="/account/login">Login</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 
 @code {
-    private string? m_StatusMessage;
+    private string? m_StatusMessage = "";
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 

@@ -69,3 +69,35 @@
     text-decoration: none;
     transform: scale(1.02);
 }
+
+/*UPLOAD PROFILE PIC*/
+
+.UploadProfilePicContainer{
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    margin-top: 100px;
+    padding: 20px 0;
+    background: rgba(60,60,60,1);
+    font-size: 15px;
+    color: white;
+    border-radius: 20px;
+}
+
+.UploadProfilePicContainer hr  {
+    margin: 20px 0;
+}
+
+.SubmitNewPfp {
+    margin: 20px 0;
+    background: #007bff;
+    width: fit-content;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+.PfpMessage {
+    margin-top: 25px;
+}

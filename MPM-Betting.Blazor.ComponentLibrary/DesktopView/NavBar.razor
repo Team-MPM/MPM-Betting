@@ -87,7 +87,7 @@ else
             </a>
         </div>
 
-        <ul class="nav-list">
+        <ul class="nav-list d-none d-md-flex">
             <li>
                 <a href="/dashboard" class="NoHoverUnderline nav-link @(NavigationManager.Uri.Contains("dashboard") ? "nav-active" : "")">
                     Dashboard
@@ -100,20 +100,16 @@ else
             </li>
         </ul>
 
-        @* <div class="nav-sport-menu"> *@
-        @*     <Select @bind-SelectedValue="@SportType"> *@
-        @*         <SelectItem Value="@ESportType.None">None</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Football">Football</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Basketball">Basketball</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Tennis">Tennis</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Hockey">Hockey</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Baseball">Baseball</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.AmericanFootball">American Football</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Formula1">Formula1</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Handball">Handball</SelectItem> *@
-        @*         <SelectItem Value="@ESportType.Volleyball">Volleyball</SelectItem> *@
-        @*     </Select> *@
-        @* </div> *@
+        <Dropdown Class="ml-5 d-md-none ">
+            <DropdownToggle Color="Color.Light" Background="Background.Secondary">
+                <span class="fw-bold white-text mr-5">Site</span>
+            </DropdownToggle>
+            <DropdownMenu Background="Background.Secondary" TextColor="TextColor.Light">
+                <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/dashboard", true))"><a class="NoHoverUnderline">Dashboard</a></DropdownItem>
+                <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/groups", true))"><a class="NoHoverUnderline">Groups</a></DropdownItem>
+            </DropdownMenu>
+        </Dropdown>
+
     </div>
 
 
@@ -133,24 +129,25 @@ else
         }
         else
         {
-            <div class="NavBarPoints">
+            <div class="NavBarPoints d-none d-md-flex">
                 @{
                     var x = ConvertToLog10(m_UserInstance.Points);
                     <div>@x</div>
                 }
-                <img src="./Images/Logo_cropped.png" height="50px"/>
+                <img src="./Images/coin.png" />
             </div>
             <Dropdown>
                 <DropdownToggle Color="Color.Light" Background="Background.Secondary">
                     <img src="@m_ImageUrl" alt="Profile Picture" class="profile-picture"/>
                 </DropdownToggle>
                 <DropdownMenu Background="Background.Secondary" TextColor="TextColor.Light">
-                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/BetHistory", true))"><a  class="NoHoverUnderline">Bet History</a></DropdownItem>
-                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/groups", true))"><a  class="NoHoverUnderline">Groups</a></DropdownItem>
+                    <DropdownItem Class="d-block d-md-none no-hover white-text"><span class="mr-3">@m_UserInstance.Points</span><img src="Images/coin.png" height="30px"/></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/BetHistory", true))"><a class="NoHoverUnderline">Bet History</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/groups", true))"><a class="NoHoverUnderline">Groups</a></DropdownItem>
                     @* <DropdownItem><a href="/inventory" class="NoHoverUnderline">Inventory</a></DropdownItem> *@
                     <DropdownDivider/>
-                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/profile", true))"><a  class="NoHoverUnderline">Profile</a></DropdownItem>
-                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/account/manage/profile", true))"><a  class="NoHoverUnderline">Manage</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/profile", true))"><a class="NoHoverUnderline">Profile</a></DropdownItem>
+                    <DropdownItem onclick="@(() => NavigationManager.NavigateTo("/account/manage/profile", true))"><a class="NoHoverUnderline">Manage</a></DropdownItem>
                     <DropdownItem>
                         <form action="Account/Logout" method="post">
                             <AntiforgeryToken/>
