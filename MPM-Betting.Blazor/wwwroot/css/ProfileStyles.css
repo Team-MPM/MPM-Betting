@@ -1,4 +1,21 @@
-﻿.ProfileDataRow {
+﻿/*BetHistory*/
+
+.BetHistoryTitleThingy {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.BetHistoryNoData {
+    display: flex;
+    justify-content: center;
+    background: rgba(60,60,60,1);
+    border-radius: 10px  ;
+    padding: 20px;
+}
+
+.ProfileDataRow {
     margin-top: 120px;
     display: flex;
     align-items: center;

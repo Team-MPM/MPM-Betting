@@ -3,15 +3,89 @@
 @using Microsoft.AspNetCore.Authorization
 @using MPM_Betting.Blazor.ComponentLibrary.Core
 @using MPM_Betting.DataModel.User
+@rendermode InteractiveServer
+@attribute [StreamRendering]
 @attribute [Authorize]
+@using System.Net.Http.Json
+@using System.Text.RegularExpressions
+@using LanguageExt
+@using Microsoft.AspNetCore.Components.Authorization
+@using MPM_Betting.DataModel.Betting
+@using MPM_Betting.DataModel.Football
+@using MPM_Betting.Services
+@using MPM_Betting.Services.Data
+@using MPM_Betting.Services.Domains
+@inject UserDomain UserDomain
+@inject FootballApi footballApi
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<h3>BetHistory</h3>
-
-
+<div class="row">
+    <div class="col-12 BetHistoryTitleThingy">
+        <h1>BetHistory</h1>
+    </div>
+</div>
+@if (betDetails.Count() != 0)
+{
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col-10">
+            <MudSimpleTable Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Style="overflow-x: auto;">
+                <thead>
+                <tr>
+                    @foreach (var h in headings)
+                    {
+                        <th>@h</th>
+                    }
+                </tr>
+                </thead>
+                <tbody>
+                
+                @for (int i = 0; i < betDetails.Count; i++)
+                {
+                    <tr>
+                        <td>@(i+1)</td>
+                        <td>@betDetails[i].Item2.GameEntry.Score.HomeTeam.Name vs @betDetails[i].Item2.GameEntry.Score.AwayTeam.Name </td>
+                        <td>@betDetails[i].Item1.HomeScore - @betDetails[i].Item1.AwayScore</td>
+                        <td>@(betDetails[i].Item2.GameEntry.StartTime)</td>
+                        <td>@betDetails[i].Item1.Points</td>
+                        <td>@(betDetails[i].Item1.ScoreHit ? "Spot on" : @betDetails[i].Item1.ResultHit ? "Hit" : "Miss")</td>
+                        <td>@(betDetails[i].Item1.Quote)</td>
+                        <td>@(betDetails[i].Item1.ScoreHit ? 
+                                Math.Round((betDetails[i].Item1.Quote * 2) * betDetails[i].Item1.Points) : 
+                                betDetails[i].Item1.ResultHit ? 
+                                    Math.Round(betDetails[i].Item1.Quote * betDetails[i].Item1.Points, 2) : 
+                                    0)</td>
+                       
+                    </tr>
+                }
+                </tbody>
+            </MudSimpleTable>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-4"></div>
+        <div class="col-4 BetHistoryNoData">
+            <h2>No Matches found! </h2>
+            
+        </div>
+        <div class="col-4"></div>
+    </div>
+}
 
 @code {
     [CascadingParameter] private SyncContextWithPayload<MpmUser> User { get; set; } = default!;
     MpmUser? m_UserInstance;
+    private List<Tuple<GameBet, FootballApi.GameDetails> > betDetails = new List<Tuple<GameBet, FootballApi.GameDetails>>();
+    
+    private bool dense = false;
+    private bool hover = true;     
+    private bool striped = false;
+    private bool bordered = false;
+    
+    string[] headings = { "#", "Match", "Score", "StartTime", "Stake", "Outcome", "Quote", "Payout", };
     
     protected override async Task OnInitializedAsync()
     {
@@ -19,10 +93,27 @@
         if (User.Payload is not null)
         {
             m_UserInstance = User.Payload;
+            UserDomain.SetUser(m_UserInstance);
         }
-        else
+
+        var result = await UserDomain.GetAllBetsFootballGameForUser();
+        if (result.IsSuccess)
         {
-            return;
+            foreach (var bet in result.Value)
+            {
+                var gameDetails = await footballApi.GetGameDetails(bet.Game.ReferenceId);
+                if (gameDetails.IsSuccess)
+                {
+                    betDetails.Add(new Tuple<GameBet, FootballApi.GameDetails>(bet, gameDetails.Value));
+                }
+                else
+                {
+                    betDetails.Add(new Tuple<GameBet, FootballApi.GameDetails>(bet, new FootballApi.GameDetails()));
+                }
+            }
         }
+        
+        
+
     }
 }

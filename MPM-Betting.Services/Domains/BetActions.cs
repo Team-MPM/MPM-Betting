@@ -82,4 +82,15 @@ public partial class UserDomain
         
         return bets;
     }
+    // public async Task<MpmResult<List<Bet>>> GetAllCompletedBets()
+    // {
+    //     if (m_User is null) return s_NoUserException;
+    //     
+    //     List<Bet> _bets = [];
+    //     
+    //     await foreach(var bet in s_GetAllCompletedBets.Invoke(m_DbContext, m_User))
+    //         _bets.Add(bet);
+    //
+    //     return _bets;
+    // }
 }

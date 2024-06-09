@@ -6,7 +6,7 @@ public partial class UserDomain
 
     private static readonly InvalidBetParameter s_InvalidBetParameter = new();
 
-    public class NoUserException : Exception;
+    public partial class NoUserException : Exception;
 
     private static readonly NoUserException s_NoUserException = new();
 
