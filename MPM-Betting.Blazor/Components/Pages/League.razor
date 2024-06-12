@@ -122,14 +122,23 @@ else
             LeagueEntry = response.Value.First(l => l.Id == Id);
             if (LeagueEntry is null)
             {
-                NavigationManager.NavigateTo("/account/error");
+                NavigationManager.NavigateTo("/error");
                 return;
             }
         }
 
         if (LeagueEntry is not null)
         {
-            var result = await Api.GetLeagueTable(LeagueEntry.Value.Id,null );
+            MpmResult<FootballApi.LeagueTable> result;
+            try
+            {
+                result = await Api.GetLeagueTable(LeagueEntry.Value.Id, null);
+            }
+            catch (Exception e)
+            {
+                NavigationManager.NavigateTo("/error");
+                return;
+            }
             if (result.IsSuccess)
             {
                 LeagueTable = result.Value!;

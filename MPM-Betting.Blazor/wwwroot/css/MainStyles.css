@@ -12,3 +12,95 @@
     justify-content: center;
     justify-items: center;
 }
+
+.BlockerVisible {
+    display: grid !important;
+    position: fixed;
+    justify-content: center;
+    align-content: center;
+    z-index: 1100;
+}
+
+.Blocker {
+    height: 100vh;
+    width: 100vw;
+    background: rgba(20,20,20,0.5);
+    display: none;
+    left: 0;
+    top:0;
+}
+
+.Blocker > h2 {
+    color: white;
+    text-shadow: 2px 2px 2px black;
+    font-size: 45px;
+    font-weight: bold;
+    margin-top: 5vh;
+    justify-self: center;
+}
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    justify-self: center;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/*Error*/
+.ErrorContainer {
+    display:flex;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    min-height: 60vh;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+}
+
+.ErrorContainer > h1 {
+    justify-content: center;
+    display: flex;
+}
+
+.ErrorBox {
+    display: grid;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+
+    border-radius: 10px;
+    margin-top: 20px;
+    justify-items  : center;
+}
+
+.BoxContent {
+    display: grid;
+    flex-direction: column;
+    width: 40%;
+    height: fit-content;
+    padding: 20px;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    grid-template-columns: 1fr;
+    background: rgba(50,50,50,0.8);
+}
+
+.BoxContent > * {
+    padding-bottom: 5%;
+}
+
+.BoxContent > button {
+    display: flex;
+    width: fit-content;
+    justify-self: center;
+}

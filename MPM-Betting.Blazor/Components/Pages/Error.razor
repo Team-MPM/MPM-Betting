@@ -3,15 +3,25 @@
 
 <PageTitle>Error</PageTitle>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="ErrorContainer">
+    <h1 class="text-danger">Error</h1>
+    <div class="ErrorBox">
+        <div class="BoxContent soft-bg">
+            <div>An error occurred while processing your request.</div>
+            <div>Please try again later</div>
+            @if (ShowRequestId)
+            {
+            <p>
+                <strong>Request ID:</strong> <code>@RequestId</code>
+            </p>
+            }
+            <a href="/">Home</a>
+        </div>
+    </div>
+</div>
 
-@if (ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@RequestId</code>
-    </p>
-}
+
+
 
 @code{
     [CascadingParameter] private HttpContext? HttpContext { get; set; }

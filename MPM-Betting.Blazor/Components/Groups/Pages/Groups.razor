@@ -27,6 +27,11 @@
 @inject IServiceProvider ServiceProvider
 @inject FootballApi FootballApi
 
+<div class="Blocker @(LoadingVisible ? "BlockerVisible" : "")">
+    <div class="loader"></div>
+    <h2>Placing bet...</h2>
+</div>
+
 <div class="group-view flex flex-row grow">
 @if (GroupId != null && m_Model.Group is not null && m_Model.Entry is not null)
 {
@@ -583,6 +588,7 @@ else
     [Parameter] public int? GroupId { get; set; }
     [Parameter] public int? SeasonId { get; set; }
     [Parameter] public string? Page { get; set; } = "overview";
+    private bool LoadingVisible { get; set; }
 
 
     [CascadingParameter] private SyncContextWithPayload<MpmUser>? User { get; set; }
@@ -1010,20 +1016,23 @@ else
     private async Task PlaceBet()
     {
         if (m_Model.Group is null || m_PlaceBetModel.GameEntry is null) return;
-        
+        LoadingVisible = true;
         var quote = m_PlaceBetModel.HomeScore == m_PlaceBetModel.AwayScore ? m_PlaceBetModel.DrawQuote : m_PlaceBetModel.HomeScore < m_PlaceBetModel.AwayScore ? m_PlaceBetModel.AwayQuote : m_PlaceBetModel.HomeeQuote;
         
         var result = await UserDomain.PlaceGameBet(quote,  m_PlaceBetModel.HomeScore,  m_PlaceBetModel.AwayScore, m_PlaceBetModel.GameEntry.Value.Id, 10, m_Model.Group);
         if (result.IsFaulted)
         {
             m_PlaceBetModel.Status = $"An error occurred {quote}";
+            LoadingVisible = false;
             return;
         }
 
         m_PlaceBetModel.Status = "";
         m_PlaceBetModel.HomeScore = 0;
         m_PlaceBetModel.AwayScore = 0;
+        LoadingVisible = false;
         HidePlaceBetModal();
         await OnParametersSetAsync();
+        
     }
 }
