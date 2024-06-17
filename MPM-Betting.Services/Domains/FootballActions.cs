@@ -35,7 +35,7 @@ public partial class UserDomain
     public List<int> GetFavouriteLeaguesForUser() => m_DbContext.UserFavouriteSeasons.Where(s => s.User == m_User).Select(s => s.LeagueId).ToList();
 
     public async Task<MpmResult<GameBet>> PlaceGameBet(double quote, int homeScore, int awayScore,
-        int referenceId, int points, MpmGroup? group = null)
+        int referenceId, long points, MpmGroup? group = null)
     {
         if (m_User is null)
             return s_NoUserException;
@@ -48,6 +48,9 @@ public partial class UserDomain
         
         if (await s_UserHasFootballGameBetQuery(m_DbContext, referenceId, m_User.Id, group))
             return s_AlreadyExistsException;
+        
+        if (points > int.MaxValue)
+            return s_InvalidBetParameter;
 
         for (var i = 0; i < 50; i++)
         {
@@ -75,6 +78,8 @@ public partial class UserDomain
             logger.LogWarning("Game with reference id {ReferenceId} not found", referenceId);
             return s_InvalidBetParameter;
         }
+        
+        var pointsInt = (int)points;
 
         var bet = new GameBet()
         {
@@ -85,7 +90,7 @@ public partial class UserDomain
             HomeScore = homeScore,
             AwayScore = awayScore,
             Type = EBetType.FootballGame,
-            Points = points,
+            Points = pointsInt,
         };
 
         if (group is null)

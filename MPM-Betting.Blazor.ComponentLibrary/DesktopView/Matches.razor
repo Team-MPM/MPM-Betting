@@ -496,11 +496,11 @@ else
 
     private async Task PlaceBet()
     {
-        int amount;
+        long amount;
         int homeScore, awayScore;
         try
         {
-            amount = int.Parse(BetAmount);
+            amount = long.Parse(BetAmount);
             homeScore = int.Parse(scoreBets.HomeScore);
             awayScore = int.Parse(scoreBets.AwayScore);
         }
@@ -579,7 +579,7 @@ else
         UpdateLoading(true);
 
 
-        var result = await UserDomain.PlaceGameBet(quote, homeScore, awayScore, SelectedMatch.Id, int.Parse(BetAmount));
+        var result = await UserDomain.PlaceGameBet(quote, homeScore, awayScore, SelectedMatch.Id, long.Parse(BetAmount));
 
         if (result.IsFaulted)
         {

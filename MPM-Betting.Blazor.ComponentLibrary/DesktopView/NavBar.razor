@@ -170,7 +170,7 @@ else
     MpmDbContext m_DbContext;
     private bool cancelClose;
     private bool reedemable = false;
-    private int Points { get; set; }
+    private long Points { get; set; }
     private bool IsFirstLogin = false;
 
     private string m_ImageUrl = "./Images/default-profile-picture.png";
@@ -277,11 +277,11 @@ else
     
     
 
-    private string ConvertToLog10(int number)
+    private string ConvertToLog10(long number)
     {
         if (number == 0)
             return "0";
-        int mag = (int)(Math.Floor(Math.Log10(number)) / 3);
+        long mag = (int)(Math.Floor(Math.Log10(number)) / 3);
         double divisor = Math.Pow(10, mag * 3);
 
         double shortNumber = number / divisor;
@@ -303,6 +303,12 @@ else
                 break;
             case 4:
                 suffix = "t";
+                break;
+            case 5:
+                suffix = "qt";
+                break;
+            case 6:
+                suffix = "qit";
                 break;
             default:
                 suffix = "a fuck ton";
